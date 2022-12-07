@@ -1,2 +1,21 @@
-6 December 2022
+7 December 2022
 
+// TODO: "Collision" check for rolling over node
+// TODO: Display node on rollover
+// TODO: Collision check for "plug"
+// TODO: Make plug black on rollover
+// TODO: Algorithm to plot "cord" path
+
+class EdgeModel {
+	// TODO: one- or two-way
+	// firstConnect: "plug" reference
+	// secondConnect: other "plug"
+	// point array to draw line
+
+	// type of line? // define types
+	// oneWay?
+	// type of arrow?
+}
+
+DONE:
+: Create TS module-based project from Asteroids template

@@ -1,10 +1,16 @@
 import type p5 from "p5";
+import Dimension from "./model/Dimension";
+import NodeModel from "./model/NodeModel";
+import Position from "./model/Position";
+import RenderNode from "./view/RenderNode";
+// import RenderNode from "./view/RenderNode";
+import RenderNode3D from "./view_3d/RenderNode3D";
 export const BASE_NODE_WIDTH = 100;
 export const BASE_NODE_HEIGHT = 50;
 // import {
 //   fontRegular
 // } from "./setup";
-let nodes: any[] = [];
+const nodes: any[] = [];
 let p: p5;
 
 const PlugPosition = {
@@ -24,89 +30,73 @@ type PlugPosition =
 
 function drawPlug(
   outlet: PlugPosition,
-  nodePosX: number,
-  nodePosY: number,
-  nodeWidth: number,
-  nodeHeight: number
-) {
+  node:NodeModel,
+):void {
   switch (outlet) {
     case PlugPosition.N:
-      p.ellipse(nodePosX + BASE_NODE_WIDTH / 2, nodePosY, 5, 5);
+      p.ellipse(node.position.x + BASE_NODE_WIDTH / 2, node.position.y, 5, 5);
       break;
     case PlugPosition.E:
       p.ellipse(
-        nodePosX + BASE_NODE_WIDTH,
-        nodePosY + BASE_NODE_HEIGHT / 2,
+        node.position.x + BASE_NODE_WIDTH,
+        node.position.y + BASE_NODE_HEIGHT / 2,
         5,
         5
       );
       break;
     case PlugPosition.S:
       p.ellipse(
-        nodePosX + BASE_NODE_WIDTH / 2,
-        nodePosY + BASE_NODE_HEIGHT,
+        node.position.x + BASE_NODE_WIDTH / 2,
+        node.position.y + BASE_NODE_HEIGHT,
         5,
         5
       );
       break;
     case PlugPosition.W:
-      p.ellipse(nodePosX, nodePosY + BASE_NODE_HEIGHT / 2, 5, 5);
+      p.ellipse(node.position.x, node.position.y + BASE_NODE_HEIGHT / 2, 5, 5);
       break;
     case PlugPosition.NE:
-      p.ellipse(nodePosX + BASE_NODE_WIDTH, nodePosY, 5, 5);
+      p.ellipse(node.position.x + BASE_NODE_WIDTH, node.position.y, 5, 5);
       break;
     case PlugPosition.SE:
-      p.ellipse(nodePosX + BASE_NODE_WIDTH, nodePosY + BASE_NODE_HEIGHT, 5, 5);
+      p.ellipse(node.position.x + BASE_NODE_WIDTH, node.position.y + BASE_NODE_HEIGHT, 5, 5);
       break;
     case PlugPosition.SW:
-      p.ellipse(nodePosX, nodePosY + BASE_NODE_HEIGHT, 5, 5);
+      p.ellipse(node.position.x, node.position.y + BASE_NODE_HEIGHT, 5, 5);
       break;
     case PlugPosition.NW:
-      p.ellipse(nodePosX, nodePosY, 5, 5);
+      p.ellipse(node.position.x, node.position.y, 5, 5);
       break;
     default:
       break;
   }
 }
 
-function displayNode(
-  posX: number,
-  posY: number,
-  label: string
-  // node: any, plugs: any[] = []
-) {
-  const nodeWidth = BASE_NODE_WIDTH;
-  const nodeHeight = BASE_NODE_HEIGHT;
-  // const label = node.data.label;
-  p.noStroke();
-  p.fill("rgba(128,128,128,0.6)");
-  p.rect(posX, posY + 5, nodeWidth, nodeHeight);
-  p.fill(255, 255, 228);
-  p.stroke(128);
-  p.strokeWeight(1);
-  p.rect(posX + 3, posY, nodeWidth, nodeHeight);
-  p.fill(0);
-  p.noStroke();
-  p.textAlign(p.CENTER, p.CENTER);
-  p.text(label, posX + 6, posY + 3, nodeWidth - 6, nodeHeight - 3);
-  // const showNodes = true;
-  // if (showNodes) {
-  // plugs.forEach((plug) => {
-  //   p.fill(255, 0, 0);
-  //   p.ellipse(plug.x, plug.y, 5, 5);
-  // });
-  // drawPlug(PlugPosition.NE, posX, posY, nodeWidth, nodeHeight);
-  // }
-}
 
-function layoutNodes() {
-  displayNode(10, 10, "Solar Array");
-  // nodes[0]);
+function layoutNodes():void {
+  const testNode = new NodeModel(
+    "1",
+    "Solar Array",
+    new Position(10, 10),
+    new Dimension(100, 50)
+  )
+
+  const isOver = testNode.checkMouseOver(p.mouseX, p.mouseY);
+  console.log('isOver', isOver);
+  RenderNode.render(testNode, isOver);
+  // RenderNode3D.render(testNode);
+    // 10, 10, "Solar Array");
 }
 
 export const draw = (_p: p5): void => {
   p = _p;
-  p.createCanvas(800, 600);
-  p.background("rgb(48, 0, 48)");
+  // const width = p.width;
+  // const height = p.height;
+  // p.orbitControl(); // tilt the camera with the mouse
+  // p.normalMaterial();
+  // p.box(150, 75, 10);
+  p.background("rgb(220,200,220)");
+  p.push(); 
   layoutNodes();
+  p.pop();
 };
