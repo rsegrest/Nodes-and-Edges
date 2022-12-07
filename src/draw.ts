@@ -1,102 +1,66 @@
 import type p5 from "p5";
 import Dimension from "./model/Dimension";
 import NodeModel from "./model/NodeModel";
+import EdgeModel from './model/EdgeModel';
 import Position from "./model/Position";
 import RenderNode from "./view/RenderNode";
-// import RenderNode from "./view/RenderNode";
-import RenderNode3D from "./view_3d/RenderNode3D";
-export const BASE_NODE_WIDTH = 100;
-export const BASE_NODE_HEIGHT = 50;
-// import {
-//   fontRegular
-// } from "./setup";
-const nodes: any[] = [];
+// import RenderEdges from "./view/RenderEdges";
+// export const BASE_NODE_WIDTH = 100;
+// export const BASE_NODE_HEIGHT = 50;
+export const nodeMetadata: any[] = [];
+export const nodes:NodeModel[] = [];
+export const edges:EdgeModel[] = [];
+
 let p: p5;
 
-const PlugPosition = {
-  N: "N",
-  E: "E",
-  S: "S",
-  W: "W",
-  NE: "NE",
-  SE: "SE",
-  SW: "SW",
-  NW: "NW",
-};
-
-type PlugPosition =
-  | typeof PlugPosition
-  | typeof PlugPosition[keyof typeof PlugPosition];
-
-function drawPlug(
-  outlet: PlugPosition,
-  node:NodeModel,
-):void {
-  switch (outlet) {
-    case PlugPosition.N:
-      p.ellipse(node.position.x + BASE_NODE_WIDTH / 2, node.position.y, 5, 5);
-      break;
-    case PlugPosition.E:
-      p.ellipse(
-        node.position.x + BASE_NODE_WIDTH,
-        node.position.y + BASE_NODE_HEIGHT / 2,
-        5,
-        5
-      );
-      break;
-    case PlugPosition.S:
-      p.ellipse(
-        node.position.x + BASE_NODE_WIDTH / 2,
-        node.position.y + BASE_NODE_HEIGHT,
-        5,
-        5
-      );
-      break;
-    case PlugPosition.W:
-      p.ellipse(node.position.x, node.position.y + BASE_NODE_HEIGHT / 2, 5, 5);
-      break;
-    case PlugPosition.NE:
-      p.ellipse(node.position.x + BASE_NODE_WIDTH, node.position.y, 5, 5);
-      break;
-    case PlugPosition.SE:
-      p.ellipse(node.position.x + BASE_NODE_WIDTH, node.position.y + BASE_NODE_HEIGHT, 5, 5);
-      break;
-    case PlugPosition.SW:
-      p.ellipse(node.position.x, node.position.y + BASE_NODE_HEIGHT, 5, 5);
-      break;
-    case PlugPosition.NW:
-      p.ellipse(node.position.x, node.position.y, 5, 5);
-      break;
-    default:
-      break;
-  }
+export function mouseClicked():void {
+  nodes.forEach((n,i) => {
+    console.log(`${i}: Looking at nodes: ${n.toString()}`)
+    const isOver = n.checkMouseOver(p.mouseX, p.mouseY);
+    if (isOver) {
+      if (n.getIsSelected()) {
+        n.deselect();
+      } else {
+        n.setSelected();
+      }
+    }
+  })
+  
 }
 
+// INTERFACE?
+// function generatedNodeData(
+//   id:string,
+//   label:string
+// ):{
+//   id:string,
+//   label:string,
+//   position:Position,
+//   dimension:Dimension,
+// } {
+//   // const position = new Position(10, 10);
+//   // const dimension = new Dimension(100, 50);
+//   return {
+//     id,
+//     label,
+//     position,
+//     dimension,
+//   }
+// }
 
-function layoutNodes():void {
-  const testNode = new NodeModel(
-    "1",
-    "Solar Array",
-    new Position(10, 10),
-    new Dimension(100, 50)
-  )
 
-  const isOver = testNode.checkMouseOver(p.mouseX, p.mouseY);
-  console.log('isOver', isOver);
-  RenderNode.render(testNode, isOver);
-  // RenderNode3D.render(testNode);
-    // 10, 10, "Solar Array");
+function renderNodes():void {
+  nodes.forEach((n) => {
+    RenderNode.render(n);
+  })
 }
+
 
 export const draw = (_p: p5): void => {
   p = _p;
-  // const width = p.width;
-  // const height = p.height;
-  // p.orbitControl(); // tilt the camera with the mouse
-  // p.normalMaterial();
-  // p.box(150, 75, 10);
+  
   p.background("rgb(220,200,220)");
   p.push(); 
-  layoutNodes();
+  renderNodes();
   p.pop();
 };

@@ -1,9 +1,12 @@
 7 December 2022
 
-// TODO: "Collision" check for rolling over node
-// TODO: Display node on rollover
-// TODO: Collision check for "plug"
-// TODO: Make plug black on rollover
+TODO: Lay out four nodes
+TODO: Chart Manager
+TODO: Store selected node(s) in an array
+TODO: Draw line from selected node
+TODO: Create edge when a second node is selected
+
+
 // TODO: Algorithm to plot "cord" path
 
 class EdgeModel {
@@ -18,4 +21,7 @@ class EdgeModel {
 }
 
 DONE:
-: Create TS module-based project from Asteroids template
+: "Collision" check for rolling over node
+: Display plugs on rollover
+: Collision check for "plug"
+: Make plug black on rollover
