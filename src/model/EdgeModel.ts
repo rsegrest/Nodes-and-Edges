@@ -25,5 +25,17 @@ class EdgeModel {
       this.targetPlug = targetPlug;
     }
   }
+  connectSource(node:NodeModel, plug:Plug|null=null):void {
+    this.sourceNode = node;
+    if (plug) {
+      this.sourcePlug = plug;
+    }
+  }
+  connectTarget(node:NodeModel, plug:Plug|null=null):void {
+    this.targetNode = node;
+    if (plug) {
+      this.targetPlug = plug;
+    }
+  }
 }
 export default EdgeModel;

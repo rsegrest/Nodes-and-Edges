@@ -1,12 +1,14 @@
 import type p5 from "p5";
-import Dimension from "./model/Dimension";
 import NodeModel from "./model/NodeModel";
 import EdgeModel from './model/EdgeModel';
-import Position from "./model/Position";
 import RenderNode from "./view/RenderNode";
+
+// import Position from "./model/Position";
+// import Dimension from "./model/Dimension";
 // import RenderEdges from "./view/RenderEdges";
 // export const BASE_NODE_WIDTH = 100;
 // export const BASE_NODE_HEIGHT = 50;
+
 export const nodeMetadata: any[] = [];
 export const nodes:NodeModel[] = [];
 export const edges:EdgeModel[] = [];

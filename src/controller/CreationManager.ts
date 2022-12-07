@@ -1,5 +1,6 @@
 import { nodes } from "../draw";
 import Dimension from "../model/Dimension";
+import EdgeModel from "../model/EdgeModel";
 import Layout from "../model/Layout";
 import NodeModel from "../model/NodeModel";
 import Plug from "../model/Plug";
@@ -26,25 +27,46 @@ export class CreationManager {
     return new Plug(plugPosition, position);
   }
 
-  static populateNodeAndEdgeList():NodeModel[] {
+  static populateNodeAndEdgeList():{
+    nodes: NodeModel[],
+    edges: EdgeModel[],
+  } {
   // const nodeData = generatedNodeData();
-  const nodes:NodeModel[] = [];
-  const labels:string[] = [
-    'Solar Array',
-    'Battery',
-    'Inverter',
-    'Load'
-  ];
-  for (let i = 0; i < 4; i += 1) {
-    const node = new NodeModel(
-      (i+1).toString(),
-      labels[i] as string,
-      new Position((i*75)+20,20),
-      new Dimension(BASE_NODE_WIDTH, BASE_NODE_HEIGHT)
-    );
-    nodes.push(node);
+    const nodes = CreationManager.createNodes();
+    const edges = CreationManager.createEdges(nodes);
+    return {
+      nodes,
+      edges,
     }
-    return nodes;
   }
+  static createNodes():NodeModel[] {
+    const nodes:NodeModel[] = [];
+    const labels:string[] = [
+      'Solar Array',
+      'Battery',
+      'Inverter',
+      'Load'
+    ];
+    for (let i = 0; i < 4; i += 1) {
+        const node = new NodeModel(
+          (i+1).toString(),
+          labels[i] as string,
+          new Position((i*75)+20,20),
+          new Dimension(BASE_NODE_WIDTH, BASE_NODE_HEIGHT)
+        );
+        nodes.push(node);
+      }
+      return nodes;
+  }
+  static createEdges(nodes:NodeModel[]):EdgeModel[] {
+    const edge1 = new EdgeModel(
+      '1-2',
+      nodes[0] as NodeModel,
+      nodes[1] as NodeModel
+    );
+
+    return [edge1];
+  }
+  // edge1
 }
 export default CreationManager;
