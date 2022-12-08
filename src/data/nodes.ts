@@ -1,23 +1,23 @@
-import { NodeType } from '../type/NodeType';
-export let nodes = [
+import { NodeType } from "../type/NodeType";
+export const nodes = [
   {
-    id: '1',
+    id: "1",
     type: NodeType.BASIC,
-    data: { label: 'Solar Array' },
+    data: { label: "Solar Array" },
   },
   {
-    id: '2',
+    id: "2",
     type: NodeType.BASIC,
-    data: { label: 'Cable' },
+    data: { label: "Cable" },
   },
   {
-    id: '3',
+    id: "3",
     type: NodeType.BASIC,
-    data: { label: 'Avionics' },
+    data: { label: "Avionics" },
   },
   {
-    id: '4',
+    id: "4",
     type: NodeType.BASIC,
-    data: { label: 'Radiator' },
-  }
-]
+    data: { label: "Radiator" },
+  },
+];
