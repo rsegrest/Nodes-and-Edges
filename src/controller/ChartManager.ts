@@ -15,7 +15,7 @@ class ChartManager {
   private constructor(p:p5) {
     ChartManager.setP(p)
     this.nodes = CreationManager.createNodes();
-    this.edges = CreationManager.createEdges(this.nodes);
+    // this.edges = CreationManager.createEdges(this.nodes);
   }
   renderElements():void {
     // console.log('ELEMENTS : '+this.toString());
@@ -27,15 +27,20 @@ class ChartManager {
     });
     // END TEMP DISABLE
 
-    const lines = RenderEdge.plotLinesBetweenNodes(
-      this.nodes[0] as NodeModel,
-      this.nodes[1] as NodeModel
-    )
-    RenderEdge.renderLines(lines);
-    // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
+    
     // this.edges.forEach((e) => {
     //   RenderEdge.render(e);
     // })
+    
+    // TEST LINES
+    // const lines = RenderEdge.plotLinesBetweenNodes(
+    //   this.nodes[0] as NodeModel,
+    //   this.nodes[1] as NodeModel
+    // )
+    // RenderEdge.renderLines(lines);
+    // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
+    
+    // RENDER GRID & GUIDES
     RenderGuides.render();
   }
   getSelectedNodes():NodeModel[] {
@@ -47,34 +52,35 @@ class ChartManager {
       ChartManager.p.mouseX,
       ChartManager.p.mouseY
     );
-    this.nodes.forEach((node) => {
-      if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
-        if (node.getIsSelected()) {
-          node.deselect();
-        } else {
-          node.setSelected();
+    for (let i = 0; i < this.nodes.length; i += 1) {
+      if (this.nodes[i] !== null && this.nodes[i] !== undefined) {
+        const node = this.nodes[i] as NodeModel;
+        node.setSelected( false )
+        if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
+            node.setSelected();
         }
       }
-    });
+    };
   }
   mouseClicked():void {
     console.log(`ChartManager.mouseClicked() @ ${new Position(ChartManager.p.mouseX, ChartManager.p.mouseY)}`);
     this.nodes.forEach((n,i) => {
-      console.log(`${i}: Looking at node: ${(n as NodeModel).toString()}`)
-      console.log(n);
-      console.log(`checking node ${(n as NodeModel).toString()} for mouse over at position: ${ChartManager.p.mouseX}, ${ChartManager.p.mouseY}`)
-      const isOver = n.checkMouseOver(
-        ChartManager.p.mouseX,
-        ChartManager.p.mouseY
-      );
-      if (isOver) {
-        console.log(`Found node: ${n.toString()}`);
-        if (n.getIsSelected()) {
-          n.deselect();
-        } else {
-          n.setSelected();
-        }
-      }
+      // console.log(`${i}: Looking at node: ${(n as NodeModel).toString()}`)
+      // console.log(n);
+      // console.log(`checking node ${(n as NodeModel).toString()} for mouse over at position: ${ChartManager.p.mouseX}, ${ChartManager.p.mouseY}`)
+      // const isOver = n.checkMouseOver(
+      //   ChartManager.p.mouseX,
+      //   ChartManager.p.mouseY
+      // );
+      // if (isOver) {
+      //   console.log(`Found node: ${n.toString()}`);
+      //   if (n.getIsSelected()) {
+      //     n.deselect();
+      //   } else {
+      //     n.setSelected();
+      //   }
+      // }
+      this.checkForSelectNode();
     })
   };
   addNode(node:NodeModel):void {

@@ -56,7 +56,7 @@ export class CreationManager {
     for (let i = 0; i < 4; i += 1) {
       const id = (i+1).toString();
       const label = labels[i] as string;
-      const position = new Position(10+(i*100)+(10*i),20);
+      const position = new Position(10+(i*150)+(10*i),20);
       const dimension = new Dimension(100, 50);
         const node = new NodeModel(
           id,

@@ -22,13 +22,16 @@
   "private": true,
   "scripts": {
     "build": "npm run bundle && npm run format:dist && npm run minify",
-    "build:dev": "npm run bundle:dev && npm run format:dist",
-    "bundle": "tsc --watch && rollup --config",
-    "bundle:dev": "tsc --sourceMap --watch --outDir tsc-out && rollup --config",
+    "build:dev": "nodemon npm run bundle && npm run format:dist",
+    "bundle": "tsc && rollup --config",
+    "format:dist": "prettier --write dist/script.js",
     "preformat:dist": "eslint --fix --no-ignore dist/script.js",
-    "format:dist": "echo format:dist && prettier --write dist/script.js",
+    "bundle:dev": "tsc --sourceMap --watch --outDir tsc-out && rollup --config",
     "minify": "terser dist/script.js --output dist/script.min.js --compress --mangle",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --config ./jest.config.cjs"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --config ./jest.config.cjs",
+    "build:dev:new": "npm run bundle:dev && npm run format:dist",
+    "bundle:new": "tsc --watch && rollup --config",
+    "format:dist:new": "echo format:dist && prettier --write dist/script.js"
   },
   "dependencies": {
     "canvas": "^2.10.2",
