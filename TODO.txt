@@ -1,11 +1,13 @@
 7 December 2022
 
-TODO: Lay out four nodes
-TODO: Chart Manager
-TODO: Store selected node(s) in an array
+TODO: Fix select
 TODO: Draw line from selected node
 TODO: Create edge when a second node is selected
 
+TESTS:
+ * Click on node to select
+    - Check if it is selected
+ * Compare 
 
 // TODO: Algorithm to plot "cord" path
 
@@ -25,3 +27,5 @@ DONE:
 : Display plugs on rollover
 : Collision check for "plug"
 : Make plug black on rollover
+: Lay out four nodes
+: Chart Manager

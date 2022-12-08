@@ -7,6 +7,7 @@
     "module": "ESNext",
     "outDir": "tsc-out",
     "isolatedModules": true,
+    "rootDirs": ["src"],
 
     /* Strict Type-Checking Options */
     "strict": true,

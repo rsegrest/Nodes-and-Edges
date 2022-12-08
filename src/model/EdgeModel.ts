@@ -37,5 +37,23 @@ class EdgeModel {
       this.targetPlug = plug;
     }
   }
+  getSourceNode():NodeModel|null {
+    return this.sourceNode;
+  }
+  getTargetNode():NodeModel|null {
+    return this.targetNode;
+  }
+  getSourcePlug():Plug|null {
+    return this.sourcePlug;
+  }
+  getTargetPlug():Plug|null {
+    return this.targetPlug;
+  }
+  getId():string {
+    return this.id;
+  }
+  public toString():string {
+    return `EdgeModel: ${this.id}, sourceNode: ${this.sourceNode}, targetNode: ${this.targetNode}, sourcePlug: ${this.sourcePlug}, targetPlug: ${this.targetPlug}`;
+  }
 }
 export default EdgeModel;

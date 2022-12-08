@@ -1,5 +1,5 @@
 import p5 from "p5";
-import NodeModel from "../model/NodeModel";
+import NodeModel, { Boundary } from "../model/NodeModel";
 import Plug from "../model/Plug";
 
 export class RenderNode {
@@ -8,11 +8,11 @@ export class RenderNode {
   constructor(p:p5) {
     RenderNode.p = p;
   }
-  static renderPlug(plug:Plug):void {
+  static renderPlug(plug:Plug, p:p5):void {
     const pos = plug.getPosition();
     const x = pos.x;
     const y = pos.y;
-    const p = RenderNode.p;
+    // const p = RenderNode.p;
     const mouseIsOver = plug.checkMouseOver(p.mouseX, p.mouseY);
     let plugStroke = 'rgba(200,200,200,0.7)';
     let plugFill = 'rgba(255,255,255,0.7)';
@@ -27,43 +27,68 @@ export class RenderNode {
     p.circle(x,y,8);
     p.pop();
   }
+
   static showNodes(
     node:NodeModel,
+    p:p5
   ):void {
     node.getPlugs().forEach((plug) => {
-      this.renderPlug(plug);
+      this.renderPlug(plug,p);
     });
   }
-  static render(node:NodeModel):void {
-    const p = RenderNode.p;
+
+  static render(node:NodeModel,p:p5):void {
+    // test variables
+    const TEST_ROLLOVER_GUIDE = true;
+    const boundary = node.getBoundary();
+    // END test variables
     const width = node.dimensions.width;
     const height = node.dimensions.height;
     const x = node.position.x;
     const y = node.position.y;
+
     const label = node.getLabel();
     let fillColor = 'rgba(228,200,200,1)';
+
     if (node.getIsSelected()) {
       fillColor = 'rgba(255,255,200,1)';
     }
+
     p.push();
     p.translate(x, y);
     p.noStroke();
     p.fill('rgba(0,0,0,0.5)');
 
-    p.rect(x,(y+5),width,height);
+    p.rect(0,(5),width,height);
     p.fill(fillColor);
     p.stroke(128);
     p.strokeWeight(1);
-    p.rect(x+3,y,width,height);
+    p.rect(3,0,width,height);
     p.fill(0);
     p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);
-    p.text(label, (x+6),(y+3),
+    p.text(label, (6),(3),
       (width-6),(height-6));
-    const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
+    p.pop();
+    const showNodes = node.checkMouseOver(
+      p.mouseX, p.mouseY
+    );
     if (showNodes) {
-      this.showNodes(node);
+      this.showNodes(node,p);
     }
+    if (TEST_ROLLOVER_GUIDE) {
+      RenderNode.drawRolloverGuide(boundary,p);
+    }
+  }
+  static drawRolloverGuide(boundary:Boundary,p:p5):void {
+    p.push();
+    p.noFill();
+    p.stroke('rgb(0,255,255)');
+    p.strokeWeight(1);
+    p.translate(boundary.left, boundary.top)
+    p.rect(0,0,
+      boundary.right - boundary.left,
+      boundary.bottom - boundary.top);
     p.pop();
   }
 }

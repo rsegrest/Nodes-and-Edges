@@ -6,5 +6,8 @@ export class Position {
     this.x = x;
     this.y = y;
   }
+  public toString():string {
+    return `Position:(x:${this.x}, y:${this.y})`;
+  }
 }
 export default Position;

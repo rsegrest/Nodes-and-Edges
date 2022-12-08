@@ -22,10 +22,11 @@
   "private": true,
   "scripts": {
     "build": "npm run bundle && npm run format:dist && npm run minify",
-    "build:dev": "nodemon npm run bundle && npm run format:dist",
-    "bundle": "tsc && rollup --config",
+    "build:dev": "npm run bundle:dev && npm run format:dist",
+    "bundle": "tsc --watch && rollup --config",
+    "bundle:dev": "tsc --sourceMap --watch --outDir tsc-out && rollup --config",
     "preformat:dist": "eslint --fix --no-ignore dist/script.js",
-    "format:dist": "prettier --write dist/script.js",
+    "format:dist": "echo format:dist && prettier --write dist/script.js",
     "minify": "terser dist/script.js --output dist/script.min.js --compress --mangle",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --config ./jest.config.cjs"
   },

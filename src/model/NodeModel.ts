@@ -27,19 +27,19 @@ export class NodeModel {
   }
   getBoundary():Boundary {
     return {
-      left: this.position.x,
-      top: this.position.y,
-      right: this.position.x + this.dimensions.width,
-      bottom: this.position.y + this.dimensions.height,
+      left: this.position.x-10,
+      top: this.position.y-10,
+      right: this.position.x+10 + this.dimensions.width,
+      bottom: this.position.y+10 + this.dimensions.height,
     };
   }
   checkMouseOver(mouseX:number, mouseY:number):boolean {
     const boundary = this.getBoundary();
     const isOver = (
-      mouseX >= (boundary.left-10) &&
-      mouseX <= (boundary.right+10) &&
-      mouseY >= (boundary.top-10) &&
-      mouseY <= (boundary.bottom+10)
+      mouseX >= (boundary.left) &&
+      mouseX <= (boundary.right) &&
+      mouseY >= (boundary.top) &&
+      mouseY <= (boundary.bottom)
     );
     return isOver;
   }
@@ -114,6 +114,10 @@ export class NodeModel {
   }
   getPlugByPosition(plugPosition:PlugPosition):Plug {
     return this.plugs.find((plug) => plug.plugPosition === plugPosition) as Plug;
+  }
+  public toString():string {
+    // console.log("NODE MODEL TO STRING")
+    return `NodeModel: ${this.id} ${this.label} ${this.position.toString()} ${this.dimensions.toString()}`;
   }
 }
 export default NodeModel;

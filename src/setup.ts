@@ -1,7 +1,13 @@
 import type p5 from "p5";
+import ChartManager from "./controller/ChartManager";
+import CreationManager from "./controller/CreationManager";
+import Layout from './model/Layout';
 import RenderEdge from "./view/RenderEdge";
+import RenderGuides from "./view/RenderGuide";
 import RenderNode from "./view/RenderNode";
 
+export let chartManager:ChartManager|null;
+export let creationManager:CreationManager|null;
 export let fontRegular: p5.Font;
 export const nodeTypes = {
   BASIC: "BASIC",
@@ -28,7 +34,10 @@ export const preload = (p: p5): void => {
 export const setup = (p: p5): void => {
   p.createCanvas(800, 600);
   p.background(248);
+  // Classes with static methods that need access to p5.js
   new RenderNode(p);
-  // new RenderNode3D(p);
   new RenderEdge(p);
+  new RenderGuides(p);
+  chartManager = ChartManager.createInstance(p);
+  creationManager = CreationManager.createInstance();
 };

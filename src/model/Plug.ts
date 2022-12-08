@@ -26,5 +26,8 @@ class Plug {
   plugIn(edge:EdgeModel):void {
     this.plugSocket = edge;
   }
+  toString():string {
+    return `Plug: ${this.plugPosition}, position: ${this.position}, plugSocket: ${this.plugSocket}`;
+  }
 }
 export default Plug;

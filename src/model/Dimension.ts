@@ -8,5 +8,8 @@ export class Dimension {
     this.width = width;
     this.height = height;
   }
+  public toString():string {
+    return `Dimension:(width:${this.width},  height:${this.height})`;
+  }
 }
 export default Dimension;

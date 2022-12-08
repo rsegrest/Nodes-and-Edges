@@ -1,4 +1,4 @@
-import { nodes } from "../draw";
+// import { nodes } from "../draw";
 import Dimension from "../model/Dimension";
 import EdgeModel from "../model/EdgeModel";
 import Layout from "../model/Layout";
@@ -14,9 +14,15 @@ export class CreationManager {
   private constructor() {
     // CreationManager.populateNodeAndEdgeList();
   };
-  static getInstance(): CreationManager {
+  static createInstance(): CreationManager {
     if (!CreationManager.instance) {
       CreationManager.instance = new CreationManager();
+    }
+    return CreationManager.instance;
+  }
+  static getInstance(): CreationManager {
+    if (!CreationManager.instance) {
+      throw(new Error('CreationManager instance is not created yet'));
     }
     return CreationManager.instance;
   }
@@ -48,25 +54,31 @@ export class CreationManager {
       'Load'
     ];
     for (let i = 0; i < 4; i += 1) {
+      const id = (i+1).toString();
+      const label = labels[i] as string;
+      const position = new Position(10+(i*100)+(10*i),20);
+      const dimension = new Dimension(100, 50);
         const node = new NodeModel(
-          (i+1).toString(),
-          labels[i] as string,
-          new Position((i*75)+20,20),
-          new Dimension(BASE_NODE_WIDTH, BASE_NODE_HEIGHT)
+          id,
+          label,
+          position,
+          // new Dimension(BASE_NODE_WIDTH, BASE_NODE_HEIGHT)
+          dimension
         );
         nodes.push(node);
       }
       return nodes;
   }
   static createEdges(nodes:NodeModel[]):EdgeModel[] {
-    const edge1 = new EdgeModel(
-      '1-2',
-      nodes[0] as NodeModel,
-      nodes[1] as NodeModel
-    );
+    // TEMP RETURN EMPTY ARRAY
+    // const edge1 = new EdgeModel(
+    //   '1-2',
+    //   nodes[0] as NodeModel,
+    //   nodes[1] as NodeModel
+    // );
 
-    return [edge1];
+    // return [edge1];
+    return [];
   }
-  // edge1
 }
 export default CreationManager;

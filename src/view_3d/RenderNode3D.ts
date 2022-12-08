@@ -7,7 +7,7 @@ export class RenderNode3D {
     RenderNode3D.p = p;
   }
   static render(
-    node:NodeModel
+    // node:NodeModel
   ):void {
     const p = RenderNode3D.p;
     console.log('RenderNode3D.render() called');
