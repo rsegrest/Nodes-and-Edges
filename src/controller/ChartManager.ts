@@ -2,7 +2,7 @@ import p5 from "p5";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
 import Position from "../model/Position";
-// import RenderEdge from "../view/RenderEdge";
+import RenderEdge from "../view/RenderEdge";
 import RenderGuides from "../view/RenderGuide";
 import RenderNode from "../view/RenderNode";
 import CreationManager from "./CreationManager";
@@ -21,6 +21,24 @@ class ChartManager {
     // console.log('ELEMENTS : '+this.toString());
     // anything to "advance" nodes and edges, or do I just render them?
 
+    // TEST LINES
+    const line1_2 = RenderEdge.plotLinesBetweenNodes(
+      this.nodes[0] as NodeModel,
+      this.nodes[1] as NodeModel
+    );
+    const line2_3 = RenderEdge.plotLinesBetweenNodes(
+      this.nodes[1] as NodeModel,
+      this.nodes[2] as NodeModel
+    );
+    const line3_4 = RenderEdge.plotLinesBetweenNodes(
+      this.nodes[2] as NodeModel,
+      this.nodes[3] as NodeModel
+    );
+
+    RenderEdge.renderLines(line1_2);
+    RenderEdge.renderLines(line2_3);
+    RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
+
     // TEMP DISABLE
     this.nodes.forEach((n) => {
       RenderNode.render(n, ChartManager.getP());
@@ -31,12 +49,6 @@ class ChartManager {
     //   RenderEdge.render(e);
     // })
 
-    // TEST LINES
-    // const lines = RenderEdge.plotLinesBetweenNodes(
-    //   this.nodes[0] as NodeModel,
-    //   this.nodes[1] as NodeModel
-    // )
-    // RenderEdge.renderLines(lines);
     // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
 
     // RENDER GRID & GUIDES

@@ -2,20 +2,18 @@ import type p5 from "p5";
 import { chartManager } from "./setup";
 import ChartManager from "./controller/ChartManager";
 
-
 let p: p5;
 
-export function mouseClicked():void {
+export function mouseClicked(): void {
   // console.log(`draw.ts: mouseClicked()`);
   (chartManager as ChartManager).mouseClicked();
 }
 
 export const draw = (_p: p5): void => {
   p = _p;
-  p.background("rgb(220,200,220)");
+  p.background("rgb(180,180,200)");
   (chartManager as ChartManager).renderElements();
 };
-
 
 // function renderNodes():void {
 //   nodes.forEach((n) => {
