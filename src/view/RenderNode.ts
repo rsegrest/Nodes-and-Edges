@@ -35,7 +35,6 @@ export class RenderNode {
   }
 
   static render(node: NodeModel, p: p5): void {
-    console.log(`Rendering node : ${node.toString()}`);
     // test variables
     const TEST_ROLLOVER_GUIDE = true;
     const boundary = node.getBoundary();

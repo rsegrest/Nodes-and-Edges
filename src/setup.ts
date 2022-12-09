@@ -32,6 +32,7 @@ export const preload = (p: p5): void => {
 /** This is a setup function. */
 export const setup = (p: p5): void => {
   p.createCanvas(800, 600);
+  p.frameRate(1);
   p.background(248);
   // Classes with static methods that need access to p5.js
   new RenderNode(p);

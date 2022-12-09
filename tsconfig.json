@@ -1,16 +1,18 @@
 {
-  /*  "src/p5-gui.js" 
-  "include": ["src/"],*/
-
+  "include": ["./src/"],
+  "exclude": [
+    "./node_modules",
+    "./tsc-out",
+    "./node_modules/@types/jest/index.d.ts"
+  ],
   "compilerOptions": {
     /* Basic Options */
-    "allowJs": true,
-    "checkJs": false,
     "target": "ES2015",
     "module": "ESNext",
     "outDir": "tsc-out",
+    /* "allowJs": true, */
     "isolatedModules": true,
-    "rootDirs": ["src"],
+    "rootDirs": ["./src"],
 
     /* Strict Type-Checking Options */
     "strict": true,
