@@ -2,6 +2,7 @@ import p5 from "p5";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
 import Position from "../model/Position";
+import { setDraggable, _createContainer } from "../p5-util/quicksettings";
 import RenderEdge from "../view/RenderEdge";
 import RenderGuides from "../view/RenderGuide";
 import RenderNode from "../view/RenderNode";
@@ -53,6 +54,41 @@ class ChartManager {
 
     // RENDER GRID & GUIDES
     RenderGuides.render();
+
+    const ui = ChartManager.createUi(
+      document.getElementById("main") as HTMLElement
+    );
+    // ChartManager.p.createDiv(ui);
+    // const button = ChartManager.p.createButton("test");
+    // button.position(10, 10);
+    // button.style.apply("background-color", "rgb(200,0,0)");
+    const div = ChartManager.p.createDiv("").size(100, 100);
+    div.html("hi", true);
+    document.getElementById("defaultCanvas0")?.appendChild(ui);
+
+    document
+      .getElementById("defaultCanvas0")
+      ?.appendChild(div as unknown as Element);
+  }
+  static createContainer(
+    p: p5,
+    parent: HTMLElement
+  ): { container: HTMLDivElement } {
+    const container = document.createElement("div");
+    // container.classList.add("p5c-container", "idle");
+    // setDraggable(container);
+    parent.appendChild(container);
+    return { container };
+  }
+  static createUi(
+    parent: HTMLElement
+    // initialState: UiState,
+    // eventHandlers: UiEventHandlers = {}
+  ): any {
+    const p = ChartManager.p;
+    // document.getElementById();
+    const cont = ChartManager.createContainer(p, parent);
+    return cont;
   }
   getSelectedNodes(): NodeModel[] {
     return this.nodes.filter((node) => node.getIsSelected());

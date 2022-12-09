@@ -1,8 +1,11 @@
 {
-  "include": ["src/"],
+  /*  "src/p5-gui.js" 
+  "include": ["src/"],*/
 
   "compilerOptions": {
     /* Basic Options */
+    "allowJs": true,
+    "checkJs": false,
     "target": "ES2015",
     "module": "ESNext",
     "outDir": "tsc-out",

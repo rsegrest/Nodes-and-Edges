@@ -1,7 +1,6 @@
 import type p5 from "p5";
 import { chartManager } from "./setup";
 import ChartManager from "./controller/ChartManager";
-
 let p: p5;
 
 export function mouseClicked(): void {
