@@ -2,7 +2,7 @@ import p5 from "p5";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
 import Position from "../model/Position";
-import { setDraggable, _createContainer } from "../p5-util/quicksettings";
+// import { setDraggable, createContainer } from "../p5-util/quicksettings";
 import RenderEdge from "../view/RenderEdge";
 import RenderGuides from "../view/RenderGuide";
 import RenderNode from "../view/RenderNode";
@@ -116,6 +116,9 @@ class ChartManager {
         ChartManager.p.mouseY
       )}`
     );
+    // canvas = document.getElementById("defaultCanvas0")?.setStyle(
+    //   "visibility","hidden"
+    // )
     this.nodes.forEach((n, i) => {
       this.checkForSelectNode();
     });

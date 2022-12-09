@@ -1,6 +1,5 @@
-7 December 2022
+9 December 2022
 
-TODO: Fix select
 TODO: Draw line from selected node
 TODO: Create edge when a second node is selected
 
@@ -29,3 +28,4 @@ DONE:
 : Make plug black on rollover
 : Lay out four nodes
 : Chart Manager
+: Fix select
