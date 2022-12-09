@@ -64,7 +64,10 @@ class ChartManager {
     // button.style.apply("background-color", "rgb(200,0,0)");
     const div = ChartManager.p.createDiv("").size(100, 100);
     div.html("hi", true);
-    document.getElementById("defaultCanvas0")?.appendChild(ui);
+    console.log("div:");
+    console.log(div);
+    // const canvas = document.getElementById("defaultCanvas0");
+    // canvas?.appendChild(ui);
 
     document
       .getElementById("defaultCanvas0")
