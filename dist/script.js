@@ -104,8 +104,9 @@
       this.isSelected = false;
       RenderNode.p = p;
     }
-    static renderPlug(plug, p) {
+    static renderPlug(plug, p, showNodes) {
       const pos = plug.getPosition();
+      const isSelected = plug.getIsSelected();
       const x = pos.x;
       const y = pos.y;
 
@@ -120,16 +121,22 @@
         plugStroke = "rgba(255,255,72,1)";
         plugFill = "rgba(0,0,0,0.8)";
       }
+      if (isSelected) {
+        plugStroke = "rgba(255,0,72,1)";
+        plugFill = "rgba(255,0,72,1)";
+      }
       p.push();
       p.stroke(plugStroke);
       p.strokeWeight(2);
       p.fill(plugFill);
-      p.circle(x, y, 8);
+      if (isSelected || showNodes) {
+        p.circle(x, y, 8);
+      }
       p.pop();
     }
-    static showNodes(node, p) {
+    static showNodes(node, p, showNodes) {
       node.getPlugs().forEach((plug) => {
-        this.renderPlug(plug, p);
+        this.renderPlug(plug, p, showNodes);
       });
     }
     static render(node, p, highlit = false) {
@@ -189,9 +196,7 @@
       p.text(label, 6, 3, width - 6, height - 6);
       p.pop();
       const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
-      if (showNodes) {
-        this.showNodes(node, p);
-      }
+      this.showNodes(node, p, showNodes);
       {
         RenderNode.drawRolloverGuide(boundary, p);
       }
@@ -252,9 +257,10 @@
   Layout.BASE_NODE_HEIGHT = 50;
 
   class Plug {
-    constructor(plugPosition, position) {
+    constructor(plugPosition, position, isSelected = false) {
       this.plugPosition = plugPosition;
       this.position = position;
+      this.isSelected = isSelected;
 
       // Edge that this plug is plugged into (null if not plugged in)
       this.plugSocket = null;
@@ -276,6 +282,12 @@
     }
     toString() {
       return `Plug: ${this.plugPosition}, position: ${this.position}, plugSocket: ${this.plugSocket}`;
+    }
+    setIsSelected(isSelected = true) {
+      this.isSelected = isSelected;
+    }
+    getIsSelected() {
+      return this.isSelected;
     }
   }
 
@@ -557,11 +569,14 @@
           ChartManager.p.mouseY
         )}`
       );
-
-      // canvas = document.getElementById("defaultCanvas0")?.setStyle(
-      //   "visibility","hidden"
-      // )
       this.nodes.forEach((n, i) => {
+        const plugs = n.getPlugs();
+        plugs.forEach((p) => {
+          if (p.checkMouseOver(ChartManager.p.mouseX, ChartManager.p.mouseY)) {
+            console.log(`Plug ${i} clicked`);
+            p.setIsSelected();
+          }
+        });
         this.checkForSelectNode();
       });
     }
@@ -631,7 +646,6 @@
 
   // const exp = require('p5-util/p5.experience.js-master/p5.experience.js')
   let chartManager;
-  let p$1;
   const preload = (p) => {
     p.loadFont("./font/Regular.otf");
   };
@@ -646,26 +660,19 @@
   //     0, 500);
   // }
   /** This is a setup function. */
-  const setup = (_p) => {
-    p$1 = _p;
-
-    // exp(p);
-    p$1.createCanvas(800, 600);
-    p$1.frameRate(1);
-    p$1.background(248);
+  const setup = (p) => {
+    p.createCanvas(800, 600);
+    p.frameRate(1);
+    p.background(248);
 
     // Classes with static methods that need access to p5.js
-    new RenderNode(p$1);
-    new RenderEdge(p$1);
-    new RenderGuides(p$1);
-    chartManager = ChartManager.createInstance(p$1);
+    new RenderNode(p);
+    new RenderEdge(p);
+    new RenderGuides(p);
+    chartManager = ChartManager.createInstance(p);
     CreationManager.createInstance();
-    console.log("p");
-    console.log(p$1);
 
-    // console.log(p.uxRect)
-    // const uxr = p.uxRect(10,10,100,100);
-    // console.log(`uxRect: ${uxRect}`);
+    // const uxRect = UX.createUxRect(10,10,100,100);
     // UX.setUxFill(uxRect, 'rgb(255,0,0)');
     // UX.setUxEvent(uxRect, () => {
     //   console.log('CLICKED!')

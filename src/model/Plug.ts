@@ -9,7 +9,8 @@ class Plug {
   private plugSocket:EdgeModel|null = null;
   constructor(
     public readonly plugPosition:PlugPosition,
-    private position:Position
+    private position:Position,
+    private isSelected:boolean = false
   ) {
     this.plugPosition = plugPosition;
     this.position = position;
@@ -28,6 +29,12 @@ class Plug {
   }
   toString():string {
     return `Plug: ${this.plugPosition}, position: ${this.position}, plugSocket: ${this.plugSocket}`;
+  }
+  setIsSelected(isSelected=true):void {
+    this.isSelected = isSelected;
+  }
+  getIsSelected():boolean {
+    return this.isSelected;
   }
 }
 export default Plug;

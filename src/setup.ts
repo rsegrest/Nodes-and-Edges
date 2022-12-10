@@ -40,11 +40,11 @@ export const setup = (p: p5): void => {
   new RenderGuides(p);
   chartManager = ChartManager.createInstance(p);
   creationManager = CreationManager.createInstance();
-  const uxRect = UX.createUxRect(10,10,100,100);
-  UX.setUxFill(uxRect, 'rgb(255,0,0)');
-  UX.setUxEvent(uxRect, () => {
-    console.log('CLICKED!')
-  });
+  // const uxRect = UX.createUxRect(10,10,100,100);
+  // UX.setUxFill(uxRect, 'rgb(255,0,0)');
+  // UX.setUxEvent(uxRect, () => {
+  //   console.log('CLICKED!')
+  // });
   
   // const gui = createGui("My awesome GUI");
 };

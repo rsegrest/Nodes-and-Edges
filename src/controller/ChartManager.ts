@@ -104,10 +104,14 @@ class ChartManager {
         ChartManager.p.mouseY
       )}`
     );
-    // canvas = document.getElementById("defaultCanvas0")?.setStyle(
-    //   "visibility","hidden"
-    // )
     this.nodes.forEach((n, i) => {
+      const plugs = n.getPlugs();
+      plugs.forEach((p) => {
+        if (p.checkMouseOver(ChartManager.p.mouseX, ChartManager.p.mouseY)) {
+          console.log(`Plug ${i} clicked`);
+          p.setIsSelected();
+        }
+      })
       this.checkForSelectNode();
     });
   }

@@ -8,8 +8,9 @@ export class RenderNode {
   constructor(p: p5) {
     RenderNode.p = p;
   }
-  static renderPlug(plug: Plug, p: p5): void {
+  static renderPlug(plug: Plug, p: p5, showNodes:boolean): void {
     const pos = plug.getPosition();
+    const isSelected = plug.getIsSelected();
     const x = pos.x;
     const y = pos.y;
     // const p = RenderNode.p;
@@ -22,17 +23,23 @@ export class RenderNode {
       plugStroke = "rgba(255,255,72,1)";
       plugFill = "rgba(0,0,0,0.8)";
     }
+    if (isSelected) {
+      plugStroke = "rgba(255,0,72,1)";
+      plugFill = "rgba(255,0,72,1)";
+    }
     p.push();
     p.stroke(plugStroke);
     p.strokeWeight(2);
     p.fill(plugFill);
-    p.circle(x, y, 8);
+    if (isSelected || showNodes) {
+      p.circle(x, y, 8);
+    }
     p.pop();
   }
 
-  static showNodes(node: NodeModel, p: p5): void {
+  static showNodes(node: NodeModel, p: p5, showNodes:boolean): void {
     node.getPlugs().forEach((plug) => {
-      this.renderPlug(plug, p);
+      this.renderPlug(plug, p, showNodes);
     });
   }
 
@@ -78,9 +85,7 @@ export class RenderNode {
     p.text(label, 6, 3, width - 6, height - 6);
     p.pop();
     const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
-    if (showNodes) {
-      this.showNodes(node, p);
-    }
+    this.showNodes(node, p, showNodes);
     if (TEST_ROLLOVER_GUIDE) {
       RenderNode.drawRolloverGuide(boundary, p);
     }
