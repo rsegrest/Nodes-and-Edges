@@ -16,6 +16,8 @@ export class RenderNode {
     const mouseIsOver = plug.checkMouseOver(p.mouseX, p.mouseY);
     let plugStroke = "rgba(200,200,200,0.7)";
     let plugFill = "rgba(255,255,200,0.7)";
+    // if mouse is over and user clicks, select plug
+    // if another plug is selected and user clicks a plug, make an edge to connect
     if (mouseIsOver) {
       plugStroke = "rgba(255,255,72,1)";
       plugFill = "rgba(0,0,0,0.8)";
@@ -34,9 +36,10 @@ export class RenderNode {
     });
   }
 
-  static render(node: NodeModel, p: p5): void {
+  static render(node: NodeModel, p: p5, highlit=false): void {
     // test variables
     const TEST_ROLLOVER_GUIDE = true;
+    const CORNER_RADIUS = 10;
     const boundary = node.getBoundary();
     // END test variables
     const width = node.dimensions.width;
@@ -56,11 +59,19 @@ export class RenderNode {
     p.noStroke();
     p.fill("rgba(0,0,0,0.5)");
 
-    p.rect(0, 5, width, height);
+    let strokeColor = 'rgb(128,128,128)';
+    let strokeWeight = 1;
+    if (highlit) {
+      strokeColor = 'rgb(255,200,0)';
+      strokeWeight = 3;
+    }
+    // round all corners except top-left
+    p.rect(0, 5, width, height, 0, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
     p.fill(fillColor);
-    p.stroke(128);
-    p.strokeWeight(1);
-    p.rect(3, 0, width, height);
+    p.stroke(strokeColor);
+    p.strokeWeight(strokeWeight);
+    // TODO: modify gray corner radii to line up with borders on top shape 
+    p.rect(3, 0, width, height, 0, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
     p.fill(0);
     p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);

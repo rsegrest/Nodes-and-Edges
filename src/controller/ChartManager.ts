@@ -39,11 +39,9 @@ class ChartManager {
     RenderEdge.renderLines(line2_3);
     RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
 
-    // TEMP DISABLE
     this.nodes.forEach((n) => {
       RenderNode.render(n, ChartManager.getP());
     });
-    // END TEMP DISABLE
 
     // this.edges.forEach((e) => {
     //   RenderEdge.render(e);

@@ -7,12 +7,15 @@
   ],
   "compilerOptions": {
     /* Basic Options */
-    "target": "ES2015",
-    "module": "ESNext",
+    "target": "es6",
+    // "module": "ESNext",
+    // "module": "commonjs", // added
     "outDir": "tsc-out",
-    /* "allowJs": true, */
+    "allowJs": true, // added
+    "checkJs": false, // added
     "isolatedModules": true,
     "rootDirs": ["./src"],
+    "moduleResolution": "Node", // added
 
     /* Strict Type-Checking Options */
     "strict": true,
