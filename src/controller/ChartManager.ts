@@ -108,7 +108,6 @@ class ChartManager {
       const plugs = n.getPlugs();
       plugs.forEach((p) => {
         if (p.checkMouseOver(ChartManager.p.mouseX, ChartManager.p.mouseY)) {
-          console.log(`Plug ${i} clicked`);
           p.setIsSelected();
         }
       })
