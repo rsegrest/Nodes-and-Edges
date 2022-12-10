@@ -1,0 +1,31 @@
+9 December 2022
+
+TODO: Draw line from selected node
+TODO: Create edge when a second node is selected
+
+TESTS:
+ * Click on node to select
+    - Check if it is selected
+ * Compare 
+
+// TODO: Algorithm to plot "cord" path
+
+class EdgeModel {
+	// TODO: one- or two-way
+	// firstConnect: "plug" reference
+	// secondConnect: other "plug"
+	// point array to draw line
+
+	// type of line? // define types
+	// oneWay?
+	// type of arrow?
+}
+
+DONE:
+: "Collision" check for rolling over node
+: Display plugs on rollover
+: Collision check for "plug"
+: Make plug black on rollover
+: Lay out four nodes
+: Chart Manager
+: Fix select
