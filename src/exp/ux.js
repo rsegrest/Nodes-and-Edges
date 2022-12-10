@@ -1,80 +1,78 @@
-// const {
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+/* Had to import ux* functions into global scope in index.html */
+import { p } from '../setup';
+
+// import {
 //   uxRect,
+//   uxCircle,
 //   uxSquare,
 //   uxTriangle,
-//   uxCircle,
 //   uxEllipse,
-//  } = require(
-//   "../p5-util/p5.experience.js-master/p5.experience.js"
-// );
-import {
-  uxRect,
-  uxSquare,
-  uxTriangle,
-  uxCircle,
-  uxEllipse,
- } from (
-  "../p5-util/p5.experience.js-master/p5.experience.js"
-);
+// } from "../p5-util/p5.experience.js-master/p5.experience.js";
 
-class UX {
-  constructor() {
-    console.log("UX constructor");
-  }
-  static createUxRect(
+// export default class UX {
+  // constructor() {
+  //   console.log("UX constructor");
+  // }
+  export function createUxRect(
     x,y,w,h,
     tl=0, tr=0, br=0, bl=0
   ) {
-    return uxRect(
-      x,y,w,h, tl=0, tr=0, br=0, bl=0);
+    return p.uxRect(
+      x,y,w,h, tl, tr, br, bl);
   }
-  static createUxSquare(x,y,s,corners) {
-    return uxSquare(x,y,s,corners);
+
+  export function createUxSquare(x,y,s,corners) {
+    return p.uxSquare(x,y,s,corners);
   }
-  static createUxTriangle(x1,y1,x2,y2,x3,y3) {
-    return uxTriangle(x1,y1,x2,y2,x3,y3);
+  export function createUxTriangle(x1,y1,x2,y2,x3,y3) {
+    return p.uxTriangle(x1,y1,x2,y2,x3,y3);
   }
-  static createUxCircle(x,y,d) {
-    return uxCircle(x,y,d);
+  export function createUxCircle(x,y,d) {
+    return p.uxCircle(x,y,d);
   }
-  static createUxEllipse(x,y,w,h) {
-    return uxEllipse(x,y,w,h);
+  export function createUxEllipse(x,y,w,h) {
+    return p.uxEllipse(x,y,w,h);
   }
 
   // UXElement
 
-  static setUxShadow(uxElement, x, y, blur, color) {
-    uxElement.setShadow(x, y, blur, color);
-  }
+  // export function setUxShadow(uxElement, x, y, blur, color) {
+  //   uxElement.setShadow(x, y, blur, color);
+  // }
 
-  static setUxFill(uxElement, color) {
-    uxElement.setFill(color);
-  }
+  // export function setUxFill(uxElement, color) {
+  //   uxElement.setFill(color);
+  // }
 
-  static setUxNoFill(uxElement) {
-    uxElement.noFill();
-  }
+  // export function setUxNoFill(uxElement) {
+  //   uxElement.noFill();
+  // }
 
-  static setUxStroke(uxElement, color) {
-    uxElement.setStroke(color);
-  }
+  // export function setUxStroke(uxElement, color) {
+  //   uxElement.setStroke(color);
+  // }
 
-  static setUxNoStroke(uxElement) {
-    uxElement.noStroke();
-  }
+  // export function setUxNoStroke(uxElement) {
+  //   uxElement.noStroke();
+  // }
 
-  static setUxStrokeWeight(uxElement, weight) {
-    uxElement.strokeWeight(weight);
-  }
-  static setUxShape(uxElement, shape) {
-    uxElement.setShape(shape);
-  }
-  static setUxEvent(uxElement, inputtype, callback) {
-    uxElement.setEvent(inputtype, callback);
-  }
-  static setUxRender(uxElement, event) {
-    uxElement.setRender(event);
-  }
+  // export function setUxStrokeWeight(uxElement, weight) {
+  //   uxElement.strokeWeight(weight);
+  // }
+  // export function setUxShape(uxElement, shape) {
+  //   uxElement.setShape(shape);
+  // }
+  // export function setUxEvent(uxElement, inputtype, callback) {
+  //   uxElement.setEvent(inputtype, callback);
+  // }
+  // export function setUxRender(uxElement, event) {
+  //   uxElement.setRender(event);
+  // }
+
+
+  
 
   // uxRectMode(mode)
   // uxEllipseMode(mode)
@@ -82,7 +80,8 @@ class UX {
   // .uxShadow(XOffset, YOffset, blurIntensity, color));
 
 
-}
+// }
+
 // module.exports = UX;
 
-export default UX;
+// export default UX;

@@ -25,6 +25,7 @@ More Infos / Reference / Tutorials & ReadMe: github.com/loneboarder/p5.experienc
 - General performance
 */
 
+
 (function() {
 
   let objectIDs = [];
@@ -150,6 +151,7 @@ More Infos / Reference / Tutorials & ReadMe: github.com/loneboarder/p5.experienc
 
   }
 
+  const stroke = p5.prototype.stroke;
 
 
   /* This is the main class for the uxElement. The constructor is very extensive as it sets the input and rendering functions.
@@ -780,7 +782,7 @@ More Infos / Reference / Tutorials & ReadMe: github.com/loneboarder/p5.experienc
 
     let lock = true;
 
-    if (mouseIsPressed) {
+    if (typeof mouseIsPressed !== 'undefined') {
       uxMousePressed();
 
       if (lock) {

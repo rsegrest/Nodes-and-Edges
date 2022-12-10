@@ -1,3 +1,4 @@
+/* eslint-disable */
 /*
 
 v.1.4. (19_05_18)
@@ -24,9 +25,27 @@ More Infos / Reference / Tutorials & ReadMe: github.com/loneboarder/p5.experienc
 - Mouse click function is written with setTimeout() - function, there is definitly a better way
 - General performance
 */
-
-(function() {
-
+// import p5, {
+//   CORNER,
+//   CENTER,
+//   stroke,
+//   noStroke,
+//   fill,
+//   noFill,
+//   rectMode,
+//   strokeWeight,
+//   ellipseMode,
+//   rect,
+//   square,
+//   triangle,
+//   circle,
+//   ellipse,
+//   mouseX,
+//   mouseY,
+//   mouseIsPressed,
+// } from 'p5';
+(function(p5) {
+  
   let objectIDs = [];
 
   let renderUxObjects = [];

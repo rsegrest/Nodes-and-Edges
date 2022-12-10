@@ -11,7 +11,7 @@
   "overrides": [
     // config with basic rules
     {
-      "files": ["src/**/*.ts", "rollup.config.js"],
+      "files": ["src/**/*.ts", "src/**/*.js", "rollup.config.js"],
       "parserOptions": {
         "sourceType": "module"
       },
