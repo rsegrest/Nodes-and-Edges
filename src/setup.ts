@@ -2,7 +2,7 @@ import type p5 from "p5";
 // const exp = require('p5-util/p5.experience.js-master/p5.experience.js')
 import ChartManager from "./controller/ChartManager";
 import CreationManager from "./controller/CreationManager";
-import UX from "./exp/ux.js";
+// import UX from "./exp/ux.js";
 // import Layout from "./model/Layout";
 import RenderEdge from "./view/RenderEdge";
 import RenderGuides from "./view/RenderGuide";

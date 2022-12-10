@@ -1,16 +1,9 @@
-<<<<<<< HEAD
 node_modules
 yarn.lock
 yarn-error.log
 tsc-out/
 .DS_Store
-=======
-node_modules/
 /tsc-out/
 /dist/*.js
 pnpm-lock.yaml
-.DS_Store
-pnpm-lock.yaml
-yarn.lock
 yarn-error.log
->>>>>>> cf29830b26b342383677b2376566677858e0f147

@@ -7,15 +7,15 @@
 //  } = require(
 //   "../p5-util/p5.experience.js-master/p5.experience.js"
 // );
-import {
-  uxRect,
-  uxSquare,
-  uxTriangle,
-  uxCircle,
-  uxEllipse,
- } from (
-  "../p5-util/p5.experience.js-master/p5.experience.js"
-);
+// import {
+//   uxRect,
+//   uxSquare,
+//   uxTriangle,
+//   uxCircle,
+//   uxEllipse,
+//  } from (
+//   "../p5-util/p5.experience.js-master/p5.experience.js"
+// );
 
 class UX {
   constructor() {
@@ -83,6 +83,5 @@ class UX {
 
 
 }
-// module.exports = UX;
 
-export default UX;
+// export default UX;
