@@ -1,11 +1,15 @@
 import NodeModel from "./NodeModel";
 import Plug from "./Plug";
+
+// TODO: Extend DraggableGuiElement (or other)
 class EdgeModel {
-  private id:string;
-  private sourceNode:NodeModel|null = null;
-  private targetNode:NodeModel|null = null;
-  private sourcePlug:Plug|null = null;
-  private targetPlug:Plug|null = null;
+
+  protected id:string;
+  protected sourceNode:NodeModel|null = null;
+  protected targetNode:NodeModel|null = null;
+  protected sourcePlug:Plug|null = null;
+  protected targetPlug:Plug|null = null;
+
   constructor(
     id:string,
     sourceNode:NodeModel,

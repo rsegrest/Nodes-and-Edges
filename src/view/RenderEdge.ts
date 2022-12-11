@@ -1,7 +1,7 @@
 import p5 from "p5";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
-import Position from "../model/Position";
+import Position from "../model/positioning/Position";
 
 class RenderEdge {
   private static p: p5;

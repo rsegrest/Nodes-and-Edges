@@ -27,6 +27,10 @@ export class RenderNode {
       plugStroke = "rgba(255,0,72,1)";
       plugFill = "rgba(255,0,72,1)";
     }
+    if (plug.getIsHighlit()) {
+      plugStroke = "rgba(0,0,255,1)";
+      plugFill = "rgba(0,255,255,1)";
+    }
     p.push();
     p.stroke(plugStroke);
     p.strokeWeight(2);
@@ -84,10 +88,12 @@ export class RenderNode {
     p.textAlign(p.CENTER, p.CENTER);
     p.text(label, 6, 3, width - 6, height - 6);
     p.pop();
-    const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
+    // const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
+    const showNodes = node.getIsRolledOver();
     this.showNodes(node, p, showNodes);
+    // Draw the bounds of the rollover sensor area
     if (TEST_ROLLOVER_GUIDE) {
-      RenderNode.drawRolloverGuide(boundary, p);
+      RenderNode.drawRolloverGuide(boundary as Boundary, p);
     }
   }
   static drawRolloverGuide(boundary: Boundary, p: p5): void {

@@ -1,10 +1,14 @@
 import p5 from "p5";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
-import Position from "../model/Position";
+import Plug from "../model/Plug";
+import Position from "../model/positioning/Position";
+import ToolboxModel from "../model/ToolboxModel";
+import ToolModel from "../model/ToolModel";
 import RenderEdge from "../view/RenderEdge";
 import RenderGuides from "../view/RenderGuide";
 import RenderNode from "../view/RenderNode";
+import RenderToolbox from "../view/RenderToolbox";
 import CreationManager from "./CreationManager";
 
 class ChartManager {
@@ -12,15 +16,22 @@ class ChartManager {
   private static p: p5;
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
+  
+  // getRolledOverObjects
+  private rolledOverObjects: (
+    NodeModel | EdgeModel | Plug | ToolboxModel | ToolModel
+  )[] = [];
+
   private constructor(p: p5) {
     ChartManager.setP(p);
     this.nodes = CreationManager.createNodes();
     // this.edges = CreationManager.createEdges(this.nodes);
   }
-  renderElements(): void {
-    // console.log('ELEMENTS : '+this.toString());
-    // anything to "advance" nodes and edges, or do I just render them?
-
+  mouseDragged(p: p5): void {
+    console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
+  }
+  // TEMP FUNCTION for testing
+  drawTestLines(): void {
     // TEST LINES
     const line1_2 = RenderEdge.plotLinesBetweenNodes(
       this.nodes[0] as NodeModel,
@@ -39,8 +50,50 @@ class ChartManager {
     RenderEdge.renderLines(line2_3);
     RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
 
-    this.nodes.forEach((n) => {
+  }
+  renderElements(): void {
+    const p = ChartManager.getP();
+    // console.log('ELEMENTS : '+this.toString());
+    // anything to "advance" nodes and edges, or do I just render them?
+
+    // DONE: Try setting "isDragging" to true on first node
+    // TODO NEXT: Check for mouse button held down on node for drag
+    //  1. If mouse button is held down, set node's "isDragging" to true
+    this.nodes.forEach((n,index) => {
+      // check for rollover
+      // TODO: Move this logic to abstract GuiElement class
+      const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
+      if (mouseIsOverNode) { n.setIsRolledOver(); }
+      else { n.setIsRolledOver(false); }
+      // if node is being dragged, update its position
+      if (n.getIsDragging()) {
+        n.dragToPosition(new Position(p.mouseX-40, p.mouseY-20));
+      }
+
+      // console.log(this.getSelectedNodes().length);
+      if (this.getSelectedNodes().length > 0) {
+        // TODO: Only draw line if user is hovering over another node:
+        //  1. iterate through plugs and check closest
+        const plugArray = this.getClosestPlugsOnSelectedNode();
+        // console.log('plugArray: '+plugArray);
+        const closestPlugOnSelectedNode = plugArray[0];
+        const closestPlugPosition = closestPlugOnSelectedNode?.getPosition();
+        const mousePosition = new Position(p.mouseX, p.mouseY);
+        const lineArray = [closestPlugPosition as Position, mousePosition];
+        RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
+        //  2. draw a preview line from the closest plug
+        //       on node 1 to the rolled-over node
+        //  NEXT: Create a preview line class:
+        //      One location to another (Position or object with position)
+      }
+      // else {
+      //   console.log('no nodes selected');
+      // }
+      
       RenderNode.render(n, ChartManager.getP());
+
+      const tbm = new ToolboxModel();
+      RenderToolbox.render(tbm);
     });
 
     // this.edges.forEach((e) => {
@@ -48,6 +101,16 @@ class ChartManager {
     // })
 
     // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
+
+    // IF A NODE IS SELECTED, SHOW A CONNECTION PREVIEW
+    // this.getSelectedNodes().forEach((node) => {
+      
+      // TEMP DISABLE, was tested
+      // this.highlightClosestPlugOnSelectedNode();
+      
+      
+      // RenderEdge.renderPreview(node);
+    // });
 
     // RENDER GRID & GUIDES
     RenderGuides.render();
@@ -81,6 +144,9 @@ class ChartManager {
   getSelectedNodes(): NodeModel[] {
     return this.nodes.filter((node) => node.getIsSelected());
   }
+  getRolledOverNodes(): NodeModel[] {
+    return this.nodes.filter((node) => node.getIsRolledOver());
+  }
   // selectedNodes includes node to check if selected
   checkForSelectNode(): void {
     const mousePosition = new Position(
@@ -96,6 +162,21 @@ class ChartManager {
         }
       }
     }
+  }
+  getClosestPlugsOnSelectedNode():Plug[] {
+    const selectedNodes = this.getSelectedNodes();
+    // Array for if multiple nodes are selected
+    // Right now, one at a time is selected, only
+    const closestPlugArray = [];
+    if (selectedNodes.length > 0) {
+      for (let i = 0; i < selectedNodes.length; i += 1) {
+        const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
+          ChartManager.p.mouseX, ChartManager.p.mouseY
+        );
+        closestPlugArray.push(closestPlug);
+      }
+    }
+    return closestPlugArray as Plug[];
   }
   mouseClicked(): void {
     console.log(

@@ -1,11 +1,11 @@
 // import { nodes } from "../draw";
-import Dimension from "../model/Dimension";
+import Dimension from "../model/positioning/Dimension";
 import EdgeModel from "../model/EdgeModel";
-import Layout from "../model/Layout";
+import Layout from "../model/positioning/Layout";
 import NodeModel from "../model/NodeModel";
 import Plug from "../model/Plug";
 import PlugPosition from "../model/PlugPosition";
-import Position from "../model/Position";
+import Position from "../model/positioning/Position";
 
 // const BASE_NODE_WIDTH = Layout.BASE_NODE_WIDTH;
 // const BASE_NODE_HEIGHT = Layout.BASE_NODE_HEIGHT;

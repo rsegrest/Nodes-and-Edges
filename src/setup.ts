@@ -7,6 +7,8 @@ import CreationManager from "./controller/CreationManager";
 import RenderEdge from "./view/RenderEdge";
 import RenderGuides from "./view/RenderGuide";
 import RenderNode from "./view/RenderNode";
+import RenderTool from "./view/RenderTool";
+import RenderToolbox from "./view/RenderToolbox";
 export let chartManager: ChartManager | null;
 export let creationManager: CreationManager | null;
 export let fontRegular: p5.Font;
@@ -28,18 +30,26 @@ export const preload = (p: p5): void => {
 //     height/2, -height/2,
 //     0, 500);
 // }
-
-/** This is a setup function. */
-export const setup = (p: p5): void => {
-  p.createCanvas(800, 600);
-  p.frameRate(1);
-  p.background(248);
-  // Classes with static methods that need access to p5.js
+const initializeRenderers = (p:p5): void => {
   new RenderNode(p);
   new RenderEdge(p);
   new RenderGuides(p);
+  new RenderTool(p);
+  new RenderToolbox(p);
+}
+const mouseDragged = (p: p5): void => {
+  ChartManager.getInstance().mouseDragged(p);
+}
+/** This is a setup function. */
+export const setup = (p: p5): void => {
+  p.createCanvas(800, 600);
+  p.frameRate(30);
+  p.background(248);
+  // Classes with static methods that need access to p5.js
+  initializeRenderers(p);
   chartManager = ChartManager.createInstance(p);
   creationManager = CreationManager.createInstance();
+
   // const uxRect = UX.createUxRect(10,10,100,100);
   // UX.setUxFill(uxRect, 'rgb(255,0,0)');
   // UX.setUxEvent(uxRect, () => {

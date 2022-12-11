@@ -1,16 +1,17 @@
 import EdgeModel from "./EdgeModel";
-import Layout from "./Layout";
+import Layout from "./positioning/Layout";
 import PlugPosition from "./PlugPosition";
-import Position from "./Position";
+import Position from "./positioning/Position";
 
 class Plug {
-  
   // Edge that this plug is plugged into (null if not plugged in)
   private plugSocket:EdgeModel|null = null;
+  private isDragging = false;
   constructor(
     public readonly plugPosition:PlugPosition,
     private position:Position,
-    private isSelected:boolean = false
+    private isSelected:boolean = false,
+    private isHighlit:boolean = false,
   ) {
     this.plugPosition = plugPosition;
     this.position = position;
@@ -36,5 +37,21 @@ class Plug {
   getIsSelected():boolean {
     return this.isSelected;
   }
+  setIsHighlit(isHighlit=true):void {
+    this.isHighlit = isHighlit;
+  }
+  getIsHighlit():boolean {
+    return this.isHighlit;
+  }
+  getIsDragging():boolean {
+    return this.isDragging;
+  }
+  setIsDragging(isDragging:boolean):void {
+    this.isDragging = isDragging;
+  }
+  setPosition(position: Position):void {
+    this.position = position;
+  }
+
 }
 export default Plug;
