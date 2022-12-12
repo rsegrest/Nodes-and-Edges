@@ -67,5 +67,16 @@ class EdgeModel extends DraggableGuiElementModel {
   public toString():string {
     return `EdgeModel: ${this.id}, sourceNode: ${this.sourceNode}, targetNode: ${this.targetNode}, sourcePlug: ${this.sourcePlug}, targetPlug: ${this.targetPlug}`;
   }
+  public toDyreqtJson():JSON {
+    throw new Error("EdgeModel-- toDyreqtJson: Method not implemented.");
+    const json = {
+      id: this.id,
+      sourceNode: this.sourceNode,
+      targetNode: this.targetNode,
+      sourcePlug: this.sourcePlug,
+      targetPlug: this.targetPlug
+    }
+    return JSON.parse(JSON.stringify(json));
+  }
 }
 export default EdgeModel;

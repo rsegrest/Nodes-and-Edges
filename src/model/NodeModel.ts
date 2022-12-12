@@ -13,6 +13,7 @@ export class NodeModel extends DraggableGuiElementModel {
 
   protected showNodes = false;
   protected plugs:PlugModel[];
+  // protected parameterList:ParameterModel[] = [];
   
   constructor(
     protected id: string,
@@ -164,6 +165,15 @@ export class NodeModel extends DraggableGuiElementModel {
   }
   public toString():string {
     return `NodeModel: ${this.id} ${this.label} ${this.position.toString()} ${this.dimensions.toString()}`;
+  }
+  public toDyreqtJson():string {
+    throw(new Error('NodeModel-- toDyreqtJson: not yet implemented'));
+    return JSON.stringify({
+      id: this.id,
+      label: this.label,
+      position: this.position,
+      dimensions: this.dimensions,
+    });
   }
 }
 export default NodeModel;

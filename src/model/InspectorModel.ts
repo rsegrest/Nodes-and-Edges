@@ -3,7 +3,7 @@ import Dimension from "./positioning/Dimension";
 import Position from "./positioning/Position";
 
 // TODO: Create panel model that is collapsible
-class InspectorPanelModel extends GuiElementModel {
+class InspectorModel extends GuiElementModel {
   // private parameterSet: any[] = [];
   private isCollapsed = false;
 
@@ -65,4 +65,4 @@ class InspectorPanelModel extends GuiElementModel {
   //   return isOver;
   // }
 }
-export default InspectorPanelModel;
+export default InspectorModel;

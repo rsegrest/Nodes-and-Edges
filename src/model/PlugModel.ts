@@ -21,6 +21,7 @@ class PlugModel extends DraggableGuiElementModel {
     this.position = position;
   }
   dragToPosition(position: Position): void {
+    // drag will connect to another plug
     throw new Error("Method not implemented.");
   }
   clickAction(): void {
