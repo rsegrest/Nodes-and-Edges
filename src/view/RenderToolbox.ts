@@ -17,7 +17,7 @@ class RenderToolbox {
   static renderTitle(tbm: ToolboxModel):void {
     const p = RenderToolbox.getP();
     const pos = tbm.getPosition();
-
+    if (!pos) return;
     // title
     p.push()
     p.fill(255);
@@ -30,7 +30,7 @@ class RenderToolbox {
     const p = RenderToolbox.getP();
     const pos = tbm.getPosition();
     const dim = tbm.getDimensions();
-
+    if (!pos || !dim) return;
     p.push();
     p.fill('rgba(32,32,64,0.8)');
     p.noStroke();
@@ -53,29 +53,37 @@ class RenderToolbox {
   }
   static ROW_SPACING = 60;
   static findFirstRowOffset(tbm: ToolboxModel):number {
-    const FIRST_ROW_OFFSET_Y = 70 + tbm.getPosition().y;
+    const pos = tbm.getPosition();
+    if (!pos) return 0;
+    const FIRST_ROW_OFFSET_Y = 70 + pos.y;
     return FIRST_ROW_OFFSET_Y;
   }
   // should this be in the model?
   static findHorizontalCenterLine(
     tbm: ToolboxModel
   ):number {
-    return tbm.getPosition().x+95;
+    const pos = tbm.getPosition();
+    if (!pos) return 0;
+    return pos.x+95;
   }
   // should this be in the model?
   static findRowCenterLine(tbm:ToolboxModel, row:number):number {
     return RenderToolbox.findFirstRowOffset(tbm)+(row*RenderToolbox.ROW_SPACING);
   }
-  static buildLocationSet(tbm: ToolboxModel):Position[] {
+  static buildLocationSet(tbm: ToolboxModel):Position[]|null {
     const p = RenderToolbox.getP();
     const pos = tbm.getPosition();
+    if (!pos) return null;
     // const dim = tbm.getDimensions();
     const toolList = tbm.getToolList();
 
     const toolLocations:Position[] = [];
     const CENTER_OFFSET_X = 45;
-    const rows = RenderToolbox.calcNumToolGridRows();
-    const columns = RenderToolbox.calcNumToolGridColumns();
+
+    // TODO: Use row and column count to calculate position
+    // const rows = RenderToolbox.calcNumToolGridRows();
+    // const columns = RenderToolbox.calcNumToolGridColumns();
+    
     // find center line
     // find row center lines
     toolList.forEach((tool,i) => {
@@ -95,10 +103,12 @@ class RenderToolbox {
     })
     return toolLocations;
   }
+
   static renderTools(tbm: ToolboxModel):void {
     const toolList = tbm.getToolList();
     const locationSet = RenderToolbox.buildLocationSet(tbm);
 
+    if (!locationSet) return;
     toolList.forEach((tool,i) => {
       RenderTool.renderTool(tool, locationSet[i] as Position);
     })
@@ -120,6 +130,7 @@ class RenderToolbox {
     const p = RenderToolbox.getP();
     const pos = tbm.getPosition();
     const dim = tbm.getDimensions();
+    if (!pos || !dim) return;
     // background
     p.push();
     p.fill('rgba(255,255,255,0.2)')
@@ -131,6 +142,7 @@ class RenderToolbox {
     const p = RenderToolbox.getP();
     const pos = tbm.getPosition();
     const dim = tbm.getDimensions();
+    if (!pos || !dim) return;
     // border
     p.noFill();
     p.stroke('rgba(32,32,64,0.8)');

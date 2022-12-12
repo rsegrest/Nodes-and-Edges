@@ -1,6 +1,6 @@
 import Dimension from "./positioning/Dimension";
 import Position from "./positioning/Position";
-import Plug from './Plug';
+import PlugModel from './PlugModel';
 import PlugPosition from "./PlugPosition";
 import DraggableGuiElementModel from "./abstract/DraggableGuiElement";
 export type Boundary = {
@@ -12,7 +12,7 @@ export type Boundary = {
 export class NodeModel extends DraggableGuiElementModel {
 
   protected showNodes = false;
-  protected plugs:Plug[];
+  protected plugs:PlugModel[];
   
   constructor(
     protected id: string,
@@ -30,7 +30,7 @@ export class NodeModel extends DraggableGuiElementModel {
   getBoundary():Boundary|null {
     return super.getBoundary(10);
   }
-  createPlugs():Plug[] {
+  createPlugs():PlugModel[] {
     const plugArray = [];
     const plugPositions = [
       PlugPosition.NW,
@@ -44,7 +44,7 @@ export class NodeModel extends DraggableGuiElementModel {
       PlugPosition.W,
     ];
     for (let i = 0; i < 8; i++) {
-      const addPlug = new Plug(
+      const addPlug = new PlugModel(
         plugPositions[i] as PlugPosition,
         this.getPlugPosition(plugPositions[i] as PlugPosition) as Position,
       );
@@ -88,7 +88,7 @@ export class NodeModel extends DraggableGuiElementModel {
     }
   }
   highlightClosestPlug(mouseX:number, mouseY:number):void {
-    this.plugs.forEach((plug:Plug) => {
+    this.plugs.forEach((plug:PlugModel) => {
       plug.setIsHighlit(false);
     })
     const closestPlug = this.getPlugClosestToMouse(mouseX, mouseY);
@@ -96,12 +96,15 @@ export class NodeModel extends DraggableGuiElementModel {
       closestPlug.setIsHighlit();
     }
   }
-  getPlugClosestToMouse(mouseX:number, mouseY:number):Plug|null {
-    let closestPlug:Plug|null = null;
+  getPlugClosestToMouse(mouseX:number, mouseY:number):PlugModel|null {
+    let closestPlug:PlugModel|null = null;
     let closestDistance = 100000;
     for (let i = 0; i < this.plugs.length; i++) {
-      const plug = this.plugs[i] as Plug;
-      const distance = (plug as Plug).getPosition().getDistance(new Position(mouseX, mouseY));
+      const plug = this.plugs[i] as PlugModel;
+      const distance = (
+        (plug as PlugModel).position as Position)
+          .getDistance(new Position(mouseX, mouseY)
+      );
       if (distance < closestDistance) {
         closestDistance = distance;
         closestPlug = plug;
@@ -118,11 +121,11 @@ export class NodeModel extends DraggableGuiElementModel {
   getShowNodes():boolean {
     return this.showNodes;
   }
-  getPlugs():Plug[] {
+  getPlugs():PlugModel[] {
     return this.plugs;
   }
-  getPlugByPosition(plugPosition:PlugPosition):Plug {
-    return this.plugs.find((plug) => plug.plugPosition === plugPosition) as Plug;
+  getPlugByPosition(plugPosition:PlugPosition):PlugModel {
+    return this.plugs.find((plug) => plug.plugPosition === plugPosition) as PlugModel;
   }
   setIsRolledOver(isRolledOver=true):void {
     this.isRolledOver = isRolledOver;
@@ -134,7 +137,6 @@ export class NodeModel extends DraggableGuiElementModel {
   public clickAction(): void {
     console.log('NodeModel onClick', this.toString());
   }
-
   // override GUIElementModel
   public setIsDragging(isDragging:boolean): void {
     this.setCursor(isDragging);
@@ -152,10 +154,12 @@ export class NodeModel extends DraggableGuiElementModel {
     const deltaY = position.y - lastPosition.y;
 
     this.plugs.forEach((plug) => {
-      plug.setPosition(new Position(
-        plug.getPosition().x + deltaX,
-        plug.getPosition().y + deltaY,
-      ));
+      if (plug !== null) {
+        plug.setPosition(new Position(
+          ((plug).position as Position).x + deltaX,
+          ((plug).position as Position).y + deltaY,
+        ));
+      }
     });
   }
   public toString():string {

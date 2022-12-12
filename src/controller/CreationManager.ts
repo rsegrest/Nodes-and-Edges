@@ -3,7 +3,7 @@ import Dimension from "../model/positioning/Dimension";
 import EdgeModel from "../model/EdgeModel";
 import Layout from "../model/positioning/Layout";
 import NodeModel from "../model/NodeModel";
-import Plug from "../model/Plug";
+import PlugModel from "../model/PlugModel";
 import PlugPosition from "../model/PlugPosition";
 import Position from "../model/positioning/Position";
 
@@ -34,8 +34,8 @@ export class CreationManager {
   ): NodeModel {
     return new NodeModel(id, label, position, dimension);
   }
-  createPlug(plugPosition: PlugPosition, position: Position): Plug {
-    return new Plug(plugPosition, position);
+  createPlug(plugPosition: PlugPosition, position: Position): PlugModel {
+    return new PlugModel(plugPosition, position);
   }
 
   static populateNodeAndEdgeList(): {

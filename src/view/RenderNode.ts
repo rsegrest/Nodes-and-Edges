@@ -1,6 +1,6 @@
 import p5 from "p5";
 import NodeModel, { Boundary } from "../model/NodeModel";
-import Plug from "../model/Plug";
+import PlugModel from "../model/PlugModel";
 
 export class RenderNode {
   public static p: p5;
@@ -8,8 +8,10 @@ export class RenderNode {
   constructor(p: p5) {
     RenderNode.p = p;
   }
-  static renderPlug(plug: Plug, p: p5, showNodes:boolean): void {
+  static renderPlug(plug: PlugModel, p: p5, showNodes:boolean): void {
+    if (plug === null) { return; }
     const pos = plug.getPosition();
+    if (pos === null) { return; }
     const isSelected = plug.getIsSelected();
     const x = pos.x;
     const y = pos.y;

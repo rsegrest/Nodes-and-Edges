@@ -37,8 +37,14 @@ const initializeRenderers = (p:p5): void => {
   new RenderTool(p);
   new RenderToolbox(p);
 }
-const mouseDragged = (p: p5): void => {
+export const mouseDragged = (p: p5): void => {
   ChartManager.getInstance().mouseDragged(p);
+}
+export const mousePressed = (p: p5): void => {
+  ChartManager.getInstance().mousePressed(p);
+}
+export const mouseReleased = (p: p5): void => {
+  ChartManager.getInstance().mouseReleased(p);
 }
 /** This is a setup function. */
 export const setup = (p: p5): void => {

@@ -1,25 +1,28 @@
 import p5 from "p5";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
-import Plug from "../model/Plug";
-import Position from "../model/positioning/Position";
-import ToolboxModel from "../model/ToolboxModel";
+import PlugModel from "../model/PlugModel";
 import ToolModel from "../model/ToolModel";
 import RenderEdge from "../view/RenderEdge";
-import RenderGuides from "../view/RenderGuide";
 import RenderNode from "../view/RenderNode";
-import RenderToolbox from "../view/RenderToolbox";
+import RenderGuides from "../view/RenderGuide";
 import CreationManager from "./CreationManager";
+import ToolboxModel from "../model/ToolboxModel";
+import RenderToolbox from "../view/RenderToolbox";
+import Position from "../model/positioning/Position";
+
+type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
 class ChartManager {
   private static instance: ChartManager | null = null;
   private static p: p5;
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
+  private toolbox: ToolboxModel = new ToolboxModel();
   
   // getRolledOverObjects
   private rolledOverObjects: (
-    NodeModel | EdgeModel | Plug | ToolboxModel | ToolModel
+    NodeModel | EdgeModel | PlugModel | ToolboxModel | ToolModel
   )[] = [];
 
   private constructor(p: p5) {
@@ -28,8 +31,77 @@ class ChartManager {
     // this.edges = CreationManager.createEdges(this.nodes);
   }
   mouseDragged(p: p5): void {
-    console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
+    // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
+    const dragTarget:DraggableObject|null = this.getDragTarget();
+    if (dragTarget instanceof NodeModel) {
+      console.log('this is a node');
+      dragTarget.setIsDragging(true);
+    }
   }
+  mousePressed(p: p5): void {
+    // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
+    
+  }
+  clearDragTargets(): void {
+    this.nodes.forEach((node) => node.setIsDragging(false));
+    this.edges.forEach((edge) => edge.setIsDragging(false));
+    // TODO: this.rolledOverObjects.forEach((obj) => obj.setIsDragging(false));
+  }
+  mouseReleased(p: p5): void {
+    console.log('mouse released');
+    this.clearDragTargets();
+  }
+  getDragTarget(): DraggableObject|null {
+    const nodeList:NodeModel[] = this.nodes;
+    const edgeList:EdgeModel[] = this.edges;
+    const plugList:PlugModel[] = this.nodes.flatMap((node) => node.getPlugs());
+    const dragTarget = null;
+    // TODO: check tools for rollover
+    // TODO: Initialize and store toolbox data in this class
+    // TODO: check toolbox for rollover
+    if (this.toolbox) {
+      if (this.toolbox.getIsRolledOver()) {
+        console.warn(`toolbox: ${this.toolbox.toString()} is rolled over`);
+        return this.toolbox;
+      }
+    }
+    if (plugList.length > 0) {
+      for (let i = 0; i < plugList.length; i += 1) {
+        const plug = plugList[i];
+        if (typeof plug === 'undefined') { continue; }
+        if (plug === null) { continue; }
+        if (plug.getIsRolledOver()) {
+          console.warn(`plug: ${plug.toString()} is rolled over`);
+          return plug;
+        }
+      }
+    }
+    if (edgeList.length > 0) {
+      for (let i = 0; i < edgeList.length; i += 1) {
+        const edge = edgeList[i];
+        if (typeof edge === 'undefined') { continue; }
+        if (edge === null) { continue; }
+        if (edge?.getIsRolledOver()) {
+          console.warn(`edge: ${edge.toString()} is rolled over`);
+          return edge;
+        }
+      }
+    }
+    if (nodeList.length > 0) {
+      for (let i = 0; i < nodeList.length; i += 1) {
+        const node = nodeList[i];
+        if (typeof node === 'undefined') { continue; }
+        if (node === null) { continue; }
+        if (node?.getIsRolledOver()) {
+          console.warn(`node: ${node.toString()} is rolled over`);
+          return node;
+        }
+      }
+    }
+    // return object that is being dragged, or null
+    return null;
+  }
+  
   // TEMP FUNCTION for testing
   drawTestLines(): void {
     // TEST LINES
@@ -91,9 +163,7 @@ class ChartManager {
       // }
       
       RenderNode.render(n, ChartManager.getP());
-
-      const tbm = new ToolboxModel();
-      RenderToolbox.render(tbm);
+      RenderToolbox.render(this.toolbox);
     });
 
     // this.edges.forEach((e) => {
@@ -163,7 +233,7 @@ class ChartManager {
       }
     }
   }
-  getClosestPlugsOnSelectedNode():Plug[] {
+  getClosestPlugsOnSelectedNode():PlugModel[] {
     const selectedNodes = this.getSelectedNodes();
     // Array for if multiple nodes are selected
     // Right now, one at a time is selected, only
@@ -176,7 +246,7 @@ class ChartManager {
         closestPlugArray.push(closestPlug);
       }
     }
-    return closestPlugArray as Plug[];
+    return closestPlugArray as PlugModel[];
   }
   mouseClicked(): void {
     console.log(

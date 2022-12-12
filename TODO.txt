@@ -1,14 +1,12 @@
-9 December 2022
+11 December 2022
 
-TODO: Draw line from selected node
+TODO: Create base class for nodes, edges, plugs, tools, toolbox
+TODO: Rolled-over node member variable in chart manager
+TODO: Draw line only when mouse is not over same node
+TODO: If drawing line, highlight target node on rollover 
 TODO: Create edge when a second node is selected
 
-TESTS:
- * Click on node to select
-    - Check if it is selected
- * Compare 
-
-// TODO: Algorithm to plot "cord" path
+TODO: Algorithm to plot "cord" path
 
 class EdgeModel {
 	// TODO: one- or two-way
@@ -21,7 +19,13 @@ class EdgeModel {
 	// type of arrow?
 }
 
+UNIT TESTS:
+ * TODO: Click on node to select
+    - Check if it is selected
+ * TOOD: Compare 
+
 DONE:
+: Draw line from selected node
 : "Collision" check for rolling over node
 : Display plugs on rollover
 : Collision check for "plug"

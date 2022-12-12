@@ -3,6 +3,9 @@ import { createSketch } from "./p5-util/sketch";
 import {
   preload,
   setup,
+  mouseDragged,
+  mousePressed,
+  mouseReleased,
 } from "./setup";
 import {
   draw,
@@ -15,6 +18,9 @@ const sketch = createSketch({
   setup,
   draw,
   mouseClicked,
+  mouseDragged,
+  mousePressed,
+  mouseReleased,
 });
 
 new p5(sketch);

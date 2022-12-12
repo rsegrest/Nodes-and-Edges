@@ -28,6 +28,485 @@
     toString() {
       return `Position:(x:${this.x}, y:${this.y})`;
     }
+    static getDistance(p1, p2) {
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    getDistance(p2) {
+      return Position.getDistance(this, p2);
+    }
+  }
+
+  class Layout {
+    constructor(p) {
+      this.width = 0;
+      this.height = 0;
+      this.width = p.width;
+      this.height = p.height;
+    }
+    createInstance(p) {
+      if (Layout.instance === null) {
+        Layout.instance = new Layout(p);
+      }
+      return Layout.instance;
+    }
+    getInstance() {
+      if (Layout.instance === null) {
+        throw new Error("Layout instance is not created yet");
+      }
+      return Layout.instance;
+    }
+    static getDistance(position1, position2) {
+      const x = position1.x - position2.x;
+      const y = position1.y - position2.y;
+      return Math.sqrt(x * x + y * y);
+    }
+  }
+  Layout.instance = null;
+  Layout.BASE_NODE_WIDTH = 100;
+  Layout.BASE_NODE_HEIGHT = 50;
+
+  class GuiElementModel {
+    constructor(
+      _isClickable,
+      _isDraggable,
+      _isResizable,
+      _isSelectable,
+      position = null,
+      dimensions = null
+    ) {
+      this._isClickable = true;
+      this._isSelectable = false;
+      this._isDraggable = false;
+      this._isResizable = false;
+      this.position = null;
+      this.dimensions = null;
+      this.isVisible = true;
+      this.isSelected = false;
+      this.isRolledOver = false;
+      this._isClickable = _isClickable;
+      this._isDraggable = _isDraggable;
+      this._isResizable = _isResizable;
+      this._isSelectable = _isSelectable;
+      position && (this.position = position);
+      dimensions && (this.dimensions = dimensions);
+    }
+    checkMouseOver(mouseX, mouseY) {
+      const boundary = this.getBoundary();
+      if (!boundary) {
+        return false;
+      }
+      const isOver =
+        mouseX >= boundary.left &&
+        mouseX <= boundary.right &&
+        mouseY >= boundary.top &&
+        mouseY <= boundary.bottom;
+      return isOver;
+    }
+    getIsDraggable() {
+      return this._isDraggable;
+    }
+    getIsClickable() {
+      return this._isClickable;
+    }
+    getIsResizable() {
+      return this._isResizable;
+    }
+    setPosition(position) {
+      this.position = position;
+    }
+    getPosition() {
+      return this.position;
+    }
+    setDimensions(dimensions) {
+      this.dimensions = dimensions;
+    }
+    getDimensions() {
+      return this.dimensions;
+    }
+    getBoundary(addMargin = 0) {
+      if (!this.getPosition() || !this.getPosition()) {
+        return null;
+      }
+      return {
+        left: this.position.x - addMargin,
+        top: this.position.y - addMargin,
+        right: this.position.x + this.dimensions.width + addMargin,
+        bottom: this.position.y + this.dimensions.height + addMargin,
+      };
+    }
+    setVisible(visible = true) {
+      this.isVisible = visible;
+    }
+    setHidden(isHidden = true) {
+      this.isVisible = !isHidden;
+    }
+    getIsVisible() {
+      return this.isVisible;
+    }
+    getIsHidden() {
+      return !this.isVisible;
+    }
+    getIsRolledOver() {
+      return this.isRolledOver;
+    }
+    setIsRolledOver(isRolledOver = true) {
+      this.isRolledOver = isRolledOver;
+    }
+    getIsSelected() {
+      return this.isSelected;
+    }
+    setIsSelected(isSelected = true) {
+      this.isSelected = isSelected;
+    }
+    getIsSelectable() {
+      return this._isSelectable;
+    }
+    setSelectable(isSelectable = true) {
+      this._isSelectable = isSelectable;
+    }
+  }
+
+  class DraggableGuiElementModel extends GuiElementModel {
+    constructor(position = null, dimensions = null, isResizable = false) {
+      super(true, true, true, isResizable, position, dimensions);
+      this.isResizable = isResizable;
+      this.isDragging = false;
+    }
+    setCursor(isGrabbing) {
+      const defaultCanvas = document.getElementById("defaultCanvas0");
+      let cursorType = "pointer";
+      if (isGrabbing) {
+        cursorType = "grab";
+      }
+      console.log("defaultCanvas");
+      console.log(defaultCanvas);
+      const htmltag = defaultCanvas;
+      htmltag["style"].cursor = cursorType;
+    }
+
+    // public startDragAction():void {
+    //   this.isDragging = (true);
+    // }
+    // public stopDragAction():void {
+    //   this.isDragging = (false);
+    // }
+    setIsDragging(isDragging) {
+      this.isDragging = isDragging;
+    }
+    getIsDragging() {
+      return this.isDragging;
+    }
+  }
+
+  class Plug extends DraggableGuiElementModel {
+    constructor(plugPosition, position, isHighlit = false) {
+      super(
+        position,
+        null, // dimensions are null for plugs
+        false // not resizable
+      );
+      this.plugPosition = plugPosition;
+      this.isHighlit = isHighlit;
+
+      // Edge that this plug is plugged into (null if not plugged in)
+      this.plugSocket = null;
+      this.plugPosition = plugPosition;
+      this.position = position;
+    }
+    dragToPosition(position) {
+      throw new Error("Method not implemented.");
+    }
+    clickAction() {
+      throw new Error("Method not implemented.");
+    }
+
+    // override superclass method
+    checkMouseOver(mouseX, mouseY) {
+      if (this.position !== null) {
+        const distance = Layout.getDistance(
+          this.position,
+          new Position(mouseX, mouseY)
+        );
+        return distance < 15;
+      }
+      return false;
+    }
+    plugIn(edge) {
+      this.plugSocket = edge;
+    }
+    toString() {
+      return `Plug: ${this.plugPosition}, position: ${this.position}, plugSocket: ${this.plugSocket}`;
+    }
+
+    // setIsSelected(isSelected=true):void {
+    //   this.isSelected = isSelected;
+    // }
+    // getIsSelected():boolean {
+    //   return this.isSelected;
+    // }
+    setIsHighlit(isHighlit = true) {
+      this.isHighlit = isHighlit;
+    }
+    getIsHighlit() {
+      return this.isHighlit;
+    }
+  }
+
+  const PlugPosition = {
+    N: "N",
+    S: "S",
+    E: "E",
+    W: "W",
+    NE: "NE",
+    NW: "NW",
+    SE: "SE",
+    SW: "SW",
+  };
+
+  class NodeModel extends DraggableGuiElementModel {
+    constructor(id, label, position, dimensions) {
+      super(position, dimensions);
+      this.id = id;
+      this.label = label;
+      this.position = position;
+      this.dimensions = dimensions;
+      this.showNodes = false;
+      this.id = id;
+      this.label = label;
+      this.position = position;
+      this.dimensions = dimensions;
+      this.plugs = this.createPlugs();
+    }
+    getBoundary() {
+      return super.getBoundary(10);
+    }
+    createPlugs() {
+      const plugArray = [];
+      const plugPositions = [
+        PlugPosition.NW,
+        PlugPosition.SW,
+        PlugPosition.SE,
+        PlugPosition.NE,
+        PlugPosition.N,
+        PlugPosition.S,
+        PlugPosition.E,
+        PlugPosition.W,
+      ];
+      for (let i = 0; i < 8; i++) {
+        const addPlug = new Plug(
+          plugPositions[i],
+          this.getPlugPosition(plugPositions[i])
+        );
+        plugArray.push(addPlug);
+      }
+      return plugArray;
+    }
+    setSelected(isSelected = true) {
+      this.isSelected = isSelected;
+    }
+    deselect() {
+      this.isSelected = false;
+    }
+    getIsSelected() {
+      return this.isSelected;
+    }
+    getPlugPosition(plugPosition) {
+      const x = this.position.x;
+      const y = this.position.y;
+      const width = this.dimensions.width;
+      const height = this.dimensions.height;
+      switch (plugPosition) {
+        case PlugPosition.NW:
+          return new Position(x + 3, y);
+        case PlugPosition.N:
+          return new Position(x + 3 + width / 2, y);
+        case PlugPosition.NE:
+          return new Position(x + 3 + width, y);
+        case PlugPosition.SW:
+          return new Position(x + 3, y + height);
+        case PlugPosition.S:
+          return new Position(x + 3 + width / 2, y + height);
+        case PlugPosition.SE:
+          return new Position(x + 3 + width, y + height);
+        case PlugPosition.W:
+          return new Position(x + 3, y + height / 2);
+        case PlugPosition.E:
+          return new Position(x + 3 + width, y + height / 2);
+        default:
+          return new Position(0, 0);
+      }
+    }
+    highlightClosestPlug(mouseX, mouseY) {
+      this.plugs.forEach((plug) => {
+        plug.setIsHighlit(false);
+      });
+      const closestPlug = this.getPlugClosestToMouse(mouseX, mouseY);
+      if (closestPlug) {
+        closestPlug.setIsHighlit();
+      }
+    }
+    getPlugClosestToMouse(mouseX, mouseY) {
+      let closestPlug = null;
+      let closestDistance = 100000;
+      for (let i = 0; i < this.plugs.length; i++) {
+        const plug = this.plugs[i];
+        const distance = plug.position.getDistance(
+          new Position(mouseX, mouseY)
+        );
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPlug = plug;
+        }
+      }
+      return closestPlug;
+    }
+    getID() {
+      return this.id;
+    }
+    getLabel() {
+      return this.label;
+    }
+    getShowNodes() {
+      return this.showNodes;
+    }
+    getPlugs() {
+      return this.plugs;
+    }
+    getPlugByPosition(plugPosition) {
+      return this.plugs.find((plug) => plug.plugPosition === plugPosition);
+    }
+    setIsRolledOver(isRolledOver = true) {
+      this.isRolledOver = isRolledOver;
+    }
+    getIsRolledOver() {
+      return this.isRolledOver;
+    }
+
+    // override GUIElementModel
+    clickAction() {
+      console.log("NodeModel onClick", this.toString());
+    }
+
+    // override GUIElementModel
+    setIsDragging(isDragging) {
+      this.setCursor(isDragging);
+      this.isDragging = isDragging;
+      this.plugs.forEach((plug) => {
+        plug.setIsDragging(true);
+      });
+    }
+    dragToPosition(position) {
+      console.log(`NodeModel dragToPosition ${position.toString()}`);
+      const lastPosition = this.position;
+      this.position = position;
+      const deltaX = position.x - lastPosition.x;
+      const deltaY = position.y - lastPosition.y;
+      this.plugs.forEach((plug) => {
+        if (plug !== null) {
+          plug.setPosition(
+            new Position(plug.position.x + deltaX, plug.position.y + deltaY)
+          );
+        }
+      });
+    }
+    toString() {
+      return `NodeModel: ${this.id} ${
+        this.label
+      } ${this.position.toString()} ${this.dimensions.toString()}`;
+    }
+  }
+
+  class Dimension {
+    constructor(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+    toString() {
+      return `Dimension:(width:${this.width},  height:${this.height})`;
+    }
+  }
+
+  class ToolModel extends DraggableGuiElementModel {
+    constructor(
+      name,
+      icon,
+      objectType, // describes object to create
+      position = null,
+      dimensions = null
+    ) {
+      super(position, dimensions, false);
+      this.name = name;
+      this.name = name;
+      this.icon = icon;
+      this.objectType = objectType;
+    }
+    getName() {
+      return this.name;
+    }
+    getIcon() {
+      return this.icon;
+    }
+    getObjectType() {
+      return this.objectType;
+    }
+    clickAction() {
+      console.log("tool clicked");
+    }
+    dragToPosition(position) {
+      console.log("tool dragged to position:  ", position);
+    }
+  }
+
+  class ToolboxModel {
+    constructor() {
+      this.toolList = [];
+      this.dimensions = new Dimension(190, 580);
+      this.position = { x: 600, y: 10 };
+      this.isCollapsed = false;
+      this.toolList.push(new ToolModel("Element", "E", "Element"));
+      this.toolList.push(new ToolModel("Subelement", "S", "Subelement"));
+      this.toolList.push(new ToolModel("Edge", "E", "Edge"));
+    }
+    getToolList() {
+      return this.toolList;
+    }
+    getDimensions() {
+      return this.dimensions;
+    }
+    setDimensions(dimensions) {
+      this.dimensions = dimensions;
+    }
+    getPosition() {
+      return this.position;
+    }
+    setPosition(position) {
+      this.position = position;
+    }
+    setIsCollapsed(isCollapsed = true) {
+      this.isCollapsed = isCollapsed;
+    }
+    getIsCollapsed() {
+      return this.isCollapsed;
+    }
+    getBoundary() {
+      return {
+        left: this.position.x,
+        top: this.position.y,
+        right: this.position.x + this.dimensions.width,
+        bottom: this.position.y + this.dimensions.height,
+      };
+    }
+    checkMouseOver(mouseX, mouseY) {
+      const boundary = this.getBoundary();
+      const isOver =
+        mouseX >= boundary.left &&
+        mouseX <= boundary.right &&
+        mouseY >= boundary.top &&
+        mouseY <= boundary.bottom;
+      return isOver;
+    }
   }
 
   class RenderEdge {
@@ -105,7 +584,13 @@
       RenderNode.p = p;
     }
     static renderPlug(plug, p, showNodes) {
+      if (plug === null) {
+        return;
+      }
       const pos = plug.getPosition();
+      if (pos === null) {
+        return;
+      }
       const isSelected = plug.getIsSelected();
       const x = pos.x;
       const y = pos.y;
@@ -124,6 +609,10 @@
       if (isSelected) {
         plugStroke = "rgba(255,0,72,1)";
         plugFill = "rgba(255,0,72,1)";
+      }
+      if (plug.getIsHighlit()) {
+        plugStroke = "rgba(0,0,255,1)";
+        plugFill = "rgba(0,255,255,1)";
       }
       p.push();
       p.stroke(plugStroke);
@@ -195,8 +684,12 @@
       p.textAlign(p.CENTER, p.CENTER);
       p.text(label, 6, 3, width - 6, height - 6);
       p.pop();
-      const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
+
+      // const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
+      const showNodes = node.getIsRolledOver();
       this.showNodes(node, p, showNodes);
+
+      // Draw the bounds of the rollover sensor area
       {
         RenderNode.drawRolloverGuide(boundary, p);
       }
@@ -217,200 +710,155 @@
     }
   }
 
-  class Dimension {
-    constructor(width, height) {
-      this.width = width;
-      this.height = height;
-    }
-    toString() {
-      return `Dimension:(width:${this.width},  height:${this.height})`;
-    }
-  }
-
-  class Layout {
+  class RenderTool {
     constructor(p) {
-      this.width = 0;
-      this.height = 0;
-      this.width = p.width;
-      this.height = p.height;
+      RenderTool.p = p;
     }
-    createInstance(p) {
-      if (Layout.instance === null) {
-        Layout.instance = new Layout(p);
-      }
-      return Layout.instance;
+    static getP() {
+      return RenderTool.p;
     }
-    getInstance() {
-      if (Layout.instance === null) {
-        throw new Error("Layout instance is not created yet");
-      }
-      return Layout.instance;
-    }
-    static getDistance(position1, position2) {
-      const x = position1.x - position2.x;
-      const y = position1.y - position2.y;
-      return Math.sqrt(x * x + y * y);
+    static renderTool(tool, location) {
+      const p = RenderTool.getP();
+      p.push();
+      p.translate(location.x, location.y);
+      p.fill("rgba(255,200,100,1)");
+      p.stroke(72);
+      p.strokeWeight(2);
+      p.rectMode(p.CENTER);
+      p.rect(0, 0, 80, 40);
+      p.noStroke();
+      p.fill(0);
+      p.text(tool.getName(), -30, 5);
+      p.pop();
     }
   }
-  Layout.instance = null;
-  Layout.BASE_NODE_WIDTH = 100;
-  Layout.BASE_NODE_HEIGHT = 50;
 
-  class Plug {
-    constructor(plugPosition, position, isSelected = false) {
-      this.plugPosition = plugPosition;
-      this.position = position;
-      this.isSelected = isSelected;
+  class RenderToolbox {
+    constructor(p) {
+      RenderToolbox.p = p;
+    }
+    static getP() {
+      return RenderToolbox.p;
+    }
+    static renderTitle(tbm) {
+      const p = RenderToolbox.getP();
+      const pos = tbm.getPosition();
 
-      // Edge that this plug is plugged into (null if not plugged in)
-      this.plugSocket = null;
-      this.plugPosition = plugPosition;
-      this.position = position;
+      // title
+      p.push();
+      p.fill(255);
+      p.noStroke();
+      p.text("TOOLBOX", pos.x + 10, pos.y + 20);
+      p.push();
     }
-    getPosition() {
-      return this.position;
+    static renderTitleBar(tbm) {
+      const p = RenderToolbox.getP();
+      const pos = tbm.getPosition();
+      const dim = tbm.getDimensions();
+      p.push();
+      p.fill("rgba(32,32,64,0.8)");
+      p.noStroke();
+      p.rect(pos.x, pos.y, dim.width, 30);
+      p.fill(255);
+      p.text("TOOLBOX", pos.x + 10, pos.y + 20);
+      p.pop();
+      RenderToolbox.renderTitle(tbm);
     }
-    checkMouseOver(mouseX, mouseY) {
-      const distance = Layout.getDistance(
-        this.position,
-        new Position(mouseX, mouseY)
+    static calcNumToolGridColumns() {
+    // tbm: ToolboxModel
+      return 2;
+    }
+    static calcNumToolGridRows() {
+    // tbm: ToolboxModel
+      return 6;
+    }
+    static findFirstRowOffset(tbm) {
+      const FIRST_ROW_OFFSET_Y = 70 + tbm.getPosition().y;
+      return FIRST_ROW_OFFSET_Y;
+    }
+
+    // should this be in the model?
+    static findHorizontalCenterLine(tbm) {
+      return tbm.getPosition().x + 95;
+    }
+
+    // should this be in the model?
+    static findRowCenterLine(tbm, row) {
+      return (
+        RenderToolbox.findFirstRowOffset(tbm) + row * RenderToolbox.ROW_SPACING
       );
-      return distance < 15;
     }
-    plugIn(edge) {
-      this.plugSocket = edge;
-    }
-    toString() {
-      return `Plug: ${this.plugPosition}, position: ${this.position}, plugSocket: ${this.plugSocket}`;
-    }
-    setIsSelected(isSelected = true) {
-      this.isSelected = isSelected;
-    }
-    getIsSelected() {
-      return this.isSelected;
-    }
-  }
+    static buildLocationSet(tbm) {
+      const pos = tbm.getPosition();
 
-  const PlugPosition = {
-    N: "N",
-    S: "S",
-    E: "E",
-    W: "W",
-    NE: "NE",
-    NW: "NW",
-    SE: "SE",
-    SW: "SW",
-  };
+      // const dim = tbm.getDimensions();
+      const toolList = tbm.getToolList();
+      const toolLocations = [];
+      const CENTER_OFFSET_X = 45;
 
-  class NodeModel {
-    constructor(id, label, position, dimensions) {
-      this.id = id;
-      this.label = label;
-      this.position = position;
-      this.dimensions = dimensions;
-      this.showNodes = false;
-      this.isSelected = false;
-      this.id = id;
-      this.label = label;
-      this.position = position;
-      this.dimensions = dimensions;
-      this.plugs = this.createPlugs();
-    }
-    getBoundary() {
-      return {
-        left: this.position.x - 10,
-        top: this.position.y - 10,
-        right: this.position.x + 10 + this.dimensions.width,
-        bottom: this.position.y + 10 + this.dimensions.height,
-      };
-    }
-    checkMouseOver(mouseX, mouseY) {
-      const boundary = this.getBoundary();
-      const isOver =
-        mouseX >= boundary.left &&
-        mouseX <= boundary.right &&
-        mouseY >= boundary.top &&
-        mouseY <= boundary.bottom;
-      return isOver;
-    }
-    createPlugs() {
-      const plugArray = [];
-      const plugPositions = [
-        PlugPosition.NW,
-        PlugPosition.SW,
-        PlugPosition.SE,
-        PlugPosition.NE,
-        PlugPosition.N,
-        PlugPosition.S,
-        PlugPosition.E,
-        PlugPosition.W,
-      ];
-      for (let i = 0; i < 8; i++) {
-        const addPlug = new Plug(
-          plugPositions[i],
-          this.getPlugPosition(plugPositions[i])
+      // find center line
+      // find row center lines
+      toolList.forEach((tool, i) => {
+        let thisX = this.findHorizontalCenterLine(tbm) - CENTER_OFFSET_X;
+        if (i % 2 !== 0) {
+          thisX += CENTER_OFFSET_X * 2;
+        }
+        toolLocations.push(
+          new Position(
+            // if two rows, center plus or minus horizontal offset
+            thisX,
+            pos.y +
+              RenderToolbox.findFirstRowOffset(tbm) +
+              Math.floor(i / 2) * 60
+          )
         );
-        plugArray.push(addPlug);
-      }
-      return plugArray;
+      });
+      return toolLocations;
     }
-    setSelected(isSelected = true) {
-      this.isSelected = isSelected;
+    static renderTools(tbm) {
+      const toolList = tbm.getToolList();
+      const locationSet = RenderToolbox.buildLocationSet(tbm);
+      toolList.forEach((tool, i) => {
+        RenderTool.renderTool(tool, locationSet[i]);
+      });
     }
-    deselect() {
-      this.isSelected = false;
+
+    // TEST
+    static render(tbm) {
+      const p = RenderToolbox.getP();
+      tbm.getPosition();
+      tbm.getDimensions();
+      RenderToolbox.renderBackground(tbm);
+      RenderToolbox.renderTBBorder(tbm);
+      RenderToolbox.renderTitleBar(tbm);
+      RenderToolbox.renderTools(tbm);
+      p.pop();
     }
-    getIsSelected() {
-      return this.isSelected;
+    static renderBackground(tbm) {
+      const p = RenderToolbox.getP();
+      const pos = tbm.getPosition();
+      const dim = tbm.getDimensions();
+
+      // background
+      p.push();
+      p.fill("rgba(255,255,255,0.2)");
+      p.noStroke();
+      p.rect(pos.x, pos.y + 30, dim.width, dim.height - 30);
+      p.pop();
     }
-    getPlugPosition(plugPosition) {
-      const x = this.position.x;
-      const y = this.position.y;
-      const width = this.dimensions.width;
-      const height = this.dimensions.height;
-      switch (plugPosition) {
-        case PlugPosition.NW:
-          return new Position(x + 3, y);
-        case PlugPosition.N:
-          return new Position(x + 3 + width / 2, y);
-        case PlugPosition.NE:
-          return new Position(x + 3 + width, y);
-        case PlugPosition.SW:
-          return new Position(x + 3, y + height);
-        case PlugPosition.S:
-          return new Position(x + 3 + width / 2, y + height);
-        case PlugPosition.SE:
-          return new Position(x + 3 + width, y + height);
-        case PlugPosition.W:
-          return new Position(x + 3, y + height / 2);
-        case PlugPosition.E:
-          return new Position(x + 3 + width, y + height / 2);
-        default:
-          return new Position(0, 0);
-      }
-    }
-    getID() {
-      return this.id;
-    }
-    getLabel() {
-      return this.label;
-    }
-    getShowNodes() {
-      return this.showNodes;
-    }
-    getPlugs() {
-      return this.plugs;
-    }
-    getPlugByPosition(plugPosition) {
-      return this.plugs.find((plug) => plug.plugPosition === plugPosition);
-    }
-    toString() {
-      // console.log("NODE MODEL TO STRING")
-      return `NodeModel: ${this.id} ${
-        this.label
-      } ${this.position.toString()} ${this.dimensions.toString()}`;
+    static renderTBBorder(tbm) {
+      const p = RenderToolbox.getP();
+      const pos = tbm.getPosition();
+      const dim = tbm.getDimensions();
+
+      // border
+      p.noFill();
+      p.stroke("rgba(32,32,64,0.8)");
+      p.strokeWeight(3);
+      p.rect(pos.x, pos.y, dim.width, dim.height);
     }
   }
+  RenderToolbox.ROW_SPACING = 60;
 
   // import { nodes } from "../draw";
   // const BASE_NODE_WIDTH = Layout.BASE_NODE_WIDTH;
@@ -482,14 +930,100 @@
     constructor(p) {
       this.nodes = [];
       this.edges = [];
+      this.toolbox = new ToolboxModel();
+
+      // getRolledOverObjects
+      this.rolledOverObjects = [];
       ChartManager.setP(p);
       this.nodes = CreationManager.createNodes();
 
       // this.edges = CreationManager.createEdges(this.nodes);
     }
-    renderElements() {
-      // console.log('ELEMENTS : '+this.toString());
-      // anything to "advance" nodes and edges, or do I just render them?
+    mouseDragged(p) {
+      // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
+      const dragTarget = this.getDragTarget();
+      if (dragTarget instanceof NodeModel) {
+        console.log("this is a node");
+        dragTarget.setIsDragging(true);
+      }
+    }
+    mousePressed(p) {
+      // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
+    }
+    clearDragTargets() {
+      this.nodes.forEach((node) => node.setIsDragging(false));
+      this.edges.forEach((edge) => edge.setIsDragging(false));
+
+      // TODO: this.rolledOverObjects.forEach((obj) => obj.setIsDragging(false));
+    }
+    mouseReleased(p) {
+      console.log("mouse released");
+      this.clearDragTargets();
+    }
+    getDragTarget() {
+      const nodeList = this.nodes;
+      const edgeList = this.edges;
+      const plugList = this.nodes.flatMap((node) => node.getPlugs());
+
+      // TODO: check tools for rollover
+      // TODO: Initialize and store toolbox data in this class
+      // TODO: check toolbox for rollover
+      if (plugList.length > 0) {
+        for (let i = 0; i < plugList.length; i += 1) {
+          const plug = plugList[i];
+          if (typeof plug === "undefined") {
+            continue;
+          }
+          if (plug === null) {
+            continue;
+          }
+          if (plug.getIsRolledOver()) {
+            console.warn(`plug: ${plug.toString()} is rolled over`);
+            return plug;
+          }
+        }
+      }
+      if (edgeList.length > 0) {
+        for (let i = 0; i < edgeList.length; i += 1) {
+          const edge = edgeList[i];
+          if (typeof edge === "undefined") {
+            continue;
+          }
+          if (edge === null) {
+            continue;
+          }
+          if (
+            edge === null || edge === void 0 ? void 0 : edge.getIsRolledOver()
+          ) {
+            console.warn(`edge: ${edge.toString()} is rolled over`);
+            return edge;
+          }
+        }
+      }
+      if (nodeList.length > 0) {
+        for (let i = 0; i < nodeList.length; i += 1) {
+          const node = nodeList[i];
+          if (typeof node === "undefined") {
+            continue;
+          }
+          if (node === null) {
+            continue;
+          }
+          if (
+            node === null || node === void 0 ? void 0 : node.getIsRolledOver()
+          ) {
+            console.warn(`node: ${node.toString()} is rolled over`);
+            return node;
+          }
+        }
+      }
+
+      // return object that is being dragged, or null
+      return null;
+    }
+
+    // TEMP FUNCTION for testing
+    drawTestLines() {
       // TEST LINES
       const line1_2 = RenderEdge.plotLinesBetweenNodes(
         this.nodes[0],
@@ -506,14 +1040,70 @@
       RenderEdge.renderLines(line1_2);
       RenderEdge.renderLines(line2_3);
       RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
-      this.nodes.forEach((n) => {
+    }
+    renderElements() {
+      const p = ChartManager.getP();
+
+      // console.log('ELEMENTS : '+this.toString());
+      // anything to "advance" nodes and edges, or do I just render them?
+      // DONE: Try setting "isDragging" to true on first node
+      // TODO NEXT: Check for mouse button held down on node for drag
+      //  1. If mouse button is held down, set node's "isDragging" to true
+      this.nodes.forEach((n, index) => {
+        // check for rollover
+        // TODO: Move this logic to abstract GuiElement class
+        const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
+        if (mouseIsOverNode) {
+          n.setIsRolledOver();
+        } else {
+          n.setIsRolledOver(false);
+        }
+
+        // if node is being dragged, update its position
+        if (n.getIsDragging()) {
+          n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
+        }
+
+        // console.log(this.getSelectedNodes().length);
+        if (this.getSelectedNodes().length > 0) {
+          // TODO: Only draw line if user is hovering over another node:
+          //  1. iterate through plugs and check closest
+          const plugArray = this.getClosestPlugsOnSelectedNode();
+
+          // console.log('plugArray: '+plugArray);
+          const closestPlugOnSelectedNode = plugArray[0];
+          const closestPlugPosition =
+            closestPlugOnSelectedNode === null ||
+            closestPlugOnSelectedNode === void 0
+              ? void 0
+              : closestPlugOnSelectedNode.getPosition();
+          const mousePosition = new Position(p.mouseX, p.mouseY);
+          const lineArray = [closestPlugPosition, mousePosition];
+          RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
+
+          //  2. draw a preview line from the closest plug
+          //       on node 1 to the rolled-over node
+          //  NEXT: Create a preview line class:
+          //      One location to another (Position or object with position)
+        }
+
+        // else {
+        //   console.log('no nodes selected');
+        // }
         RenderNode.render(n, ChartManager.getP());
+        RenderToolbox.render(this.toolbox);
       });
 
       // this.edges.forEach((e) => {
       //   RenderEdge.render(e);
       // })
       // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
+      // IF A NODE IS SELECTED, SHOW A CONNECTION PREVIEW
+      // this.getSelectedNodes().forEach((node) => {
+      // TEMP DISABLE, was tested
+      // this.highlightClosestPlugOnSelectedNode();
+      // RenderEdge.renderPreview(node);
+      // });
       // RENDER GRID & GUIDES
       RenderGuides.render();
     }
@@ -545,6 +1135,9 @@
     getSelectedNodes() {
       return this.nodes.filter((node) => node.getIsSelected());
     }
+    getRolledOverNodes() {
+      return this.nodes.filter((node) => node.getIsRolledOver());
+    }
 
     // selectedNodes includes node to check if selected
     checkForSelectNode() {
@@ -562,6 +1155,23 @@
         }
       }
     }
+    getClosestPlugsOnSelectedNode() {
+      const selectedNodes = this.getSelectedNodes();
+
+      // Array for if multiple nodes are selected
+      // Right now, one at a time is selected, only
+      const closestPlugArray = [];
+      if (selectedNodes.length > 0) {
+        for (let i = 0; i < selectedNodes.length; i += 1) {
+          const closestPlug = selectedNodes[i].getPlugClosestToMouse(
+            ChartManager.p.mouseX,
+            ChartManager.p.mouseY
+          );
+          closestPlugArray.push(closestPlug);
+        }
+      }
+      return closestPlugArray;
+    }
     mouseClicked() {
       console.log(
         `ChartManager.mouseClicked() @ ${new Position(
@@ -573,7 +1183,6 @@
         const plugs = n.getPlugs();
         plugs.forEach((p) => {
           if (p.checkMouseOver(ChartManager.p.mouseX, ChartManager.p.mouseY)) {
-            console.log(`Plug ${i} clicked`);
             p.setIsSelected();
           }
         });
@@ -659,16 +1268,31 @@
   //     height/2, -height/2,
   //     0, 500);
   // }
-  /** This is a setup function. */
-  const setup = (p) => {
-    p.createCanvas(800, 600);
-    p.frameRate(1);
-    p.background(248);
-
-    // Classes with static methods that need access to p5.js
+  const initializeRenderers = (p) => {
     new RenderNode(p);
     new RenderEdge(p);
     new RenderGuides(p);
+    new RenderTool(p);
+    new RenderToolbox(p);
+  };
+  const mouseDragged = (p) => {
+    ChartManager.getInstance().mouseDragged(p);
+  };
+  const mousePressed = (p) => {
+    ChartManager.getInstance().mousePressed(p);
+  };
+  const mouseReleased = (p) => {
+    ChartManager.getInstance().mouseReleased(p);
+  };
+
+  /** This is a setup function. */
+  const setup = (p) => {
+    p.createCanvas(800, 600);
+    p.frameRate(30);
+    p.background(248);
+
+    // Classes with static methods that need access to p5.js
+    initializeRenderers(p);
     chartManager = ChartManager.createInstance(p);
     CreationManager.createInstance();
 
@@ -721,6 +1345,9 @@
     setup,
     draw,
     mouseClicked,
+    mouseDragged,
+    mousePressed,
+    mouseReleased,
   });
   new p5(sketch);
 })(p5);

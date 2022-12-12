@@ -24,12 +24,12 @@ abstract class DraggableGuiElementModel extends GuiElementModel {
     }
     
     
-    public startDragAction():void {
-      this.isDragging = (true);
-    }
-    public stopDragAction():void {
-      this.isDragging = (false);
-    }
+    // public startDragAction():void {
+    //   this.isDragging = (true);
+    // }
+    // public stopDragAction():void {
+    //   this.isDragging = (false);
+    // }
     public setIsDragging(isDragging:boolean): void {
       this.isDragging = isDragging;
     }

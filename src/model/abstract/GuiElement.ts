@@ -84,5 +84,23 @@ abstract class GuiElementModel {
     public getIsHidden(): boolean {
       return !this.isVisible;
     }
+    public getIsRolledOver(): boolean {
+      return this.isRolledOver;
+    }
+    public setIsRolledOver(isRolledOver=true): void {
+      this.isRolledOver = isRolledOver;
+    }
+    public getIsSelected(): boolean {
+      return this.isSelected;
+    }
+    public setIsSelected(isSelected=true): void {
+      this.isSelected = isSelected;
+    }
+    public getIsSelectable(): boolean {
+      return this._isSelectable;
+    }
+    public setSelectable(isSelectable=true): void {
+      this._isSelectable = isSelectable;
+    }
 }
 export default GuiElementModel;
