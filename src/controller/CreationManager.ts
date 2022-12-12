@@ -1,7 +1,7 @@
 // import { nodes } from "../draw";
 import Dimension from "../model/positioning/Dimension";
 import EdgeModel from "../model/EdgeModel";
-import Layout from "../model/positioning/Layout";
+// import Layout from "../model/positioning/Layout";
 import NodeModel from "../model/NodeModel";
 import PlugModel from "../model/PlugModel";
 import PlugPosition from "../model/PlugPosition";
@@ -44,7 +44,8 @@ export class CreationManager {
   } {
     // const nodeData = generatedNodeData();
     const nodes = CreationManager.createNodes();
-    const edges = CreationManager.createEdges(nodes);
+    const edges = [] as EdgeModel[];
+    // const edges = CreationManager.createEdges(nodes);
     return {
       nodes,
       edges,
@@ -69,7 +70,10 @@ export class CreationManager {
     }
     return nodes;
   }
-  static createEdges(nodes: NodeModel[]): EdgeModel[] {
+  // TODO: Use this (temp method) to set up a test case
+  static createEdges(
+    // nodes: NodeModel[]
+  ): EdgeModel[] {
     // TEMP RETURN EMPTY ARRAY
     // const edge1 = new EdgeModel(
     //   '1-2',
