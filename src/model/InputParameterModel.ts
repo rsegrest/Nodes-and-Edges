@@ -1,6 +1,6 @@
 import Parameter from "./abstract/Parameter";
 
-class OutputParameter extends Parameter {
+class InputParameterModel extends Parameter {
     constructor(
         name: string,
         value: string,
@@ -9,4 +9,4 @@ class OutputParameter extends Parameter {
       super(name, value, units);
     }
 }
-export default OutputParameter;
+export default InputParameterModel;

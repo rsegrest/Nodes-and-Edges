@@ -3,6 +3,8 @@ import Position from "./positioning/Position";
 import PlugModel from './PlugModel';
 import PlugPosition from "./PlugPosition";
 import DraggableGuiElementModel from "./abstract/DraggableGuiElement";
+import InputParameterModel from "./InputParameterModel";
+import OutputParameterModel from "./OutputParameterModel";
 export type Boundary = {
   left: number;
   top: number;
@@ -20,6 +22,9 @@ export class NodeModel extends DraggableGuiElementModel {
     protected label: string,
     public position:Position,
     public dimensions:Dimension,
+    protected inputParameterList:InputParameterModel[] = [],
+    protected outputParameterList:OutputParameterModel[] = [],
+
   ) {
     super(position, dimensions);
     this.id = id;
@@ -163,6 +168,25 @@ export class NodeModel extends DraggableGuiElementModel {
       }
     });
   }
+  public getInputParameterList():InputParameterModel[] {
+    return this.inputParameterList;
+  }
+  public getOutputParameterList():OutputParameterModel[] {
+    return this.outputParameterList;
+  }
+  public addInputParameter(inputParameter:InputParameterModel):void {
+    this.inputParameterList.push(inputParameter);
+  }
+  public addOutputParameter(outputParameter:OutputParameterModel):void {
+    this.outputParameterList.push(outputParameter);
+  }
+  public setInputParameterList(inputParameterList:InputParameterModel[]):void {
+    this.inputParameterList = inputParameterList;
+  }
+  public setOutputParameterList(outputParameterList:OutputParameterModel[]):void {
+    this.outputParameterList = outputParameterList;
+  }
+  
   public toString():string {
     return `NodeModel: ${this.id} ${this.label} ${this.position.toString()} ${this.dimensions.toString()}`;
   }
