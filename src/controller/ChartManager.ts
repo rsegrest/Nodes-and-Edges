@@ -10,6 +10,8 @@ import CreationManager from "./CreationManager";
 import ToolboxModel from "../model/ToolboxModel";
 import RenderToolbox from "../view/RenderToolbox";
 import Position from "../model/positioning/Position";
+import RenderInspector from "../view/RenderInspector";
+import InspectorPanelModel from "../model/InspectorPanelModel";
 
 type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
@@ -19,7 +21,7 @@ class ChartManager {
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
   private toolbox: ToolboxModel = new ToolboxModel();
-  
+  private inspector: InspectorPanelModel = new InspectorPanelModel();
   // getRolledOverObjects
   private rolledOverObjects: (
     NodeModel | EdgeModel | PlugModel | ToolboxModel | ToolModel
@@ -30,6 +32,7 @@ class ChartManager {
     this.nodes = CreationManager.createNodes();
     // this.edges = CreationManager.createEdges(this.nodes);
   }
+
   mouseDragged(p: p5): void {
     // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
     const dragTarget:DraggableObject|null = this.getDragTarget();
@@ -38,27 +41,35 @@ class ChartManager {
       dragTarget.setIsDragging(true);
     }
   }
+
   mousePressed(p: p5): void {
     // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
     
   }
+
   clearDragTargets(): void {
     this.nodes.forEach((node) => node.setIsDragging(false));
     this.edges.forEach((edge) => edge.setIsDragging(false));
     // TODO: this.rolledOverObjects.forEach((obj) => obj.setIsDragging(false));
   }
+
   mouseReleased(p: p5): void {
     console.log('mouse released');
     this.clearDragTargets();
   }
+
   getDragTarget(): DraggableObject|null {
     const nodeList:NodeModel[] = this.nodes;
     const edgeList:EdgeModel[] = this.edges;
     const plugList:PlugModel[] = this.nodes.flatMap((node) => node.getPlugs());
-    const dragTarget = null;
+
+    // TODO: Does this need to be a member variable?
+    // const dragTarget = null;
+
     // TODO: check tools for rollover
     // TODO: Initialize and store toolbox data in this class
     // TODO: check toolbox for rollover
+
     if (this.toolbox) {
       if (this.toolbox.getIsRolledOver()) {
         console.warn(`toolbox: ${this.toolbox.toString()} is rolled over`);
@@ -121,7 +132,6 @@ class ChartManager {
     RenderEdge.renderLines(line1_2);
     RenderEdge.renderLines(line2_3);
     RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
-
   }
   renderElements(): void {
     const p = ChartManager.getP();
@@ -164,6 +174,7 @@ class ChartManager {
       
       RenderNode.render(n, ChartManager.getP());
       RenderToolbox.render(this.toolbox);
+      RenderInspector.render(this.inspector);
     });
 
     // this.edges.forEach((e) => {

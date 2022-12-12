@@ -6,6 +6,7 @@ import CreationManager from "./controller/CreationManager";
 // import Layout from "./model/Layout";
 import RenderEdge from "./view/RenderEdge";
 import RenderGuides from "./view/RenderGuide";
+import RenderInspector from "./view/RenderInspector";
 import RenderNode from "./view/RenderNode";
 import RenderTool from "./view/RenderTool";
 import RenderToolbox from "./view/RenderToolbox";
@@ -36,6 +37,7 @@ const initializeRenderers = (p:p5): void => {
   new RenderGuides(p);
   new RenderTool(p);
   new RenderToolbox(p);
+  new RenderInspector(p);
 }
 export const mouseDragged = (p: p5): void => {
   ChartManager.getInstance().mouseDragged(p);
