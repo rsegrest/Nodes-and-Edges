@@ -6,6 +6,7 @@ import DraggableGuiElementModel from "./abstract/DraggableGuiElement";
 
 class PlugModel extends DraggableGuiElementModel {
   // Edge that this plug is plugged into (null if not plugged in)
+  public readonly type = "Plug";
   private plugSocket:EdgeModel|null = null;
   constructor(
     public readonly plugPosition:PlugPosition,

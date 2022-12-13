@@ -41,76 +41,72 @@ class RenderToolbox {
 
     RenderToolbox.renderTitle(tbm);
   }
-  static calcNumToolGridColumns(
-    // tbm: ToolboxModel
-  ):number {
-    return 2;
-  }
-  static calcNumToolGridRows(
-    // tbm: ToolboxModel
-  ):number {
-    return 6;
-  }
-  static ROW_SPACING = 60;
-  static findFirstRowOffset(tbm: ToolboxModel):number {
-    const pos = tbm.getPosition();
-    if (!pos) return 0;
-    const FIRST_ROW_OFFSET_Y = 70 + pos.y;
-    return FIRST_ROW_OFFSET_Y;
-  }
+  // static calcNumToolGridColumns(
+  //   // tbm: ToolboxModel
+  // ):number {
+  //   return 2;
+  // }
+  // static calcNumToolGridRows(
+  //   // tbm: ToolboxModel
+  // ):number {
+  //   return 6;
+  // }
+  // static ROW_SPACING = 60;
+  // static findFirstRowOffset(tbm: ToolboxModel):number {
+  //   const pos = tbm.getPosition();
+  //   if (!pos) return 0;
+  //   const FIRST_ROW_OFFSET_Y = 70 + pos.y;
+  //   return FIRST_ROW_OFFSET_Y;
+  // }
+  // static findHorizontalCenterLine(
+  //   tbm: ToolboxModel
+  // ):number {
+  //   const pos = tbm.getPosition();
+  //   if (!pos) return 0;
+  //   return pos.x+95;
+  // }
   // should this be in the model?
-  static findHorizontalCenterLine(
-    tbm: ToolboxModel
-  ):number {
-    const pos = tbm.getPosition();
-    if (!pos) return 0;
-    return pos.x+95;
-  }
-  // should this be in the model?
-  static findRowCenterLine(tbm:ToolboxModel, row:number):number {
-    return RenderToolbox.findFirstRowOffset(tbm)+(row*RenderToolbox.ROW_SPACING);
-  }
-  static buildLocationSet(tbm: ToolboxModel):Position[]|null {
-    const p = RenderToolbox.getP();
-    const pos = tbm.getPosition();
-    if (!pos) return null;
-    // const dim = tbm.getDimensions();
-    const toolList = tbm.getToolList();
+  // static findRowCenterLine(tbm:ToolboxModel, row:number):number {
+  //   return RenderToolbox.findFirstRowOffset(tbm)+(row*RenderToolbox.ROW_SPACING);
+  // }
+  // static buildLocationSet(tbm: ToolboxModel):Position[]|null {
+  //   const p = RenderToolbox.getP();
+  //   const pos = tbm.getPosition();
+  //   if (!pos) return null;
+  //   // const dim = tbm.getDimensions();
+  //   const toolList = tbm.getToolList();
 
-    const toolLocations:Position[] = [];
-    const CENTER_OFFSET_X = 45;
+  //   const toolLocations:Position[] = [];
+  //   const CENTER_OFFSET_X = 45;
 
-    // TODO: Use row and column count to calculate position
-    // const rows = RenderToolbox.calcNumToolGridRows();
-    // const columns = RenderToolbox.calcNumToolGridColumns();
+  //   // TODO: Use row and column count to calculate position
+  //   // const rows = RenderToolbox.calcNumToolGridRows();
+  //   // const columns = RenderToolbox.calcNumToolGridColumns();
     
-    // find center line
-    // find row center lines
-    toolList.forEach((tool,i) => {
-      let thisX = this.findHorizontalCenterLine(tbm)-CENTER_OFFSET_X;
-      if (i%2 !== 0) {
-        thisX += (CENTER_OFFSET_X*2);
-      }
-      toolLocations.push(
-        new Position(
-          // if two rows, center plus or minus horizontal offset
-          thisX,
-          pos.y+(
-            RenderToolbox.findFirstRowOffset(tbm)
-          )+(Math.floor(i/2)*60)
-        )
-      );
-    })
-    return toolLocations;
-  }
+  //   // find center line
+  //   // find row center lines
+  //   toolList.forEach((tool,i) => {
+  //     let thisX = this.findHorizontalCenterLine(tbm)-CENTER_OFFSET_X;
+  //     if (i%2 !== 0) {
+  //       thisX += (CENTER_OFFSET_X*2);
+  //     }
+  //     toolLocations.push(
+  //       new Position(
+  //         // if two rows, center plus or minus horizontal offset
+  //         thisX,
+  //         pos.y+(
+  //           RenderToolbox.findFirstRowOffset(tbm)
+  //         )+(Math.floor(i/2)*60)
+  //       )
+  //     );
+  //   })
+  //   return toolLocations;
+  // }
 
   static renderTools(tbm: ToolboxModel):void {
     const toolList = tbm.getToolList();
-    const locationSet = RenderToolbox.buildLocationSet(tbm);
-
-    if (!locationSet) return;
     toolList.forEach((tool,i) => {
-      RenderTool.renderTool(tool, locationSet[i] as Position);
+      RenderTool.render(tool);
     })
   }
   // TEST

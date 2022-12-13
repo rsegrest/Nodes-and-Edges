@@ -4,7 +4,7 @@ import PlugModel from "./PlugModel";
 import Position from "./positioning/Position";
 
 class EdgeModel extends DraggableGuiElementModel {
-
+  public readonly type = "Edge";
   protected id:string;
   protected sourceNode:NodeModel|null = null;
   protected targetNode:NodeModel|null = null;

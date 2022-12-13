@@ -5,6 +5,7 @@ import Position from "./positioning/Position";
 // TODO: Create panel model that is collapsible
 class InspectorModel extends GuiElementModel {
   // private parameterSet: any[] = [];
+  public readonly type = "Inspector";
   private isCollapsed = false;
 
   constructor() {

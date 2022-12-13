@@ -6,10 +6,20 @@ import NodeModel from "../model/NodeModel";
 import PlugModel from "../model/PlugModel";
 import PlugPosition from "../model/PlugPosition";
 import Position from "../model/positioning/Position";
+import DynamicToolModel from "../model/DynamicToolModel";
 
 // const BASE_NODE_WIDTH = Layout.BASE_NODE_WIDTH;
 // const BASE_NODE_HEIGHT = Layout.BASE_NODE_HEIGHT;
 export class CreationManager {
+  public static createNewObjectFromDynamicTool(dynamicTool: DynamicToolModel|null):NodeModel {
+    const objectsNewPos = dynamicTool?.getPosition();
+    const objectsNewDim = dynamicTool?.getDimensions();
+    const objectType = dynamicTool?.getObjectType();
+    // get object types from looking at where tools are created
+    // need to have a master list of new object types
+    // Element, Subelement, Edge
+    return new NodeModel('69', 'new node', objectsNewPos as Position, objectsNewDim as Dimension);
+  }
   private static instance: CreationManager;
   private constructor() {
     // CreationManager.populateNodeAndEdgeList();
@@ -63,9 +73,10 @@ export class CreationManager {
         id,
         label,
         position,
-        // new Dimension(BASE_NODE_WIDTH, BASE_NODE_HEIGHT)
         dimension
       );
+      // console.log('node', node)
+      // console.log('node boundary', node.getBoundary())
       nodes.push(node);
     }
     return nodes;

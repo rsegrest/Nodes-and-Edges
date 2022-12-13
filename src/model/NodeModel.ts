@@ -1,18 +1,14 @@
 import Dimension from "./positioning/Dimension";
 import Position from "./positioning/Position";
+import Boundary from './positioning/Boundary'
 import PlugModel from './PlugModel';
 import PlugPosition from "./PlugPosition";
 import DraggableGuiElementModel from "./abstract/DraggableGuiElement";
 import InputParameterModel from "./InputParameterModel";
 import OutputParameterModel from "./OutputParameterModel";
-export type Boundary = {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
-export class NodeModel extends DraggableGuiElementModel {
 
+export class NodeModel extends DraggableGuiElementModel {
+  public readonly type = "Node";
   protected showNodes = false;
   protected plugs:PlugModel[];
   // protected parameterList:ParameterModel[] = [];
@@ -32,9 +28,10 @@ export class NodeModel extends DraggableGuiElementModel {
     this.position = position;
     this.dimensions = dimensions;
     this.plugs = this.createPlugs();
+    this.setUpBoundary();
   }
   getBoundary():Boundary|null {
-    return super.getBoundary(10);
+    return super.getBoundary();
   }
   createPlugs():PlugModel[] {
     const plugArray = [];
@@ -140,8 +137,15 @@ export class NodeModel extends DraggableGuiElementModel {
     return this.isRolledOver;
   }
   // override GUIElementModel
+  // TODO: Use this function for select (currently not called)
+  // TODO: Check other implementations of superclass
   public clickAction(): void {
+    throw('NodeModel clickAction not implemented');
     console.log('NodeModel onClick', this.toString());
+  }
+  // override setUpBoundary
+  public setUpBoundary(): void {
+    super.setUpBoundary(10);
   }
   // override GUIElementModel
   public setIsDragging(isDragging:boolean): void {
@@ -153,11 +157,12 @@ export class NodeModel extends DraggableGuiElementModel {
     });
   }
   public dragToPosition(position:Position):void {
-    console.log(`NodeModel dragToPosition ${position.toString()}`);
+    // console.log(`NodeModel dragToPosition ${position.toString()}`);
     const lastPosition = this.position;
     this.position = position;
     const deltaX = position.x - lastPosition.x;
     const deltaY = position.y - lastPosition.y;
+    this.setUpBoundary();
 
     this.plugs.forEach((plug) => {
       if (plug !== null) {
@@ -186,7 +191,7 @@ export class NodeModel extends DraggableGuiElementModel {
   public setOutputParameterList(outputParameterList:OutputParameterModel[]):void {
     this.outputParameterList = outputParameterList;
   }
-  
+
   public toString():string {
     return `NodeModel: ${this.id} ${this.label} ${this.position.toString()} ${this.dimensions.toString()}`;
   }

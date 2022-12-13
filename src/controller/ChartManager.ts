@@ -11,7 +11,10 @@ import ToolboxModel from "../model/ToolboxModel";
 import RenderToolbox from "../view/RenderToolbox";
 import Position from "../model/positioning/Position";
 import RenderInspector from "../view/RenderInspector";
-import InspectorPanelModel from "../model/InspectorPanelModel";
+import InspectorModel from "../model/InspectorModel";
+import DynamicToolModel from "../model/DynamicToolModel";
+import RenderTool from "../view/RenderTool";
+import Dimension from "../model/positioning/Dimension";
 
 type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
@@ -21,7 +24,8 @@ class ChartManager {
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
   private toolbox: ToolboxModel = new ToolboxModel();
-  private inspector: InspectorPanelModel = new InspectorPanelModel();
+  private inspector: InspectorModel = new InspectorModel();
+  private dynamicTool: DynamicToolModel|null = null; // TODO: rename?
   // getRolledOverObjects
   private rolledOverObjects: (
     NodeModel | EdgeModel | PlugModel | ToolboxModel | ToolModel
@@ -36,10 +40,28 @@ class ChartManager {
   mouseDragged(p: p5): void {
     // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
     const dragTarget:DraggableObject|null = this.getDragTarget();
-    if (dragTarget instanceof NodeModel) {
-      console.log('this is a node');
-      dragTarget.setIsDragging(true);
+    if (dragTarget === null) { 
+      // console.log('1. drag target is null');
+      return;
     }
+    // console.log(`1. drag target assigned as ${dragTarget?.type}`);if (dragTarget === null) { return; }
+    // let testTarget = null;
+    if (dragTarget.type === 'Node') {
+      // testTarget = 'Node';
+      (dragTarget as NodeModel).setIsDragging(true);
+    } else if (dragTarget.type === 'Edge') {
+      // testTarget = 'Edge';
+      (dragTarget as EdgeModel).setIsDragging(true);
+    } else if (dragTarget.type === 'Plug') {
+      // testTarget = 'Plug';
+      (dragTarget as PlugModel).setIsDragging(true);
+    } else if (dragTarget.type === 'Tool') {
+      // testTarget = 'Tool';
+      // throw(new Error('tool model is being dragged'));
+      (dragTarget as ToolModel).setIsDragging(true);
+    }
+    // console.log(`2. drag target assigned as ${testTarget}`);
+    
   }
 
   mousePressed(p: p5): void {
@@ -48,13 +70,25 @@ class ChartManager {
   }
 
   clearDragTargets(): void {
-    this.nodes.forEach((node) => node.setIsDragging(false));
+    this.nodes.forEach((node) => {
+      node.setIsDragging(false);
+      node.getPlugs().forEach((plug) => plug.setIsDragging(false));
+    });
     this.edges.forEach((edge) => edge.setIsDragging(false));
-    // TODO: this.rolledOverObjects.forEach((obj) => obj.setIsDragging(false));
+    this.toolbox.getToolList().forEach((tool) => tool.setIsDragging(false));
   }
 
   mouseReleased(p: p5): void {
-    console.log('mouse released');
+    // console.log('mouse released');
+    if (this.dynamicTool !== null) {
+      const newlyMintedNode = CreationManager.createNewObjectFromDynamicTool(this.dynamicTool);
+      this.nodes.push(newlyMintedNode);
+      this.dynamicTool = null;
+    }
+  this.dynamicTool = null;
+    // if there is a dynamicTool in the slot,
+    //  set the dynamicTool to null
+    // TODO THEN: create the new class (before to have info?) 
     this.clearDragTargets();
   }
 
@@ -65,15 +99,21 @@ class ChartManager {
 
     // TODO: Does this need to be a member variable?
     // const dragTarget = null;
+    // DONE(?): check toolbox for rollover
 
-    // TODO: check tools for rollover
-    // TODO: Initialize and store toolbox data in this class
-    // TODO: check toolbox for rollover
-
+    // check tools
     if (this.toolbox) {
       if (this.toolbox.getIsRolledOver()) {
-        console.warn(`toolbox: ${this.toolbox.toString()} is rolled over`);
-        return this.toolbox;
+        const toolList = this.toolbox.getToolList();
+
+        // toolList.forEach((tool) => {
+        for (let i = 0; i < toolList.length; i += 1) {
+          const tool = toolList[i];
+          if (tool.getIsRolledOver()) {
+            return tool;
+          }
+        };
+
       }
     }
     if (plugList.length > 0) {
@@ -82,7 +122,7 @@ class ChartManager {
         if (typeof plug === 'undefined') { continue; }
         if (plug === null) { continue; }
         if (plug.getIsRolledOver()) {
-          console.warn(`plug: ${plug.toString()} is rolled over`);
+          // console.warn(`plug: ${plug.toString()} is rolled over`);
           return plug;
         }
       }
@@ -93,7 +133,7 @@ class ChartManager {
         if (typeof edge === 'undefined') { continue; }
         if (edge === null) { continue; }
         if (edge?.getIsRolledOver()) {
-          console.warn(`edge: ${edge.toString()} is rolled over`);
+          // console.warn(`edge: ${edge.toString()} is rolled over`);
           return edge;
         }
       }
@@ -104,7 +144,7 @@ class ChartManager {
         if (typeof node === 'undefined') { continue; }
         if (node === null) { continue; }
         if (node?.getIsRolledOver()) {
-          console.warn(`node: ${node.toString()} is rolled over`);
+          // console.warn(`node: ${node.toString()} is rolled over`);
           return node;
         }
       }
@@ -137,9 +177,10 @@ class ChartManager {
     const p = ChartManager.getP();
     // console.log('ELEMENTS : '+this.toString());
     // anything to "advance" nodes and edges, or do I just render them?
-
-    // DONE: Try setting "isDragging" to true on first node
-    // TODO NEXT: Check for mouse button held down on node for drag
+    if (this.dynamicTool !== null) {
+      // this.dynamicTool.render();
+      RenderTool.render(this.dynamicTool);
+    }
     //  1. If mouse button is held down, set node's "isDragging" to true
     this.nodes.forEach((n,index) => {
       // check for rollover
@@ -177,6 +218,31 @@ class ChartManager {
       RenderInspector.render(this.inspector);
     });
 
+    const mouseIsOverToolbox = this.toolbox.checkMouseOver(p.mouseX, p.mouseY);
+    if (mouseIsOverToolbox) { this.toolbox.setIsRolledOver(); }
+
+    // CHECK FOR TOOLS ROLLOVER
+    this.toolbox.getToolList().forEach((t,index) => {
+      // check for rollover
+      // TODO: Move this logic to abstract GuiElement class
+      if (t.getIsDragging()) {
+        this.dragDynamicTool(new Position(p.mouseX-40, p.mouseY-20), t);
+      }
+      // RE-ACTIVATE?
+      // console.log('t : '+(t as ToolModel).getBoundary())
+      const mouseIsOverTool = (t as ToolModel).checkMouseOver(p.mouseX, p.mouseY);
+
+      // console.log('mouseIsOverTool('+t+') : '+mouseIsOverTool)
+
+      if (mouseIsOverTool) { t.setIsRolledOver(); }
+      else { t.setIsRolledOver(false); }
+      // if node is being dragged, update its position
+      // if (t.getIsDragging()) {
+      //   t.dragToPosition(new Position(p.mouseX-20, p.mouseY-10));
+      // }
+    });
+    
+
     // this.edges.forEach((e) => {
     //   RenderEdge.render(e);
     // })
@@ -196,12 +262,27 @@ class ChartManager {
     // RENDER GRID & GUIDES
     RenderGuides.render();
   }
-  testAddHtmlDiv(): void {
-    const aDiv = document.createElement("p"); // is a node
-    aDiv.innerHTML = "This is an HTML div appended to a top-layer div";
-    const canvas = document.getElementById("htmlContainer");
-    canvas?.appendChild(aDiv);
+  dragDynamicTool(pos: Position, tool:ToolModel|null=null):void {
+    if (this.dynamicTool === null) {
+      // CREATE NEW
+      this.dynamicTool = new DynamicToolModel(
+        tool?.getName() as string,
+        tool?.getIcon() as string,
+        tool?.getObjectType() as string,
+        tool?.position as Position,
+        tool?.dimensions as Dimension,);
+    }
+    this.dynamicTool.dragToPosition(pos);
   }
+  setDynamicSlot(dt:DynamicToolModel):void {
+    this.dynamicTool = dt;
+  };
+  // testAddHtmlDiv(): void {
+  //   const aDiv = document.createElement("p"); // is a node
+  //   aDiv.innerHTML = "This is an HTML div appended to a top-layer div";
+  //   const canvas = document.getElementById("htmlContainer");
+  //   canvas?.appendChild(aDiv);
+  // }
   static createContainer(
     p: p5,
     parent: HTMLElement
@@ -260,12 +341,12 @@ class ChartManager {
     return closestPlugArray as PlugModel[];
   }
   mouseClicked(): void {
-    console.log(
-      `ChartManager.mouseClicked() @ ${new Position(
-        ChartManager.p.mouseX,
-        ChartManager.p.mouseY
-      )}`
-    );
+    // console.log(
+    //   `ChartManager.mouseClicked() @ ${new Position(
+    //     ChartManager.p.mouseX,
+    //     ChartManager.p.mouseY
+    //   )}`
+    // );
     this.nodes.forEach((n, i) => {
       const plugs = n.getPlugs();
       plugs.forEach((p) => {

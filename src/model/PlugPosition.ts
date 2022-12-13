@@ -1,4 +1,5 @@
 const PlugPosition = {
+  type: "PlugPosition",
   N: 'N',
   S: 'S',
   E: 'E',

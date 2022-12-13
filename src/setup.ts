@@ -61,7 +61,7 @@ export const setup = (p: p5): void => {
   // const uxRect = UX.createUxRect(10,10,100,100);
   // UX.setUxFill(uxRect, 'rgb(255,0,0)');
   // UX.setUxEvent(uxRect, () => {
-  //   console.log('CLICKED!')
+  //   ('CLICKED!')
   // });
   
   // const gui = createGui("My awesome GUI");

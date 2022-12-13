@@ -1,7 +1,7 @@
 import p5 from "p5";
-import NodeModel, { Boundary } from "../model/NodeModel";
+import NodeModel from "../model/NodeModel";
 import PlugModel from "../model/PlugModel";
-
+import Boundary from "../model/positioning/Boundary";
 export class RenderNode {
   public static p: p5;
   private isSelected = false;
@@ -95,7 +95,7 @@ export class RenderNode {
     this.showNodes(node, p, showNodes);
     // Draw the bounds of the rollover sensor area
     if (TEST_ROLLOVER_GUIDE) {
-      RenderNode.drawRolloverGuide(boundary as Boundary, p);
+      RenderNode.drawRolloverGuide(node.getBoundary() as Boundary, p);
     }
   }
   static drawRolloverGuide(boundary: Boundary, p: p5): void {
@@ -103,12 +103,16 @@ export class RenderNode {
     p.noFill();
     p.stroke("rgb(0,255,255)");
     p.strokeWeight(1);
-    p.translate(boundary.left, boundary.top);
+    if (boundary === null) {
+      console.warn("boundary is null in RenderNode.drawRolloverGuide");
+      return;
+    }
+    p.translate(boundary.getLeft(), boundary.getTop());
     p.rect(
       0,
       0,
-      boundary.right - boundary.left,
-      boundary.bottom - boundary.top
+      boundary.getRight() - boundary.getLeft(),
+      boundary.getBottom() - boundary.getTop()
     );
     p.pop();
   }

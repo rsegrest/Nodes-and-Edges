@@ -51,16 +51,11 @@
     // create a gui using the provider
     if (provider === "QuickSettings") {
       if (QuickSettings) {
-        console.log("Creating p5.gui powered by QuickSettings.");
         gui = new QSGui(label, parent, sketch);
       } else {
-        console.log(
-          "QuickSettings not found. Is the script included in your HTML?"
-        );
         gui = new DummyGui(label, parent, sketch);
       }
     } else {
-      console.log("Unknown GUI provider " + provider);
       gui = new DummyGui(label, parent, sketch);
     }
 
@@ -168,8 +163,6 @@
         var arg = params[i];
         var val = object[arg];
         var typ = typeof val;
-
-        //console.log(typ, arg, val);
 
         // don't need to show the sliders for range min, max and step of a property
         var sliderConfigRegEx = /^(.*min|.*max|.*step)$/i;

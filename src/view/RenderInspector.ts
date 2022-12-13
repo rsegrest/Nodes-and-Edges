@@ -1,5 +1,5 @@
 import p5 from 'p5';
-import InspectorPanelModel from '../model/InspectorPanelModel';
+import InspectorModel from '../model/InspectorModel';
 
 class RenderInspector {
 
@@ -11,7 +11,7 @@ class RenderInspector {
 
   // TEST
 
-  static render(ipm:InspectorPanelModel):void {
+  static render(ipm:InspectorModel):void {
     const p = RenderInspector.getP();
     // const pos = ipm.getPosition();
     // const dim = ipm.getDimensions();
@@ -23,7 +23,7 @@ class RenderInspector {
   }
   // calculate column position
   // set row height
-  static renderTitle(ipm: InspectorPanelModel):void {
+  static renderTitle(ipm: InspectorModel):void {
     const p = RenderInspector.getP();
     const pos = ipm.getPosition();
     if (!pos) return;
@@ -34,7 +34,7 @@ class RenderInspector {
     p.text("Object Inspector", pos.x+10, pos.y+20);
     p.push()
   }
-  static renderTitleBar(ipm: InspectorPanelModel):void {
+  static renderTitleBar(ipm: InspectorModel):void {
     const p = RenderInspector.getP();
     const pos = ipm.getPosition();
     const dim = ipm.getDimensions();
@@ -50,7 +50,7 @@ class RenderInspector {
 
     RenderInspector.renderTitle(ipm);
   }
-  static renderBackground(ipm: InspectorPanelModel):void {
+  static renderBackground(ipm: InspectorModel):void {
     const p = RenderInspector.getP();
     const pos = ipm.getPosition();
     const dim = ipm.getDimensions();
@@ -62,7 +62,7 @@ class RenderInspector {
     p.rect(pos.x, pos.y+30, dim.width, dim.height-30);
     p.pop();
   }
-  static renderInspectorBorder(ipm: InspectorPanelModel):void {
+  static renderInspectorBorder(ipm: InspectorModel):void {
     const p = RenderInspector.getP();
     const pos = ipm.getPosition();
     const dim = ipm.getDimensions();
