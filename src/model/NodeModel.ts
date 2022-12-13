@@ -127,7 +127,7 @@ export class NodeModel extends DraggableGuiElementModel {
   getPlugs():PlugModel[] {
     return this.plugs;
   }
-  getPlugByPosition(plugPosition:PlugPosition):PlugModel {
+  getPlugByPosition(plugPosition:PlugPosition|string):PlugModel {
     return this.plugs.find((plug) => plug.plugPosition === plugPosition) as PlugModel;
   }
   setIsRolledOver(isRolledOver=true):void {

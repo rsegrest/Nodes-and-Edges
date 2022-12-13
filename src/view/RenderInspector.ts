@@ -42,7 +42,8 @@ class RenderInspector {
       RenderParameter.render(
         outputParameterList[i] as OutputParameterModel,
         ipm,
-        false
+        false,
+        (i === 0)
       );
     }
   }

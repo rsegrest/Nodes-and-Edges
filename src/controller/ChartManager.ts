@@ -108,7 +108,7 @@ class ChartManager {
   this.dynamicTool = null;
     // if there is a dynamicTool in the slot,
     //  set the dynamicTool to null
-    // TODO THEN: create the new class (before to have info?) 
+    //  then create the new class (has info?) 
     this.clearDragTargets();
   }
 
@@ -117,9 +117,8 @@ class ChartManager {
     const edgeList:EdgeModel[] = this.edges;
     const plugList:PlugModel[] = this.nodes.flatMap((node) => node.getPlugs());
 
-    // TODO: Does this need to be a member variable?
+    // TODO: Does "dragTarget" need to be a member variable?
     // const dragTarget = null;
-    // DONE(?): check toolbox for rollover
 
     // check tools
     if (this.toolbox) {
@@ -176,15 +175,15 @@ class ChartManager {
   // TEMP FUNCTION for testing
   drawTestLines(): void {
     // TEST LINES
-    const line1_2 = RenderEdge.plotLinesBetweenNodes(
+    const line1_2 = RenderEdge.plotConnection(
       this.nodes[0] as NodeModel,
       this.nodes[1] as NodeModel
     );
-    const line2_3 = RenderEdge.plotLinesBetweenNodes(
+    const line2_3 = RenderEdge.plotConnection(
       this.nodes[1] as NodeModel,
       this.nodes[2] as NodeModel
     );
-    const line3_4 = RenderEdge.plotLinesBetweenNodes(
+    const line3_4 = RenderEdge.plotConnection(
       this.nodes[2] as NodeModel,
       this.nodes[3] as NodeModel
     );
@@ -193,13 +192,7 @@ class ChartManager {
     RenderEdge.renderLines(line2_3);
     RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
   }
-
-  renderElements(): void {
-    const p = ChartManager.getP();
-    // console.log('ELEMENTS : '+this.toString());
-    // anything to "advance" nodes and edges, or do I just render them?
-
-    // 1. RENDER NODES
+  renderNodes(p:p5): void {
     this.nodes.forEach((n,index) => {
       // check for rollover
       // TODO: Move this logic to abstract GuiElement class
@@ -211,7 +204,6 @@ class ChartManager {
         n.dragToPosition(new Position(p.mouseX-40, p.mouseY-20));
       }
 
-      // console.log(this.getSelectedNodes().length);
       if (this.getSelectedNodes().length > 0) {
         // TODO: Only draw line if user is hovering over another node:
         //  1. iterate through plugs and check closest
@@ -222,54 +214,94 @@ class ChartManager {
         const mousePosition = new Position(p.mouseX, p.mouseY);
         const lineArray = [closestPlugPosition as Position, mousePosition];
         RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
-        //  2. draw a preview line from the closest plug
-        //       on node 1 to the rolled-over node
-        //  NEXT: Create a preview line class:
-        //      One location to another (Position or object with position)
       }
-      // else {
-      //   console.log('no nodes selected');
-      // }
       
       RenderNode.render(n, ChartManager.getP());
     });
-
-    // 2. RENDER TOOLBOX
+  }
+  renderElements(): void {
+    const p = ChartManager.getP();
+    
+    // 1. RENDER TOOLBOX
     RenderToolbox.render(this.toolbox);
-
-    // 3. RENDER INSPECTOR (and parameters in node)
-    // TODO: SEND SELECTED NODE (instead of first in array)
+    
+    // 2. RENDER INSPECTOR (and parameters in node)
     RenderInspector.render(
       this.inspector,
       this.getSelectedNodes()[0] as NodeModel
-    );
-
+      );
+      
     const mouseIsOverToolbox = this.toolbox.checkMouseOver(p.mouseX, p.mouseY);
     if (mouseIsOverToolbox) { this.toolbox.setIsRolledOver(); }
-
-    // 4. RENDER TOOLS
-    // CHECK FOR TOOLS ROLLOVER
-    this.toolbox.getToolList().forEach((t,index) => {
-      // check for rollover
-      // TODO: Move this logic to abstract GuiElement class
-      if (t.getIsDragging()) {
-        this.dragDynamicTool(new Position(p.mouseX-40, p.mouseY-20), t);
-      }
-      // RE-ACTIVATE?
-      // console.log('t : '+(t as ToolModel).getBoundary())
-      const mouseIsOverTool = (t as ToolModel).checkMouseOver(p.mouseX, p.mouseY);
-
-      // console.log('mouseIsOverTool('+t+') : '+mouseIsOverTool)
-
-      if (mouseIsOverTool) { t.setIsRolledOver(); }
-      else { t.setIsRolledOver(false); }
-      // if node is being dragged, update its position
-      // if (t.getIsDragging()) {
-      //   t.dragToPosition(new Position(p.mouseX-20, p.mouseY-10));
-      // }
-    });
     
-    // 5. RENDER EDGES
+    // 3. RENDER TOOLS
+    this.renderTools(p);
+    
+    // 4. RENDER EDGES
+    this.renderEdges();
+    
+    // 5. RENDER NODES
+    this.renderNodes(p);
+
+    // 6. RENDER DYNAMIC TOOL
+    if (this.dynamicTool !== null) {
+      // this.dynamicTool.render();
+      RenderTool.render(this.dynamicTool);
+    }
+
+    // 7. (DEBUG): RENDER GRID & GUIDES
+    RenderGuides.render();
+  }
+  
+  // 5. RENDER EDGES
+  renderEdges(): void {
+    // TEST CASE: Add edges manually and render them
+    const firstNode1 = this.nodes[0] as NodeModel;
+    const secondNode1 = this.nodes[1] as NodeModel;
+    const firstPlug1 = firstNode1.getPlugByPosition('E');
+    const secondPlug1 = secondNode1.getPlugByPosition('W');
+    
+    const oneEdge = new EdgeModel(
+      'e0-1',
+      firstNode1,
+      secondNode1,
+      firstPlug1,
+      secondPlug1
+    );
+
+    const firstNode2 = this.nodes[1] as NodeModel;
+    const secondNode2 = this.nodes[2] as NodeModel;
+    const firstPlug2 = firstNode2.getPlugByPosition('E');
+    const secondPlug2 = secondNode2.getPlugByPosition('W');
+    
+    const anotherEdge = new EdgeModel(
+      'e1-2',
+      firstNode2,
+      secondNode2,
+      firstPlug2,
+      secondPlug2
+    );
+
+
+    const firstNode3 = this.nodes[2] as NodeModel;
+    const secondNode3 = this.nodes[3] as NodeModel;
+    const firstPlug3 = firstNode3.getPlugByPosition('E');
+    const secondPlug3 = secondNode3.getPlugByPosition('W');
+    
+    const yetAnotherEdge = new EdgeModel(
+      'e2-3',
+      firstNode3,
+      secondNode3,
+      firstPlug3,
+      secondPlug3
+    );
+
+    RenderEdge.render(oneEdge)
+    RenderEdge.render(anotherEdge);
+    RenderEdge.render(yetAnotherEdge);
+    // END TEST CASE
+
+    // ITERATE THROUGH EDGES
     // this.edges.forEach((e) => {
     //   RenderEdge.render(e);
     // })
@@ -285,16 +317,21 @@ class ChartManager {
       
       // RenderEdge.renderPreview(node);
     // });
-
-    // 6. RENDER DYNAMIC TOOL
-    if (this.dynamicTool !== null) {
-      // this.dynamicTool.render();
-      RenderTool.render(this.dynamicTool);
-    }
-
-    // 7. (DEBUG): RENDER GRID & GUIDES
-    RenderGuides.render();
   }
+  // 4. RENDER TOOLS
+  renderTools(p: p5):void {
+    this.toolbox.getToolList().forEach((t) => {
+      // check for rollover
+      // TODO: Move this logic to abstract GuiElement class
+      if (t.getIsDragging()) {
+        this.dragDynamicTool(new Position(p.mouseX-40, p.mouseY-20), t);
+      }
+      const mouseIsOverTool = (t as ToolModel).checkMouseOver(p.mouseX, p.mouseY);
+      if (mouseIsOverTool) { t.setIsRolledOver(); }
+      else { t.setIsRolledOver(false); }
+    });
+  }
+
   dragDynamicTool(pos: Position, tool:ToolModel|null=null):void {
     if (this.dynamicTool === null) {
       // CREATE NEW

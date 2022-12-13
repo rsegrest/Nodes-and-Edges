@@ -1,6 +1,8 @@
 import p5 from "p5";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
+import PlugModel from "../model/PlugModel";
+import Dimension from "../model/positioning/Dimension";
 import Position from "../model/positioning/Position";
 
 class RenderEdge {
@@ -9,11 +11,17 @@ class RenderEdge {
     RenderEdge.p = p;
   }
 
-  static plotLinesBetweenNodes(node1: NodeModel, node2: NodeModel): Position[] {
-    const start_x = node1.position.x + node1.dimensions.width / 2;
-    const start_y = node1.position.y + node1.dimensions.height / 2;
-    const end_x = node2.position.x + node2.dimensions.width / 2;
-    const end_y = node2.position.y + node2.dimensions.height / 2;
+  static plotConnection(source: NodeModel|PlugModel, target: NodeModel|PlugModel): Position[] {
+    let sourceDim = source.dimensions;
+    if (source instanceof PlugModel) { sourceDim = new Dimension(0, 0); }
+    let targetDim = target.dimensions;
+    if (target instanceof PlugModel) { targetDim = new Dimension(0, 0); }
+
+    const start_x = (source.position as Position).x + (sourceDim as Dimension).width / 2;
+    const start_y = (source.position as Position).y + (sourceDim as Dimension).height / 2;
+
+    const end_x = (target.position as Position).x + (targetDim as Dimension).width / 2;
+    const end_y = (target.position as Position).y + (targetDim as Dimension).height / 2;
 
     const mid_1x = start_x + (end_x - start_x) / 2;
     const mid_1y = start_y;
@@ -54,12 +62,27 @@ class RenderEdge {
   }
 
   static render(edge: EdgeModel): void {
-    const start = edge.getSourceNode();
-    const end = edge.getTargetNode();
-    const positions = this.plotLinesBetweenNodes(
-      start as NodeModel,
-      end as NodeModel
-    );
+
+    const sourcePlug = edge.getSourcePlug();
+    const targetPlug = edge.getTargetPlug();
+    let positions:Position[] = [];
+
+    if (sourcePlug === null || targetPlug === null) {
+      const start = edge.getSourceNode();
+      const end = edge.getTargetNode();
+
+      positions = this.plotConnection(
+        start as NodeModel,
+        end as NodeModel
+      );
+    } else {
+      const start = edge.getSourcePlug();
+      const end = edge.getTargetPlug();
+      positions = this.plotConnection(
+        start as PlugModel,
+        end as PlugModel
+      )
+    }
     this.renderLines(positions);
   }
 }

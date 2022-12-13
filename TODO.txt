@@ -23,6 +23,7 @@ UNIT TESTS:
  * TODO: Compare 
 
 DONE:
+: SEND SELECTED NODE (instead of first in array)
 : Rolled-over node member variable in chart manager
 : check tools for rollover
 : Initialize and store toolbox data in this class

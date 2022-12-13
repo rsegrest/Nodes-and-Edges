@@ -74,11 +74,14 @@ class RenderParameter {
     isFirstParameter = false,
     shouldAddHorizontalDivider = false,
   ):void {
-    
     if (isFirstParameter) {
       RenderParameter.rowCount = 0;
       this.addHorizontalDivider(inspector, "Input Parameters")
     }
+    if (shouldAddHorizontalDivider) {
+      this.addHorizontalDivider(inspector, "Output Parameters");
+    }
+    if (RenderParameter.rowCount >= 8) { return; }
     const p = RenderParameter.p;
     // const inspectorPos = inspector.getPosition();
     if (p === null) { throw(new Error('p is null in RenderParameter')); }
@@ -93,7 +96,11 @@ class RenderParameter {
     if (p === null) { throw(new Error('p is null in RenderParameter')); }
     if (inspectorPos === null) { throw(new Error('inspector position is null in RenderParameter')); }
     p.push();
-    p.fill('rgba(255,255,148,1)');
+    if (label === "Output Parameters") {
+      p.fill('rgba(11,255,11,1)');
+    } else {
+      p.fill('rgba(255,255,148,1)');
+    }
     p.translate(
       (
         (inspector.boundary as Boundary).getLeft()+2
@@ -123,6 +130,7 @@ class RenderParameter {
     parameter:InputParameterModel|OutputParameterModel,
     inspector:InspectorModel,
     isFirstParameter=false,
+    shouldAddHorizontalDivider=false,
   ):void {
     const p = this.p;
     if (p === null) { throw(new Error('p is null in RenderParameter')); }
@@ -131,13 +139,12 @@ class RenderParameter {
       (inspector.boundary as Boundary).getLeft(),
       (inspector.boundary as Boundary).getTop()
     );
-    p.fill('rgba(255,0,0,1)');
-    p.circle(0,0,10);
     p.pop();
     this.renderParameterRowInInspector(
         parameter,
         inspector,
-        isFirstParameter
+        isFirstParameter,
+        shouldAddHorizontalDivider,
     );
 
   }
