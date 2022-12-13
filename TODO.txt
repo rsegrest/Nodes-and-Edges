@@ -1,7 +1,5 @@
-11 December 2022
+14 December 2022
 
-TODO: Create base class for nodes, edges, plugs, tools, toolbox
-TODO: Rolled-over node member variable in chart manager
 TODO: Draw line only when mouse is not over same node
 TODO: If drawing line, highlight target node on rollover 
 TODO: Create edge when a second node is selected
@@ -22,9 +20,15 @@ class EdgeModel {
 UNIT TESTS:
  * TODO: Click on node to select
     - Check if it is selected
- * TOOD: Compare 
+ * TODO: Compare 
 
 DONE:
+: Rolled-over node member variable in chart manager
+: check tools for rollover
+: Initialize and store toolbox data in this class
+: Create base class for nodes, edges, plugs, tools, toolbox
+: Try setting "isDragging" to true on first node
+: Check for mouse button held down on node for drag
 : Draw line from selected node
 : "Collision" check for rolling over node
 : Display plugs on rollover

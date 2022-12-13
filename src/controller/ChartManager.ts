@@ -1,20 +1,25 @@
 import p5 from "p5";
+import Position from "../model/positioning/Position";
+import Dimension from "../model/positioning/Dimension";
+import Layout from "../model/positioning/Layout";
+
+import CreationManager from "./CreationManager";
+
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
 import PlugModel from "../model/PlugModel";
 import ToolModel from "../model/ToolModel";
+import DynamicToolModel from "../model/DynamicToolModel";
+import ToolboxModel from "../model/ToolboxModel";
+import InspectorModel from "../model/InspectorModel";
+// import GuiElementModel from "../model/abstract/GuiElement";
+
 import RenderEdge from "../view/RenderEdge";
 import RenderNode from "../view/RenderNode";
-import RenderGuides from "../view/RenderGuide";
-import CreationManager from "./CreationManager";
-import ToolboxModel from "../model/ToolboxModel";
-import RenderToolbox from "../view/RenderToolbox";
-import Position from "../model/positioning/Position";
-import RenderInspector from "../view/RenderInspector";
-import InspectorModel from "../model/InspectorModel";
-import DynamicToolModel from "../model/DynamicToolModel";
 import RenderTool from "../view/RenderTool";
-import Dimension from "../model/positioning/Dimension";
+import RenderGuides from "../view/RenderGuide";
+import RenderToolbox from "../view/RenderToolbox";
+import RenderInspector from "../view/RenderInspector";
 
 type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
@@ -35,6 +40,21 @@ class ChartManager {
     ChartManager.setP(p);
     this.nodes = CreationManager.createNodes();
     // this.edges = CreationManager.createEdges(this.nodes);
+  }
+
+  repositionElementOnResize(element: ToolboxModel|InspectorModel, windowWidth: number, windowHeight: number):void {
+    Layout.positionElementBasedOnScreenSize(
+      element, windowWidth, windowHeight );
+    return;
+  }
+
+  resizeCanvas(windowWidth: number, windowHeight: number):void {
+    // throw new Error("Method not implemented.");
+    this.repositionElementOnResize(this.toolbox, windowWidth, windowHeight);
+    this.repositionElementOnResize(this.inspector, windowWidth, windowHeight);
+    // move Toolbox
+    // move Tools
+    // move Inspector
   }
 
   mouseDragged(p: p5): void {
@@ -173,15 +193,13 @@ class ChartManager {
     RenderEdge.renderLines(line2_3);
     RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
   }
+
   renderElements(): void {
     const p = ChartManager.getP();
     // console.log('ELEMENTS : '+this.toString());
     // anything to "advance" nodes and edges, or do I just render them?
-    if (this.dynamicTool !== null) {
-      // this.dynamicTool.render();
-      RenderTool.render(this.dynamicTool);
-    }
-    //  1. If mouse button is held down, set node's "isDragging" to true
+
+    // 1. RENDER NODES
     this.nodes.forEach((n,index) => {
       // check for rollover
       // TODO: Move this logic to abstract GuiElement class
@@ -214,13 +232,22 @@ class ChartManager {
       // }
       
       RenderNode.render(n, ChartManager.getP());
-      RenderToolbox.render(this.toolbox);
-      RenderInspector.render(this.inspector);
     });
+
+    // 2. RENDER TOOLBOX
+    RenderToolbox.render(this.toolbox);
+
+    // 3. RENDER INSPECTOR (and parameters in node)
+    // TODO: SEND SELECTED NODE (instead of first in array)
+    RenderInspector.render(
+      this.inspector,
+      this.getSelectedNodes()[0] as NodeModel
+    );
 
     const mouseIsOverToolbox = this.toolbox.checkMouseOver(p.mouseX, p.mouseY);
     if (mouseIsOverToolbox) { this.toolbox.setIsRolledOver(); }
 
+    // 4. RENDER TOOLS
     // CHECK FOR TOOLS ROLLOVER
     this.toolbox.getToolList().forEach((t,index) => {
       // check for rollover
@@ -242,7 +269,7 @@ class ChartManager {
       // }
     });
     
-
+    // 5. RENDER EDGES
     // this.edges.forEach((e) => {
     //   RenderEdge.render(e);
     // })
@@ -259,7 +286,13 @@ class ChartManager {
       // RenderEdge.renderPreview(node);
     // });
 
-    // RENDER GRID & GUIDES
+    // 6. RENDER DYNAMIC TOOL
+    if (this.dynamicTool !== null) {
+      // this.dynamicTool.render();
+      RenderTool.render(this.dynamicTool);
+    }
+
+    // 7. (DEBUG): RENDER GRID & GUIDES
     RenderGuides.render();
   }
   dragDynamicTool(pos: Position, tool:ToolModel|null=null):void {

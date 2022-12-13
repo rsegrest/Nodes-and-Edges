@@ -4,7 +4,7 @@ class InputParameterModel extends Parameter {
     public readonly type = "InputParameter";
     constructor(
         name: string,
-        value: string,
+        value: string|number,
         units: string|null = null
     ) {
       super(name, value, units);

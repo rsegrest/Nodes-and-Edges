@@ -65,7 +65,13 @@ class RenderTool {
     );
     p.noStroke();
     p.fill(0);
-    p.text(tool.getName(), 0, 10);
+    p.text(
+      tool.getName(),
+      5, 5, // start
+      // right and bottom bounds
+      (boundary as Boundary).getRight() - (boundary as Boundary).getLeft(),
+      (boundary as Boundary).getBottom() - (boundary as Boundary).getTop()
+    );
     p.pop();
     
     if (boundary === null) {

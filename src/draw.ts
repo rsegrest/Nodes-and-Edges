@@ -2,6 +2,8 @@ import type p5 from "p5";
 import { chartManager } from "./setup";
 import ChartManager from "./controller/ChartManager";
 let p: p5;
+let lastWindowDimensionX:number|null = null;
+let lastWindowDimensionY:number|null = null;
 
 export function mouseClicked(): void {
   // console.log(`draw.ts: mouseClicked()`);
@@ -10,6 +12,12 @@ export function mouseClicked(): void {
 
 export const draw = (_p: p5): void => {
   p = _p;
+  if (lastWindowDimensionX !== p.windowWidth || lastWindowDimensionY !== p.windowHeight) {
+    p.resizeCanvas(p.windowWidth, p.windowHeight);
+    (chartManager as ChartManager).resizeCanvas(p.windowWidth, p.windowHeight);
+    lastWindowDimensionX = p.windowWidth;
+    lastWindowDimensionY = p.windowHeight;
+  }
   p.background("rgb(180,180,200)");
   (chartManager as ChartManager).renderElements();
 };

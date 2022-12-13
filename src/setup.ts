@@ -8,6 +8,7 @@ import RenderEdge from "./view/RenderEdge";
 import RenderGuides from "./view/RenderGuide";
 import RenderInspector from "./view/RenderInspector";
 import RenderNode from "./view/RenderNode";
+import RenderParameter from "./view/RenderParameter";
 import RenderTool from "./view/RenderTool";
 import RenderToolbox from "./view/RenderToolbox";
 export let chartManager: ChartManager | null;
@@ -38,6 +39,7 @@ const initializeRenderers = (p:p5): void => {
   new RenderTool(p);
   new RenderToolbox(p);
   new RenderInspector(p);
+  new RenderParameter(p);
 }
 export const mouseDragged = (p: p5): void => {
   ChartManager.getInstance().mouseDragged(p);
@@ -50,7 +52,8 @@ export const mouseReleased = (p: p5): void => {
 }
 /** This is a setup function. */
 export const setup = (p: p5): void => {
-  p.createCanvas(800, 600);
+
+  p.createCanvas(p.windowWidth, p.windowHeight);
   p.frameRate(30);
   p.background(248);
   // Classes with static methods that need access to p5.js

@@ -7,10 +7,13 @@ import PlugModel from "../model/PlugModel";
 import PlugPosition from "../model/PlugPosition";
 import Position from "../model/positioning/Position";
 import DynamicToolModel from "../model/DynamicToolModel";
+import InputParameterModel from "../model/InputParameterModel";
+import OutputParameterModel from "../model/OutputParameterModel";
 
 // const BASE_NODE_WIDTH = Layout.BASE_NODE_WIDTH;
 // const BASE_NODE_HEIGHT = Layout.BASE_NODE_HEIGHT;
 export class CreationManager {
+  // on drag and drop, create new node
   public static createNewObjectFromDynamicTool(dynamicTool: DynamicToolModel|null):NodeModel {
     const objectsNewPos = dynamicTool?.getPosition();
     const objectsNewDim = dynamicTool?.getDimensions();
@@ -18,7 +21,11 @@ export class CreationManager {
     // get object types from looking at where tools are created
     // need to have a master list of new object types
     // Element, Subelement, Edge
-    return new NodeModel('69', 'new node', objectsNewPos as Position, objectsNewDim as Dimension);
+    return new NodeModel(
+      '69', 'new node',
+      objectsNewPos as Position, objectsNewDim as Dimension,
+      // inputParameterList, outputParameterList
+    );
   }
   private static instance: CreationManager;
   private constructor() {
@@ -36,7 +43,8 @@ export class CreationManager {
     }
     return CreationManager.instance;
   }
-  createNodeModel(
+  // TODO: not called currently, use as interface for Dyreqt data
+  static createNodeModel(
     id: string,
     label: string,
     position: Position,
@@ -64,6 +72,19 @@ export class CreationManager {
   static createNodes(): NodeModel[] {
     const nodes: NodeModel[] = [];
     const labels: string[] = ["Solar Array", "Cable", "Avionics", "Radiator"];
+    const inputParameterList = [
+      new InputParameterModel('parameter1', 1000, 'meters'),
+      new InputParameterModel('parameter2', 69, null),
+      new InputParameterModel('fuel', 420, 'grams'),
+      new InputParameterModel('Another fourth param', 'aStringValue', 'count')
+    ]
+    const outputParameterList = [
+      new OutputParameterModel('parameter1', 0, 'meters'),
+      new OutputParameterModel('parameter2', 6.9, null),
+      new OutputParameterModel('fuelRemaining', 2, 'grams'),
+      new OutputParameterModel('Another fourth param', 'aStringValue', 'count')
+    ]
+    
     for (let i = 0; i < 4; i += 1) {
       const id = (i + 1).toString();
       const label = labels[i] as string;
@@ -73,7 +94,9 @@ export class CreationManager {
         id,
         label,
         position,
-        dimension
+        dimension,
+        inputParameterList,
+        outputParameterList
       );
       // console.log('node', node)
       // console.log('node boundary', node.getBoundary())
@@ -81,6 +104,7 @@ export class CreationManager {
     }
     return nodes;
   }
+
   // TODO: Use this (temp method) to set up a test case
   static createEdges(
     // nodes: NodeModel[]
