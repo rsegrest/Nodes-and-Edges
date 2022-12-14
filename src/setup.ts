@@ -2,6 +2,7 @@ import type p5 from "p5";
 // const exp = require('p5-util/p5.experience.js-master/p5.experience.js')
 import ChartManager from "./controller/ChartManager";
 import CreationManager from "./controller/CreationManager";
+import MouseManager from "./controller/MouseManager";
 import ApplicationModel from "./model/ApplicationModel";
 import RenderApplication from "./view/RenderApplication";
 // import UX from "./exp/ux.js";
@@ -47,13 +48,13 @@ const initializeRenderers = (p:p5): void => {
   new RenderApplication(p);
 }
 export const mouseDragged = (p: p5): void => {
-  ChartManager.getInstance().mouseDragged(p);
+  MouseManager.mouseDragged(p, applicationModel as ApplicationModel);
 }
 export const mousePressed = (p: p5): void => {
-  ChartManager.getInstance().mousePressed(p);
+  MouseManager.mousePressed(p);
 }
 export const mouseReleased = (p: p5): void => {
-  ChartManager.getInstance().mouseReleased(p);
+  MouseManager.mouseReleased(p, applicationModel as ApplicationModel);
 }
 /** This is a setup function. */
 export const setup = (p: p5): void => {

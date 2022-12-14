@@ -1,6 +1,7 @@
 import p5 from "p5";
 import ChartManager from "../controller/ChartManager";
 import CreationManager from "../controller/CreationManager";
+import InteractionManager from "../controller/InteractionManager";
 import ApplicationModel from "../model/ApplicationModel";
 import NodeModel from "../model/NodeModel";
 import Position from "../model/positioning/Position";
@@ -21,8 +22,6 @@ class RenderApplication {
   constructor(p:p5) {
     RenderApplication.p = p;
   }
-
-
   // RENDER
   static renderNodes(p:p5, appModel:ApplicationModel): void {
     const nodes = appModel?.getNodes();
@@ -40,7 +39,7 @@ class RenderApplication {
       if (appModel.getSelectedNodes().length > 0) {
         // TODO: Only draw line if user is hovering over another node:
         //  1. iterate through plugs and check closest
-        const plugArray = ChartManager.getClosestPlugsOnSelectedNode(appModel);
+        const plugArray = InteractionManager.getClosestPlugsOnSelectedNode(appModel);
         // console.log('plugArray: '+plugArray);
         const closestPlugOnSelectedNode = plugArray[0];
         const closestPlugPosition = closestPlugOnSelectedNode?.getPosition();
@@ -117,7 +116,7 @@ class RenderApplication {
       // check for rollover
       // TODO: Move this logic to abstract GuiElement class
       if (t.getIsDragging()) {
-        ChartManager.dragDynamicTool(appModel, new Position(p.mouseX-40, p.mouseY-20), t);
+        InteractionManager.dragDynamicTool(appModel, new Position(p.mouseX-40, p.mouseY-20), t);
       }
       const mouseIsOverTool = (t as ToolModel).checkMouseOver(p.mouseX, p.mouseY);
       if (mouseIsOverTool) { t.setIsRolledOver(); }
