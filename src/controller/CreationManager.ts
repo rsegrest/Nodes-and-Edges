@@ -9,6 +9,7 @@ import Position from "../model/positioning/Position";
 import DynamicToolModel from "../model/DynamicToolModel";
 import InputParameterModel from "../model/InputParameterModel";
 import OutputParameterModel from "../model/OutputParameterModel";
+import p5 from "p5";
 
 // const BASE_NODE_WIDTH = Layout.BASE_NODE_WIDTH;
 // const BASE_NODE_HEIGHT = Layout.BASE_NODE_HEIGHT;
@@ -31,17 +32,19 @@ export class CreationManager {
   private constructor() {
     // CreationManager.populateNodeAndEdgeList();
   }
-  static createInstance(): CreationManager {
-    if (!CreationManager.instance) {
-      CreationManager.instance = new CreationManager();
-    }
-    return CreationManager.instance;
-  }
-  static getInstance(): CreationManager {
-    if (!CreationManager.instance) {
-      throw new Error("CreationManager instance is not created yet");
-    }
-    return CreationManager.instance;
+
+  // RENDER (Testing HTML Component render)
+  static createContainer(
+    p: p5,
+    parent: HTMLElement
+  ): { container: HTMLDivElement } {
+    const container = document.createElement("div");
+    container.setAttribute(
+      'style',
+      "position: absolute; top: 100px; left: 100px; background: #f00; width: 10px; height: 10px;",
+    );
+    parent.appendChild(container);
+    return { container };
   }
   // TODO: not called currently, use as interface for Dyreqt data
   static createNodeModel(
@@ -147,6 +150,19 @@ export class CreationManager {
     );
 
     return [oneEdge, anotherEdge, yetAnotherEdge]
+  }
+
+  static createInstance(): CreationManager {
+    if (!CreationManager.instance) {
+      CreationManager.instance = new CreationManager();
+    }
+    return CreationManager.instance;
+  }
+  static getInstance(): CreationManager {
+    if (!CreationManager.instance) {
+      throw new Error("CreationManager instance is not created yet");
+    }
+    return CreationManager.instance;
   }
 }
 export default CreationManager;

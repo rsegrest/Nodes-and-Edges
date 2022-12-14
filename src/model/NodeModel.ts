@@ -127,6 +127,9 @@ export class NodeModel extends DraggableGuiElementModel {
   getPlugs():PlugModel[] {
     return this.plugs;
   }
+  getSelectedPlugs():PlugModel[] {
+    return this.plugs.filter((plug) => plug.getIsSelected());
+  }
   getPlugByPosition(plugPosition:PlugPosition|string):PlugModel {
     return this.plugs.find((plug) => plug.plugPosition === plugPosition) as PlugModel;
   }

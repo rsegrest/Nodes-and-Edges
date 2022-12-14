@@ -803,6 +803,9 @@
     getPlugs() {
       return this.plugs;
     }
+    getSelectedPlugs() {
+      return this.plugs.filter((plug) => plug.getIsSelected());
+    }
     getPlugByPosition(plugPosition) {
       return this.plugs.find((plug) => plug.plugPosition === plugPosition);
     }
@@ -953,17 +956,16 @@
     constructor() {
       // CreationManager.populateNodeAndEdgeList();
     }
-    static createInstance() {
-      if (!CreationManager.instance) {
-        CreationManager.instance = new CreationManager();
-      }
-      return CreationManager.instance;
-    }
-    static getInstance() {
-      if (!CreationManager.instance) {
-        throw new Error("CreationManager instance is not created yet");
-      }
-      return CreationManager.instance;
+
+    // RENDER (Testing HTML Component render)
+    static createContainer(p, parent) {
+      const container = document.createElement("div");
+      container.setAttribute(
+        "style",
+        "position: absolute; top: 100px; left: 100px; background: #f00; width: 10px; height: 10px;"
+      );
+      parent.appendChild(container);
+      return { container };
     }
 
     // TODO: not called currently, use as interface for Dyreqt data
@@ -1060,7 +1062,130 @@
       );
       return [oneEdge, anotherEdge, yetAnotherEdge];
     }
+    static createInstance() {
+      if (!CreationManager.instance) {
+        CreationManager.instance = new CreationManager();
+      }
+      return CreationManager.instance;
+    }
+    static getInstance() {
+      if (!CreationManager.instance) {
+        throw new Error("CreationManager instance is not created yet");
+      }
+      return CreationManager.instance;
+    }
   }
+
+  class ApplicationModel {
+    setDynamicTool(dtool) {
+      this.dynamicTool = dtool;
+    }
+    getDynamicTool() {
+      return this.dynamicTool;
+    }
+    constructor(p) {
+      this.nodes = [];
+      this.edges = [];
+      this.toolbox = new ToolboxModel();
+      this.inspector = new InspectorModel();
+      this.dynamicTool = null;
+
+      // getRolledOverObjects
+      this.rolledOverObjects = [];
+      ApplicationModel.setP(p);
+      this.nodes = CreationManager.createNodes();
+      this.edges = CreationManager.createEdges(this.nodes);
+    }
+    addNode(node) {
+      this.nodes.push(node);
+    }
+    removeNode(node) {
+      const index = this.nodes.indexOf(node);
+      if (index > -1) {
+        this.nodes.splice(index, 1);
+      }
+    }
+    addEdge(edge) {
+      this.edges.push(edge);
+    }
+    removeEdge(edge) {
+      const index = this.edges.indexOf(edge);
+      if (index > -1) {
+        this.edges.splice(index, 1);
+      }
+    }
+
+    // GETTERS
+    getSelectedNodes() {
+      return this.nodes.filter((node) => node.getIsSelected());
+    }
+    getSelectedEdges() {
+      return this.edges.filter((edge) => edge.getIsSelected());
+    }
+    getSelectedPlugs() {
+      const selectedPlugs = [];
+      this.nodes.forEach((node) => {
+        selectedPlugs.push(...node.getSelectedPlugs());
+      });
+      return selectedPlugs;
+    }
+    getRolledOverNodes() {
+      return this.nodes.filter((node) => node.getIsRolledOver());
+    }
+    getNodes() {
+      return this.nodes;
+    }
+    getEdges() {
+      return this.edges;
+    }
+    getInspector() {
+      return this.inspector;
+    }
+    getToolbox() {
+      return this.toolbox;
+    }
+    static createInstance(p) {
+      if (ApplicationModel.instance === null) {
+        ApplicationModel.instance = new ApplicationModel(p);
+      }
+      return ApplicationModel.instance;
+    }
+    static getInstance(p) {
+      if (ApplicationModel.instance === null) {
+        console.warn("ApplicationModel instance is null");
+        ApplicationModel.instance = new ApplicationModel(p);
+      }
+      return ApplicationModel.instance;
+    }
+    static getP() {
+      return ApplicationModel.p;
+    }
+
+    // SETTERS
+    setDynamicSlot(dt) {
+      this.dynamicTool = dt;
+    }
+    static setP(p) {
+      ApplicationModel.p = p;
+    }
+
+    // OVERLOADS
+    toString() {
+      let returnStr = `ApplicationModel:\n\t${this.nodes.length} nodes,\n\t${this.edges.length}\n`;
+      returnStr += "NODES: [\n\t";
+      this.nodes.forEach((node) => {
+        returnStr += `\t${node.toString()},\n`;
+      });
+      returnStr += "]\nEDGES: [\n\t";
+      this.edges.forEach((edge) => {
+        returnStr += `\t${edge.toString()},\n`;
+      });
+      returnStr += "";
+      return returnStr;
+    }
+  }
+  ApplicationModel.instance = null;
+  ApplicationModel.p = null;
 
   class DynamicToolModel extends ToolModel {
     constructor(
@@ -1300,21 +1425,31 @@
     }
     static render(tool) {
       const p = RenderTool.getP();
-      const boundary = tool.getBoundary();
+      const boundary =
+        tool === null || tool === void 0 ? void 0 : tool.getBoundary();
       p.push();
-      const pos = tool.getPosition();
-      const dim = tool.getPosition();
+      const pos =
+        tool === null || tool === void 0 ? void 0 : tool.getPosition();
+      const dim =
+        tool === null || tool === void 0 ? void 0 : tool.getPosition();
       if (
         pos === null ||
         dim === null ||
         typeof pos === "undefined" ||
         typeof dim === "undefined"
       ) {
-        throw new Error("tool position data is null");
+        // was throw
+        console.warn("tool position data is null");
+        return;
       }
-      if (tool.type === "DynamicTool") {
+      if (
+        (tool === null || tool === void 0 ? void 0 : tool.type) ===
+        "DynamicTool"
+      ) {
         p.fill("rgba(255,255,0,1)");
-      } else if (tool.type === "Tool") {
+      } else if (
+        (tool === null || tool === void 0 ? void 0 : tool.type) === "Tool"
+      ) {
         p.fill("rgba(255,2,100,1)");
       } else {
         p.fill("rgba(128,0,255,1)");
@@ -1471,14 +1606,17 @@
 
     // TEST
     static render(tbm) {
-      const p = RenderToolbox.getP();
-      tbm.getPosition();
-      tbm.getDimensions();
-      RenderToolbox.renderBackground(tbm);
-      RenderToolbox.renderTBBorder(tbm);
-      RenderToolbox.renderTitleBar(tbm);
-      RenderToolbox.renderTools(tbm);
-      p.pop();
+      // const p = RenderToolbox.getP();
+      // const pos = tbm.getPosition();
+      // const dim = tbm.getDimensions();
+      if (tbm) {
+        RenderToolbox.renderBackground(tbm);
+        RenderToolbox.renderTBBorder(tbm);
+        RenderToolbox.renderTitleBar(tbm);
+        RenderToolbox.renderTools(tbm);
+      } else {
+        console.warn("RenderToolbox.render: tbm is null");
+      }
     }
     static renderBackground(tbm) {
       const p = RenderToolbox.getP();
@@ -1693,16 +1831,20 @@
         inputParameterList = node.getInputParameterList();
         outputParameterList = node.getOutputParameterList();
       }
-      RenderInspector.renderBackground(ipm);
-      RenderInspector.renderInspectorBorder(ipm);
-      RenderInspector.renderTitleBar(ipm);
-      const inputParamLength = inputParameterList.length;
-      for (let i = 0; i < inputParamLength; i += 1) {
-        RenderParameter.render(inputParameterList[i], ipm, i === 0);
-      }
-      const outputParamLength = outputParameterList.length;
-      for (let i = 0; i < outputParamLength; i += 1) {
-        RenderParameter.render(outputParameterList[i], ipm, false, i === 0);
+      if (ipm) {
+        RenderInspector.renderBackground(ipm);
+        RenderInspector.renderInspectorBorder(ipm);
+        RenderInspector.renderTitleBar(ipm);
+        const inputParamLength = inputParameterList.length;
+        for (let i = 0; i < inputParamLength; i += 1) {
+          RenderParameter.render(inputParameterList[i], ipm, i === 0);
+        }
+        const outputParamLength = outputParameterList.length;
+        for (let i = 0; i < outputParamLength; i += 1) {
+          RenderParameter.render(outputParameterList[i], ipm, false, i === 0);
+        }
+      } else {
+        console.warn("InspectorModel is null");
       }
     }
 
@@ -1734,16 +1876,20 @@
     }
     static renderBackground(ipm) {
       const p = RenderInspector.getP();
-      const pos = ipm.getPosition();
-      const dim = ipm.getDimensions();
-      if (!pos || !dim) return;
+      if (ipm) {
+        const pos = ipm.getPosition();
+        const dim = ipm.getDimensions();
+        if (!pos || !dim) return;
 
-      // background
-      p.push();
-      p.fill("rgba(255,255,255,0.9)");
-      p.noStroke();
-      p.rect(pos.x, pos.y + 30, dim.width, dim.height - 30);
-      p.pop();
+        // background
+        p.push();
+        p.fill("rgba(255,255,255,0.9)");
+        p.noStroke();
+        p.rect(pos.x, pos.y + 30, dim.width, dim.height - 30);
+        p.pop();
+      } else {
+        console.warn("InspectorModel is null");
+      }
     }
     static renderInspectorBorder(ipm) {
       const p = RenderInspector.getP();
@@ -1765,35 +1911,47 @@
   }
 
   class ChartManager {
+    // private nodes: NodeModel[] = [];
+    // private edges: EdgeModel[] = [];
+    // private toolbox: ToolboxModel = new ToolboxModel();
+    // private inspector: InspectorModel = new InspectorModel();
+    // private dynamicTool: DynamicToolModel|null = null; // TODO: rename?
+    // // getRolledOverObjects
+    // private rolledOverObjects: (
+    //   NodeModel | EdgeModel | PlugModel | ToolboxModel | ToolModel
+    // )[] = [];
     constructor(p) {
-      this.nodes = [];
-      this.edges = [];
-      this.toolbox = new ToolboxModel();
-      this.inspector = new InspectorModel();
-      this.dynamicTool = null; // TODO: rename?
-      // getRolledOverObjects
-      this.rolledOverObjects = [];
       ChartManager.setP(p);
-      this.nodes = CreationManager.createNodes();
-      this.edges = CreationManager.createEdges(this.nodes);
+      ChartManager.applicationModel = ApplicationModel.createInstance(p);
+
+      // this.nodes = CreationManager.createNodes();
+      // this.edges = CreationManager.createEdges(this.nodes);
     }
-    repositionElementOnResize(element, windowWidth, windowHeight) {
-      Layout.positionElementBasedOnScreenSize(
-        element,
+
+    // INTERACTION
+    resizeCanvas(windowWidth, windowHeight) {
+      const appModel = ChartManager.applicationModel;
+      this.repositionElementOnResize(
+        appModel === null || appModel === void 0
+          ? void 0
+          : appModel.getToolbox(),
         windowWidth,
         windowHeight
       );
-      return;
-    }
-    resizeCanvas(windowWidth, windowHeight) {
-      // throw new Error("Method not implemented.");
-      this.repositionElementOnResize(this.toolbox, windowWidth, windowHeight);
-      this.repositionElementOnResize(this.inspector, windowWidth, windowHeight);
+      this.repositionElementOnResize(
+        appModel === null || appModel === void 0
+          ? void 0
+          : appModel.getInspector(),
+        windowWidth,
+        windowHeight
+      );
 
       // move Toolbox
       // move Tools
       // move Inspector
     }
+
+    // INTERACTION
     mouseDragged(p) {
       // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
       const dragTarget = this.getDragTarget();
@@ -1821,44 +1979,58 @@
 
       // console.log(`2. drag target assigned as ${testTarget}`);
     }
+
+    // INTERACTION (STUB)
     mousePressed(p) {
       // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
     }
+
+    // INTERACTION (MOUSE)
     clearDragTargets() {
-      this.nodes.forEach((node) => {
+      const appModel = ChartManager.applicationModel;
+      appModel.getNodes().forEach((node) => {
         node.setIsDragging(false);
         node.getPlugs().forEach((plug) => plug.setIsDragging(false));
       });
-      this.edges.forEach((edge) => edge.setIsDragging(false));
-      this.toolbox.getToolList().forEach((tool) => tool.setIsDragging(false));
+      appModel.getEdges().forEach((edge) => edge.setIsDragging(false));
+      appModel
+        .getToolbox()
+        .getToolList()
+        .forEach((tool) => tool.setIsDragging(false));
     }
+
+    // INTERACTION (MOUSE)
     mouseReleased(p) {
-      // console.log('mouse released');
-      if (this.dynamicTool !== null) {
+      const appModel = ChartManager.applicationModel;
+      if (appModel.getDynamicTool() !== null) {
         const newlyMintedNode = CreationManager.createNewObjectFromDynamicTool(
-          this.dynamicTool
+          appModel.getDynamicTool()
         );
-        this.nodes.push(newlyMintedNode);
-        this.dynamicTool = null;
+        appModel.getNodes().push(newlyMintedNode);
+        appModel.setDynamicTool(null);
       }
-      this.dynamicTool = null;
+      appModel.setDynamicTool(null);
 
       // if there is a dynamicTool in the slot,
       //  set the dynamicTool to null
       //  then create the new class (has info?)
       this.clearDragTargets();
     }
+
+    // INTERACTION (MOUSE)
     getDragTarget() {
-      const nodeList = this.nodes;
-      const edgeList = this.edges;
-      const plugList = this.nodes.flatMap((node) => node.getPlugs());
+      const appModel = ChartManager.applicationModel;
+      const nodeList = appModel.getNodes();
+      const edgeList = appModel.getEdges();
+      const plugList = appModel.getNodes().flatMap((node) => node.getPlugs());
 
       // TODO: Does "dragTarget" need to be a member variable?
       // const dragTarget = null;
       // check tools
-      if (this.toolbox) {
-        if (this.toolbox.getIsRolledOver()) {
-          const toolList = this.toolbox.getToolList();
+      const toolbox = appModel.getToolbox();
+      if (toolbox) {
+        if (toolbox.getIsRolledOver()) {
+          const toolList = toolbox.getToolList();
 
           // toolList.forEach((tool) => {
           for (let i = 0; i < toolList.length; i += 1) {
@@ -1922,65 +2094,93 @@
       // return object that is being dragged, or null
       return null;
     }
-
-    // TEMP FUNCTION for testing
-    drawTestLines() {
-      // TEST LINES
-      const line1_2 = RenderEdge.plotConnection(this.nodes[0], this.nodes[1]);
-      const line2_3 = RenderEdge.plotConnection(this.nodes[1], this.nodes[2]);
-      const line3_4 = RenderEdge.plotConnection(this.nodes[2], this.nodes[3]);
-      RenderEdge.renderLines(line1_2);
-      RenderEdge.renderLines(line2_3);
-      RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
-    }
     renderNodes(p) {
-      this.nodes.forEach((n, index) => {
-        // check for rollover
-        // TODO: Move this logic to abstract GuiElement class
-        const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
-        if (mouseIsOverNode) {
-          n.setIsRolledOver();
-        } else {
-          n.setIsRolledOver(false);
-        }
+      const appModel = ChartManager.applicationModel;
+      const nodes =
+        appModel === null || appModel === void 0 ? void 0 : appModel.getNodes();
+      nodes === null || nodes === void 0
+        ? void 0
+        : nodes.forEach((n, index) => {
+            // check for rollover
+            // TODO: Move this logic to abstract GuiElement class
+            const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
+            if (mouseIsOverNode) {
+              n.setIsRolledOver();
+            } else {
+              n.setIsRolledOver(false);
+            }
 
-        // if node is being dragged, update its position
-        if (n.getIsDragging()) {
-          n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
-        }
-        if (this.getSelectedNodes().length > 0) {
-          // TODO: Only draw line if user is hovering over another node:
-          //  1. iterate through plugs and check closest
-          const plugArray = this.getClosestPlugsOnSelectedNode();
+            // if node is being dragged, update its position
+            if (n.getIsDragging()) {
+              n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
+            }
+            if (appModel.getSelectedNodes().length > 0) {
+              // TODO: Only draw line if user is hovering over another node:
+              //  1. iterate through plugs and check closest
+              const plugArray = this.getClosestPlugsOnSelectedNode();
 
-          // console.log('plugArray: '+plugArray);
-          const closestPlugOnSelectedNode = plugArray[0];
-          const closestPlugPosition =
-            closestPlugOnSelectedNode === null ||
-            closestPlugOnSelectedNode === void 0
-              ? void 0
-              : closestPlugOnSelectedNode.getPosition();
-          const mousePosition = new Position(p.mouseX, p.mouseY);
-          const lineArray = [closestPlugPosition, mousePosition];
-          RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
-        }
-        RenderNode.render(n, ChartManager.getP());
-      });
+              // console.log('plugArray: '+plugArray);
+              const closestPlugOnSelectedNode = plugArray[0];
+              const closestPlugPosition =
+                closestPlugOnSelectedNode === null ||
+                closestPlugOnSelectedNode === void 0
+                  ? void 0
+                  : closestPlugOnSelectedNode.getPosition();
+              const mousePosition = new Position(p.mouseX, p.mouseY);
+              const lineArray = [closestPlugPosition, mousePosition];
+              RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
+            }
+            RenderNode.render(n, ChartManager.getP());
+          });
     }
+
+    // RENDER
     renderElements() {
       const p = ChartManager.getP();
+      const appModel = ChartManager.applicationModel;
+      const toolbox =
+        appModel === null || appModel === void 0
+          ? void 0
+          : appModel.getToolbox();
+      const inspector =
+        appModel === null || appModel === void 0
+          ? void 0
+          : appModel.getInspector();
+      appModel === null || appModel === void 0 ? void 0 : appModel.getNodes();
+      appModel === null || appModel === void 0 ? void 0 : appModel.getEdges();
+      toolbox === null || toolbox === void 0 ? void 0 : toolbox.getToolList();
+      const dynamicTool =
+        appModel === null || appModel === void 0
+          ? void 0
+          : appModel.getDynamicTool();
+      appModel === null || appModel === void 0
+        ? void 0
+        : appModel.getSelectedNodes();
+      appModel === null || appModel === void 0
+        ? void 0
+        : appModel.getSelectedEdges();
+      appModel === null || appModel === void 0
+        ? void 0
+        : appModel.getSelectedPlugs();
 
       // 1. RENDER TOOLBOX
-      RenderToolbox.render(this.toolbox);
+      RenderToolbox.render(toolbox);
 
       // 2. RENDER INSPECTOR (and parameters in node)
-      RenderInspector.render(this.inspector, this.getSelectedNodes()[0]);
-      const mouseIsOverToolbox = this.toolbox.checkMouseOver(
-        p.mouseX,
-        p.mouseY
+      RenderInspector.render(
+        inspector,
+        appModel === null || appModel === void 0
+          ? void 0
+          : appModel.getSelectedNodes()[0]
       );
+      const mouseIsOverToolbox =
+        toolbox === null || toolbox === void 0
+          ? void 0
+          : toolbox.checkMouseOver(p.mouseX, p.mouseY);
       if (mouseIsOverToolbox) {
-        this.toolbox.setIsRolledOver();
+        toolbox === null || toolbox === void 0
+          ? void 0
+          : toolbox.setIsRolledOver();
       }
 
       // 3. RENDER TOOLS
@@ -1993,107 +2193,89 @@
       this.renderNodes(p);
 
       // 6. RENDER DYNAMIC TOOL
-      if (this.dynamicTool !== null) {
+      if (dynamicTool !== null) {
         // this.dynamicTool.render();
-        RenderTool.render(this.dynamicTool);
+        RenderTool.render(dynamicTool);
       }
 
       // 7. (DEBUG): RENDER GRID & GUIDES
       RenderGuides.render();
       const htmlContainer = document.getElementById("htmlContainer");
-      ChartManager.createContainer(p, htmlContainer);
+      CreationManager.createContainer(p, htmlContainer);
     }
 
     // 5. RENDER EDGES
     renderEdges() {
-      // ITERATE THROUGH EDGES
-      this.edges.forEach((e) => {
-        RenderEdge.render(e);
-      });
+      const appModel = ChartManager.applicationModel;
+      const edges =
+        appModel === null || appModel === void 0 ? void 0 : appModel.getEdges();
+      edges === null || edges === void 0
+        ? void 0
+        : edges.forEach((e) => {
+            RenderEdge.render(e);
+          });
 
-      // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
-      // IF A NODE IS SELECTED, SHOW A CONNECTION PREVIEW
-      // this.getSelectedNodes().forEach((node) => {
-      // TEMP DISABLE, was tested
-      // this.highlightClosestPlugOnSelectedNode();
-      // RenderEdge.renderPreview(node);
-      // });
+      // TODO: If a node is selected, show a preview of connection
     }
 
-    // 4. RENDER TOOLS
+    // 3. RENDER TOOLS
     renderTools(p) {
-      this.toolbox.getToolList().forEach((t) => {
-        // check for rollover
-        // TODO: Move this logic to abstract GuiElement class
-        if (t.getIsDragging()) {
-          this.dragDynamicTool(new Position(p.mouseX - 40, p.mouseY - 20), t);
-        }
-        const mouseIsOverTool = t.checkMouseOver(p.mouseX, p.mouseY);
-        if (mouseIsOverTool) {
-          t.setIsRolledOver();
-        } else {
-          t.setIsRolledOver(false);
-        }
-      });
+      const appModel = ChartManager.applicationModel;
+      const toolbox =
+        appModel === null || appModel === void 0
+          ? void 0
+          : appModel.getToolbox();
+      toolbox === null || toolbox === void 0
+        ? void 0
+        : toolbox.getToolList().forEach((t) => {
+            // check for rollover
+            // TODO: Move this logic to abstract GuiElement class
+            if (t.getIsDragging()) {
+              this.dragDynamicTool(
+                new Position(p.mouseX - 40, p.mouseY - 20),
+                t
+              );
+            }
+            const mouseIsOverTool = t.checkMouseOver(p.mouseX, p.mouseY);
+            if (mouseIsOverTool) {
+              t.setIsRolledOver();
+            } else {
+              t.setIsRolledOver(false);
+            }
+          });
     }
+
+    // INTERACTION
     dragDynamicTool(pos, tool = null) {
-      if (this.dynamicTool === null) {
+      const appModel = ChartManager.applicationModel;
+      const dynamicTool = appModel.getDynamicTool();
+      if (dynamicTool === null) {
         // CREATE NEW
-        this.dynamicTool = new DynamicToolModel(
-          tool === null || tool === void 0 ? void 0 : tool.getName(),
-          tool === null || tool === void 0 ? void 0 : tool.getIcon(),
-          tool === null || tool === void 0 ? void 0 : tool.getObjectType(),
-          tool === null || tool === void 0 ? void 0 : tool.position,
-          tool === null || tool === void 0 ? void 0 : tool.dimensions
+        appModel.setDynamicTool(
+          new DynamicToolModel(
+            tool === null || tool === void 0 ? void 0 : tool.getName(),
+            tool === null || tool === void 0 ? void 0 : tool.getIcon(),
+            tool === null || tool === void 0 ? void 0 : tool.getObjectType(),
+            tool === null || tool === void 0 ? void 0 : tool.position,
+            tool === null || tool === void 0 ? void 0 : tool.dimensions
+          )
         );
       }
-      this.dynamicTool.dragToPosition(pos);
-    }
-    setDynamicSlot(dt) {
-      this.dynamicTool = dt;
-    }
-    // testAddHtmlDiv(): void {
-    //   const aDiv = document.createElement("p"); // is a node
-    //   aDiv.innerHTML = "This is an HTML div appended to a top-layer div";
-    //   const canvas = document.getElementById("htmlContainer");
-    //   canvas?.appendChild(aDiv);
-    // }
-    static createContainer(p, parent) {
-      const container = document.createElement("div");
-      container.setAttribute(
-        "style",
-        "position: absolute; top: 100px; left: 100px; background: #f00; width: 10px; height: 10px;"
-      );
-      parent.appendChild(container);
-      return { container };
+      dynamicTool.dragToPosition(pos);
     }
 
-    // static createUi(
-    //   parent: HTMLElement
-    //   // initialState: UiState,
-    //   // eventHandlers: UiEventHandlers = {}
-    // ): any {
-    //   const p = ChartManager.p;
-    //   // document.getElementById();
-    //   const cont = ChartManager.createContainer(p, parent);
-    //   return cont;
-    // }
-    getSelectedNodes() {
-      return this.nodes.filter((node) => node.getIsSelected());
-    }
-    getRolledOverNodes() {
-      return this.nodes.filter((node) => node.getIsRolledOver());
-    }
-
+    // INTERACTION
     // selectedNodes includes node to check if selected
     checkForSelectNode() {
+      const appModel = ChartManager.applicationModel;
+      const nodes = appModel.getNodes();
       const mousePosition = new Position(
         ChartManager.p.mouseX,
         ChartManager.p.mouseY
       );
-      for (let i = 0; i < this.nodes.length; i += 1) {
-        if (this.nodes[i] !== null && this.nodes[i] !== undefined) {
-          const node = this.nodes[i];
+      for (let i = 0; i < nodes.length; i += 1) {
+        if (nodes[i] !== null && nodes[i] !== undefined) {
+          const node = nodes[i];
           node.setSelected(false);
           if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
             node.setSelected();
@@ -2101,8 +2283,11 @@
         }
       }
     }
+
+    // INTERACTION
     getClosestPlugsOnSelectedNode() {
-      const selectedNodes = this.getSelectedNodes();
+      const appModel = ChartManager.applicationModel;
+      const selectedNodes = appModel.getSelectedNodes();
 
       // Array for if multiple nodes are selected
       // Right now, one at a time is selected, only
@@ -2118,14 +2303,12 @@
       }
       return closestPlugArray;
     }
+
+    // INTERACTION (MOUSE)
     mouseClicked() {
-      // console.log(
-      //   `ChartManager.mouseClicked() @ ${new Position(
-      //     ChartManager.p.mouseX,
-      //     ChartManager.p.mouseY
-      //   )}`
-      // );
-      this.nodes.forEach((n, i) => {
+      const appModel = ChartManager.applicationModel;
+      const nodes = appModel.getNodes();
+      nodes.forEach((n, i) => {
         const plugs = n.getPlugs();
         plugs.forEach((p) => {
           if (p.checkMouseOver(ChartManager.p.mouseX, ChartManager.p.mouseY)) {
@@ -2135,36 +2318,40 @@
         this.checkForSelectNode();
       });
     }
-    addNode(node) {
-      this.nodes.push(node);
-    }
-    removeNode(node) {
-      const index = this.nodes.indexOf(node);
-      if (index > -1) {
-        this.nodes.splice(index, 1);
-      }
-    }
-    addEdge(edge) {
-      this.edges.push(edge);
-    }
-    removeEdge(edge) {
-      const index = this.edges.indexOf(edge);
-      if (index > -1) {
-        this.edges.splice(index, 1);
-      }
-    }
-    getNodes() {
-      return this.nodes;
-    }
-    getEdges() {
-      return this.edges;
-    }
+
+    // INTERACTION
     selectNode(node) {
       node.setSelected();
     }
+
+    // INTERACTION
     deselectNode(node) {
       node.deselect();
     }
+
+    // INTERACTION
+    repositionElementOnResize(element, windowWidth, windowHeight) {
+      Layout.positionElementBasedOnScreenSize(
+        element,
+        windowWidth,
+        windowHeight
+      );
+      return;
+    }
+
+    // GETTERS
+    // getSelectedNodes(): NodeModel[] {
+    //   return this.nodes.filter((node) => node.getIsSelected());
+    // }
+    // getRolledOverNodes(): NodeModel[] {
+    //   return this.nodes.filter((node) => node.getIsRolledOver());
+    // }
+    // getNodes(): NodeModel[] {
+    //   return this.nodes;
+    // }
+    // getEdges(): EdgeModel[] {
+    //   return this.edges;
+    // }
     static createInstance(p) {
       if (ChartManager.instance === null) {
         ChartManager.instance = new ChartManager(p);
@@ -2177,31 +2364,77 @@
       }
       return ChartManager.instance;
     }
-    static setP(p) {
-      ChartManager.p = p;
-    }
     static getP() {
       return ChartManager.p;
     }
+
+    // SETTERS
+    // setDynamicSlot(dt:DynamicToolModel):void {
+    //   this.dynamicTool = dt;
+    // };
+    static setP(p) {
+      ChartManager.p = p;
+    }
+
+    // OVERLOADS
     toString() {
-      let returnStr = `ChartManager:\n\t${this.nodes.length} nodes,\n\t${this.edges.length}\n`;
-      returnStr += "NODES: [\n\t";
-      this.nodes.forEach((node) => {
-        returnStr += `\t${node.toString()},\n`;
-      });
-      returnStr += "]\nEDGES: [\n\t";
-      this.edges.forEach((edge) => {
-        returnStr += `\t${edge.toString()},\n`;
-      });
-      returnStr += "";
+      const returnStr = "ChartManager";
+
+      // let returnStr = `ChartManager:\n\t${this.nodes.length} nodes,\n\t${this.edges.length}\n`;
+      // returnStr += "NODES: [\n\t";
+      // this.nodes.forEach((node) => {
+      //   returnStr += `\t${node.toString()},\n`;
+      // });
+      // returnStr += "]\nEDGES: [\n\t";
+      // this.edges.forEach((edge) => {
+      //   returnStr += `\t${edge.toString()},\n`;
+      // });
+      // returnStr += "";
       return returnStr;
     }
   }
   ChartManager.instance = null;
 
+  // TEMP FUNCTION for testing
+  // drawTestLines(): void {
+  //   // TEST LINES
+  //   const line1_2 = RenderEdge.plotConnection(
+  //     this.nodes[0] as NodeModel,
+  //     this.nodes[1] as NodeModel
+  //   );
+  //   const line2_3 = RenderEdge.plotConnection(
+  //     this.nodes[1] as NodeModel,
+  //     this.nodes[2] as NodeModel
+  //   );
+  //   const line3_4 = RenderEdge.plotConnection(
+  //     this.nodes[2] as NodeModel,
+  //     this.nodes[3] as NodeModel
+  //   );
+  //   RenderEdge.renderLines(line1_2);
+  //   RenderEdge.renderLines(line2_3);
+  //   RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
+  // }
+  // testAddHtmlDiv(): void {
+  //   const aDiv = document.createElement("p"); // is a node
+  //   aDiv.innerHTML = "This is an HTML div appended to a top-layer div";
+  //   const canvas = document.getElementById("htmlContainer");
+  //   canvas?.appendChild(aDiv);
+  // }
+  // static createUi(
+  //   parent: HTMLElement
+  //   // initialState: UiState,
+  //   // eventHandlers: UiEventHandlers = {}
+  // ): any {
+  //   const p = ChartManager.p;
+  //   // document.getElementById();
+  //   const cont = ChartManager.createContainer(p, parent);
+  //   return cont;
+  // }
+
   // const exp = require('p5-util/p5.experience.js-master/p5.experience.js')
   let chartManager;
   const preload = (p) => {
+    ApplicationModel.createInstance(p);
     p.loadFont("./font/Regular.otf");
   };
 
@@ -2235,14 +2468,15 @@
 
   /** This is a setup function. */
   const setup = (p) => {
+    ApplicationModel.createInstance(p);
+    chartManager = ChartManager.createInstance(p);
+    CreationManager.createInstance();
     p.createCanvas(p.windowWidth, p.windowHeight);
     p.frameRate(30);
     p.background(248);
 
     // Classes with static methods that need access to p5.js
     initializeRenderers(p);
-    chartManager = ChartManager.createInstance(p);
-    CreationManager.createInstance();
 
     // const uxRect = UX.createUxRect(10,10,100,100);
     // UX.setUxFill(uxRect, 'rgb(255,0,0)');

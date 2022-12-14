@@ -32,23 +32,24 @@ class RenderTool {
   }
   static render(tool: ToolModel): void {
     const p = RenderTool.getP();
-    const boundary = tool.getBoundary();
+    const boundary = tool?.getBoundary();
 
     p.push();
-    const pos = tool.getPosition();
-    const dim = tool.getPosition();
+    const pos = tool?.getPosition();
+    const dim = tool?.getPosition();
     if (
       (pos === null)
       || (dim === null)
       || (typeof pos === 'undefined')
       || (typeof dim === 'undefined')
     ) {
-      throw(new Error('tool position data is null'));
+      // was throw
+      console.warn('tool position data is null');
       return;
     }
-    if (tool.type === 'DynamicTool') {
+    if (tool?.type === 'DynamicTool') {
       p.fill('rgba(255,255,0,1)');
-    } else if ( tool.type === 'Tool') {
+    } else if ( tool?.type === 'Tool') {
       p.fill('rgba(255,2,100,1)');
     } else {
       p.fill('rgba(128,0,255,1)');

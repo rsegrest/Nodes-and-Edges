@@ -5,6 +5,7 @@ import Layout from "../model/positioning/Layout";
 
 import CreationManager from "./CreationManager";
 
+import ApplicationModel from "../model/ApplicationModel";
 import EdgeModel from "../model/EdgeModel";
 import NodeModel from "../model/NodeModel";
 import PlugModel from "../model/PlugModel";
@@ -25,105 +26,94 @@ type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
 class ChartManager {
   private static instance: ChartManager | null = null;
+  private static applicationModel: ApplicationModel|null;
   private static p: p5;
-  private nodes: NodeModel[] = [];
-  private edges: EdgeModel[] = [];
-  private toolbox: ToolboxModel = new ToolboxModel();
-  private inspector: InspectorModel = new InspectorModel();
-  private dynamicTool: DynamicToolModel|null = null; // TODO: rename?
-  // getRolledOverObjects
-  private rolledOverObjects: (
-    NodeModel | EdgeModel | PlugModel | ToolboxModel | ToolModel
-  )[] = [];
 
   private constructor(p: p5) {
     ChartManager.setP(p);
-    this.nodes = CreationManager.createNodes();
-    this.edges = CreationManager.createEdges(this.nodes);
+    ChartManager.applicationModel = ApplicationModel.createInstance(p);
   }
 
-  repositionElementOnResize(element: ToolboxModel|InspectorModel, windowWidth: number, windowHeight: number):void {
-    Layout.positionElementBasedOnScreenSize(
-      element, windowWidth, windowHeight );
-    return;
-  }
-
+  // INTERACTION
   resizeCanvas(windowWidth: number, windowHeight: number):void {
-    // throw new Error("Method not implemented.");
-    this.repositionElementOnResize(this.toolbox, windowWidth, windowHeight);
-    this.repositionElementOnResize(this.inspector, windowWidth, windowHeight);
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    this.repositionElementOnResize(
+      appModel?.getToolbox(),
+        windowWidth, windowHeight
+      );
+    this.repositionElementOnResize(
+      appModel?.getInspector(),
+        windowWidth, windowHeight
+      );
     // move Toolbox
     // move Tools
     // move Inspector
   }
 
+  // INTERACTION
   mouseDragged(p: p5): void {
     // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
     const dragTarget:DraggableObject|null = this.getDragTarget();
-    if (dragTarget === null) { 
-      // console.log('1. drag target is null');
-      return;
-    }
-    // console.log(`1. drag target assigned as ${dragTarget?.type}`);if (dragTarget === null) { return; }
-    // let testTarget = null;
+    if (dragTarget === null) { return; }
     if (dragTarget.type === 'Node') {
-      // testTarget = 'Node';
       (dragTarget as NodeModel).setIsDragging(true);
     } else if (dragTarget.type === 'Edge') {
-      // testTarget = 'Edge';
       (dragTarget as EdgeModel).setIsDragging(true);
     } else if (dragTarget.type === 'Plug') {
-      // testTarget = 'Plug';
       (dragTarget as PlugModel).setIsDragging(true);
     } else if (dragTarget.type === 'Tool') {
-      // testTarget = 'Tool';
-      // throw(new Error('tool model is being dragged'));
       (dragTarget as ToolModel).setIsDragging(true);
     }
     // console.log(`2. drag target assigned as ${testTarget}`);
     
   }
 
+  // INTERACTION (STUB)
   mousePressed(p: p5): void {
     // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
-    
   }
 
+  // INTERACTION (MOUSE)
   clearDragTargets(): void {
-    this.nodes.forEach((node) => {
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    appModel.getNodes().forEach((node) => {
       node.setIsDragging(false);
       node.getPlugs().forEach((plug) => plug.setIsDragging(false));
     });
-    this.edges.forEach((edge) => edge.setIsDragging(false));
-    this.toolbox.getToolList().forEach((tool) => tool.setIsDragging(false));
+    appModel.getEdges().forEach((edge) => edge.setIsDragging(false));
+    appModel.getToolbox().getToolList().forEach((tool) => tool.setIsDragging(false));
   }
 
+  // INTERACTION (MOUSE)
   mouseReleased(p: p5): void {
-    // console.log('mouse released');
-    if (this.dynamicTool !== null) {
-      const newlyMintedNode = CreationManager.createNewObjectFromDynamicTool(this.dynamicTool);
-      this.nodes.push(newlyMintedNode);
-      this.dynamicTool = null;
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    if (appModel.getDynamicTool() !== null) {
+      const newlyMintedNode = CreationManager.createNewObjectFromDynamicTool(appModel.getDynamicTool());
+      appModel.getNodes().push(newlyMintedNode);
+      appModel.setDynamicTool(null);
     }
-  this.dynamicTool = null;
+    appModel.setDynamicTool(null);
     // if there is a dynamicTool in the slot,
     //  set the dynamicTool to null
     //  then create the new class (has info?) 
     this.clearDragTargets();
   }
 
+  // INTERACTION (MOUSE)
   getDragTarget(): DraggableObject|null {
-    const nodeList:NodeModel[] = this.nodes;
-    const edgeList:EdgeModel[] = this.edges;
-    const plugList:PlugModel[] = this.nodes.flatMap((node) => node.getPlugs());
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const nodeList:NodeModel[] = appModel.getNodes();
+    const edgeList:EdgeModel[] = appModel.getEdges();
+    const plugList:PlugModel[] = appModel.getNodes().flatMap((node) => node.getPlugs());
 
     // TODO: Does "dragTarget" need to be a member variable?
     // const dragTarget = null;
 
     // check tools
-    if (this.toolbox) {
-      if (this.toolbox.getIsRolledOver()) {
-        const toolList = this.toolbox.getToolList();
+    const toolbox = appModel.getToolbox();
+    if (toolbox) {
+      if (toolbox.getIsRolledOver()) {
+        const toolList = toolbox.getToolList();
 
         // toolList.forEach((tool) => {
         for (let i = 0; i < toolList.length; i += 1) {
@@ -171,29 +161,105 @@ class ChartManager {
     // return object that is being dragged, or null
     return null;
   }
-  
-  // TEMP FUNCTION for testing
-  drawTestLines(): void {
-    // TEST LINES
-    const line1_2 = RenderEdge.plotConnection(
-      this.nodes[0] as NodeModel,
-      this.nodes[1] as NodeModel
-    );
-    const line2_3 = RenderEdge.plotConnection(
-      this.nodes[1] as NodeModel,
-      this.nodes[2] as NodeModel
-    );
-    const line3_4 = RenderEdge.plotConnection(
-      this.nodes[2] as NodeModel,
-      this.nodes[3] as NodeModel
-    );
 
-    RenderEdge.renderLines(line1_2);
-    RenderEdge.renderLines(line2_3);
-    RenderEdge.renderLines(line3_4, "rgb(0,0,200)");
+  // INTERACTION
+  dragDynamicTool(pos: Position, tool:ToolModel|null=null):void {
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const dynamicTool:DynamicToolModel|null = appModel.getDynamicTool();
+    if (dynamicTool === null) {
+      // CREATE NEW
+      appModel.setDynamicTool(
+        new DynamicToolModel(
+          tool?.getName() as string,
+          tool?.getIcon() as string,
+          tool?.getObjectType() as string,
+          tool?.position as Position,
+          tool?.dimensions as Dimension,)
+        );
+    }
+    (dynamicTool as DynamicToolModel).dragToPosition(pos);
   }
+
+  
+  // INTERACTION
+  // selectedNodes includes node to check if selected
+  checkForSelectNode(): void {
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const nodes = appModel.getNodes();
+    const mousePosition = new Position(
+      ChartManager.p.mouseX,
+      ChartManager.p.mouseY
+    );
+    for (let i = 0; i < nodes.length; i += 1) {
+      if (nodes[i] !== null && nodes[i] !== undefined) {
+        const node = nodes[i] as NodeModel;
+        node.setSelected(false);
+        if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
+          node.setSelected();
+        }
+      }
+    }
+  }
+  // INTERACTION
+  getClosestPlugsOnSelectedNode():PlugModel[] {
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const selectedNodes = appModel.getSelectedNodes();
+    // Array for if multiple nodes are selected
+    // Right now, one at a time is selected, only
+    const closestPlugArray = [];
+    if (selectedNodes.length > 0) {
+      for (let i = 0; i < selectedNodes.length; i += 1) {
+        const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
+          ChartManager.p.mouseX, ChartManager.p.mouseY
+        );
+        closestPlugArray.push(closestPlug);
+      }
+    }
+    return closestPlugArray as PlugModel[];
+  }
+  // INTERACTION (MOUSE)
+  mouseClicked(): void {
+    {
+
+      // console.log(
+      //   `ChartManager.mouseClicked() @ ${new Position(
+      //     ChartManager.p.mouseX,
+      //     ChartManager.p.mouseY
+      //   )}`
+      // );
+    }
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const nodes:NodeModel[] = appModel.getNodes();
+    nodes.forEach((n, i) => {
+      const plugs = n.getPlugs();
+      plugs.forEach((p) => {
+        if (p.checkMouseOver(ChartManager.p.mouseX, ChartManager.p.mouseY)) {
+          p.setIsSelected();
+        }
+      })
+      this.checkForSelectNode();
+    });
+  }
+  // INTERACTION
+  selectNode(node: NodeModel): void {
+    node.setSelected();
+  }
+  // INTERACTION
+  deselectNode(node: NodeModel): void {
+    node.deselect();
+  }
+
+  // INTERACTION
+  repositionElementOnResize(element: ToolboxModel|InspectorModel, windowWidth: number, windowHeight: number):void {
+    Layout.positionElementBasedOnScreenSize(
+      element, windowWidth, windowHeight );
+    return;
+  }
+  
   renderNodes(p:p5): void {
-    this.nodes.forEach((n,index) => {
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const nodes = appModel?.getNodes();
+    nodes?.forEach((n,index) => {
       // check for rollover
       // TODO: Move this logic to abstract GuiElement class
       const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
@@ -204,7 +270,7 @@ class ChartManager {
         n.dragToPosition(new Position(p.mouseX-40, p.mouseY-20));
       }
 
-      if (this.getSelectedNodes().length > 0) {
+      if (appModel.getSelectedNodes().length > 0) {
         // TODO: Only draw line if user is hovering over another node:
         //  1. iterate through plugs and check closest
         const plugArray = this.getClosestPlugsOnSelectedNode();
@@ -219,20 +285,31 @@ class ChartManager {
       RenderNode.render(n, ChartManager.getP());
     });
   }
+  // RENDER
   renderElements(): void {
     const p = ChartManager.getP();
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+
+    const toolbox = appModel?.getToolbox();
+    const inspector = appModel?.getInspector();
+    const nodes = appModel?.getNodes();
+    const edges = appModel?.getEdges();
+    const tools = toolbox?.getToolList();
+    const dynamicTool = appModel?.getDynamicTool();
+    const selectedNodes = appModel?.getSelectedNodes();
+    const selectedEdges = appModel?.getSelectedEdges();
+    const selectedPlugs = appModel?.getSelectedPlugs();
     
     // 1. RENDER TOOLBOX
-    RenderToolbox.render(this.toolbox);
+    RenderToolbox.render(toolbox);
     
     // 2. RENDER INSPECTOR (and parameters in node)
     RenderInspector.render(
-      this.inspector,
-      this.getSelectedNodes()[0] as NodeModel
-      );
-      
-    const mouseIsOverToolbox = this.toolbox.checkMouseOver(p.mouseX, p.mouseY);
-    if (mouseIsOverToolbox) { this.toolbox.setIsRolledOver(); }
+      inspector,
+      appModel?.getSelectedNodes()[0] as NodeModel
+    );
+    const mouseIsOverToolbox = toolbox?.checkMouseOver(p.mouseX, p.mouseY);
+    if (mouseIsOverToolbox) { toolbox?.setIsRolledOver(); }
     
     // 3. RENDER TOOLS
     this.renderTools(p);
@@ -244,40 +321,32 @@ class ChartManager {
     this.renderNodes(p);
 
     // 6. RENDER DYNAMIC TOOL
-    if (this.dynamicTool !== null) {
+    if (dynamicTool !== null) {
       // this.dynamicTool.render();
-      RenderTool.render(this.dynamicTool);
+      RenderTool.render(dynamicTool);
     }
 
     // 7. (DEBUG): RENDER GRID & GUIDES
     RenderGuides.render();
     const htmlContainer = document.getElementById('htmlContainer');
-    ChartManager.createContainer(p, htmlContainer as HTMLElement);
+    CreationManager.createContainer(p, htmlContainer as HTMLElement);
   }
   
   // 5. RENDER EDGES
   renderEdges(): void {
-
-    // ITERATE THROUGH EDGES
-    this.edges.forEach((e) => {
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const edges = appModel?.getEdges();
+    edges?.forEach((e) => {
       RenderEdge.render(e);
     })
 
-    // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
-
-    // IF A NODE IS SELECTED, SHOW A CONNECTION PREVIEW
-    // this.getSelectedNodes().forEach((node) => {
-      
-      // TEMP DISABLE, was tested
-      // this.highlightClosestPlugOnSelectedNode();
-      
-      
-      // RenderEdge.renderPreview(node);
-    // });
+    // TODO: If a node is selected, show a preview of connection
   }
-  // 4. RENDER TOOLS
+  // 3. RENDER TOOLS
   renderTools(p: p5):void {
-    this.toolbox.getToolList().forEach((t) => {
+    const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+    const toolbox = appModel?.getToolbox();
+    toolbox?.getToolList().forEach((t) => {
       // check for rollover
       // TODO: Move this logic to abstract GuiElement class
       if (t.getIsDragging()) {
@@ -289,133 +358,6 @@ class ChartManager {
     });
   }
 
-  dragDynamicTool(pos: Position, tool:ToolModel|null=null):void {
-    if (this.dynamicTool === null) {
-      // CREATE NEW
-      this.dynamicTool = new DynamicToolModel(
-        tool?.getName() as string,
-        tool?.getIcon() as string,
-        tool?.getObjectType() as string,
-        tool?.position as Position,
-        tool?.dimensions as Dimension,);
-    }
-    this.dynamicTool.dragToPosition(pos);
-  }
-  setDynamicSlot(dt:DynamicToolModel):void {
-    this.dynamicTool = dt;
-  };
-  // testAddHtmlDiv(): void {
-  //   const aDiv = document.createElement("p"); // is a node
-  //   aDiv.innerHTML = "This is an HTML div appended to a top-layer div";
-  //   const canvas = document.getElementById("htmlContainer");
-  //   canvas?.appendChild(aDiv);
-  // }
-  static createContainer(
-    p: p5,
-    parent: HTMLElement
-  ): { container: HTMLDivElement } {
-    const container = document.createElement("div");
-    container.setAttribute(
-      'style',
-      "position: absolute; top: 100px; left: 100px; background: #f00; width: 10px; height: 10px;",
-    );
-    parent.appendChild(container);
-    return { container };
-  }
-  // static createUi(
-  //   parent: HTMLElement
-  //   // initialState: UiState,
-  //   // eventHandlers: UiEventHandlers = {}
-  // ): any {
-  //   const p = ChartManager.p;
-  //   // document.getElementById();
-  //   const cont = ChartManager.createContainer(p, parent);
-  //   return cont;
-  // }
-  getSelectedNodes(): NodeModel[] {
-    return this.nodes.filter((node) => node.getIsSelected());
-  }
-  getRolledOverNodes(): NodeModel[] {
-    return this.nodes.filter((node) => node.getIsRolledOver());
-  }
-  // selectedNodes includes node to check if selected
-  checkForSelectNode(): void {
-    const mousePosition = new Position(
-      ChartManager.p.mouseX,
-      ChartManager.p.mouseY
-    );
-    for (let i = 0; i < this.nodes.length; i += 1) {
-      if (this.nodes[i] !== null && this.nodes[i] !== undefined) {
-        const node = this.nodes[i] as NodeModel;
-        node.setSelected(false);
-        if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
-          node.setSelected();
-        }
-      }
-    }
-  }
-  getClosestPlugsOnSelectedNode():PlugModel[] {
-    const selectedNodes = this.getSelectedNodes();
-    // Array for if multiple nodes are selected
-    // Right now, one at a time is selected, only
-    const closestPlugArray = [];
-    if (selectedNodes.length > 0) {
-      for (let i = 0; i < selectedNodes.length; i += 1) {
-        const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
-          ChartManager.p.mouseX, ChartManager.p.mouseY
-        );
-        closestPlugArray.push(closestPlug);
-      }
-    }
-    return closestPlugArray as PlugModel[];
-  }
-  mouseClicked(): void {
-    // console.log(
-    //   `ChartManager.mouseClicked() @ ${new Position(
-    //     ChartManager.p.mouseX,
-    //     ChartManager.p.mouseY
-    //   )}`
-    // );
-    this.nodes.forEach((n, i) => {
-      const plugs = n.getPlugs();
-      plugs.forEach((p) => {
-        if (p.checkMouseOver(ChartManager.p.mouseX, ChartManager.p.mouseY)) {
-          p.setIsSelected();
-        }
-      })
-      this.checkForSelectNode();
-    });
-  }
-  addNode(node: NodeModel): void {
-    this.nodes.push(node);
-  }
-  removeNode(node: NodeModel): void {
-    const index = this.nodes.indexOf(node);
-    if (index > -1) {
-      this.nodes.splice(index, 1);
-    }
-  }
-  addEdge(edge: EdgeModel): void {
-    this.edges.push(edge);
-  }
-  removeEdge(edge: EdgeModel): void {
-    const index = this.edges.indexOf(edge);
-    if (index > -1) {
-      this.edges.splice(index, 1);
-    }
-  }
-  getNodes(): NodeModel[] {
-    return this.nodes;
-  }
-  getEdges(): EdgeModel[] {
-    return this.edges;
-  }
-  selectNode(node: NodeModel): void {
-    node.setSelected();
-  }
-  deselectNode(node: NodeModel): void {
-    node.deselect();
-  }
   static createInstance(p: p5): ChartManager {
     if (ChartManager.instance === null) {
       ChartManager.instance = new ChartManager(p);
@@ -428,24 +370,26 @@ class ChartManager {
     }
     return ChartManager.instance;
   }
-  static setP(p: p5): void {
-    ChartManager.p = p;
-  }
   static getP(): p5 {
     return ChartManager.p;
   }
+  static setP(p: p5): void {
+    ChartManager.p = p;
+  }
+  // OVERLOADS
   public toString(): string {
-    let returnStr = `ChartManager:\n\t${this.nodes.length} nodes,\n\t${this.edges.length}\n`;
-    returnStr += "NODES: [\n\t";
-    this.nodes.forEach((node) => {
-      returnStr += `\t${node.toString()},\n`;
-    });
-    returnStr += "]\nEDGES: [\n\t";
+    const returnStr = 'ChartManager';
+    // let returnStr = `ChartManager:\n\t${this.nodes.length} nodes,\n\t${this.edges.length}\n`;
+    // returnStr += "NODES: [\n\t";
+    // this.nodes.forEach((node) => {
+    //   returnStr += `\t${node.toString()},\n`;
+    // });
+    // returnStr += "]\nEDGES: [\n\t";
 
-    this.edges.forEach((edge) => {
-      returnStr += `\t${edge.toString()},\n`;
-    });
-    returnStr += "";
+    // this.edges.forEach((edge) => {
+    //   returnStr += `\t${edge.toString()},\n`;
+    // });
+    // returnStr += "";
     return returnStr;
   }
 }

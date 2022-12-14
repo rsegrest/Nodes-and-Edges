@@ -11,7 +11,7 @@ import {
   draw,
   mouseClicked,
 } from "./draw";
-
+import ApplicationModel from "./model/ApplicationModel";
 
 const sketch = createSketch({
   preload,

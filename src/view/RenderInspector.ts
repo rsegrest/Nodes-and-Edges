@@ -22,29 +22,30 @@ class RenderInspector {
       inputParameterList = node.getInputParameterList();
       outputParameterList = node.getOutputParameterList();
     }
-    
+    if (ipm) {
+      RenderInspector.renderBackground(ipm);
+      RenderInspector.renderInspectorBorder(ipm);
+      RenderInspector.renderTitleBar(ipm);
+      const inputParamLength = inputParameterList.length;
+      for (let i = 0; i < inputParamLength; i += 1) {
+        RenderParameter.render(
+          inputParameterList[i] as InputParameterModel,
+          ipm,
+          (i === 0)
+        );
+      }
 
-    RenderInspector.renderBackground(ipm);
-    RenderInspector.renderInspectorBorder(ipm);
-    RenderInspector.renderTitleBar(ipm);
-
-    const inputParamLength = inputParameterList.length;
-    for (let i = 0; i < inputParamLength; i += 1) {
-      RenderParameter.render(
-        inputParameterList[i] as InputParameterModel,
-        ipm,
-        (i === 0)
-      );
-    }
-
-    const outputParamLength = outputParameterList.length;
-    for (let i = 0; i < outputParamLength; i += 1) {
-      RenderParameter.render(
-        outputParameterList[i] as OutputParameterModel,
-        ipm,
-        false,
-        (i === 0)
-      );
+      const outputParamLength = outputParameterList.length;
+      for (let i = 0; i < outputParamLength; i += 1) {
+        RenderParameter.render(
+          outputParameterList[i] as OutputParameterModel,
+          ipm,
+          false,
+          (i === 0)
+        );
+      }
+    } else {
+      console.warn('InspectorModel is null');
     }
   }
   // calculate column position
@@ -76,15 +77,19 @@ class RenderInspector {
   }
   static renderBackground(ipm: InspectorModel):void {
     const p = RenderInspector.getP();
-    const pos = ipm.getPosition();
-    const dim = ipm.getDimensions();
-    if (!pos || !dim) return;
-    // background
-    p.push();
-    p.fill('rgba(255,255,255,0.9)')
-    p.noStroke();
-    p.rect(pos.x, pos.y+30, dim.width, dim.height-30);
-    p.pop();
+    if (ipm) {
+      const pos = ipm.getPosition();
+      const dim = ipm.getDimensions();
+      if (!pos || !dim) return;
+      // background
+      p.push();
+      p.fill('rgba(255,255,255,0.9)')
+      p.noStroke();
+      p.rect(pos.x, pos.y+30, dim.width, dim.height-30);
+      p.pop();
+    } else {
+      console.warn('InspectorModel is null')
+    }
   }
   static renderInspectorBorder(ipm: InspectorModel):void {
     const p = RenderInspector.getP();

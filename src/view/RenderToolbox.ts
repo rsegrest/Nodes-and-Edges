@@ -112,15 +112,17 @@ class RenderToolbox {
   // TEST
 
   static render(tbm: ToolboxModel):void {
-    const p = RenderToolbox.getP();
-    const pos = tbm.getPosition();
-    const dim = tbm.getDimensions();
-
-    RenderToolbox.renderBackground(tbm);
-    RenderToolbox.renderTBBorder(tbm);
-    RenderToolbox.renderTitleBar(tbm);
-    RenderToolbox.renderTools(tbm);
-    p.pop();
+    // const p = RenderToolbox.getP();
+    // const pos = tbm.getPosition();
+    // const dim = tbm.getDimensions();
+    if (tbm) {
+      RenderToolbox.renderBackground(tbm);
+      RenderToolbox.renderTBBorder(tbm);
+      RenderToolbox.renderTitleBar(tbm);
+      RenderToolbox.renderTools(tbm);
+    } else {
+      console.warn('RenderToolbox.render: tbm is null')
+    }
   }
   static renderBackground(tbm: ToolboxModel):void {
     const p = RenderToolbox.getP();

@@ -1,6 +1,9 @@
 14 December 2022
 
-TODO: Draw line only when mouse is not over same node
+TODO: Interaction manager?
+TODO: Class to handle adding input field
+
+TODO: Draw line only when interacting with plug
 TODO: If drawing line, highlight target node on rollover 
 TODO: Create edge when a second node is selected
 
