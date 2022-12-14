@@ -1,4 +1,6 @@
-abstract class Parameter {
+import GuiElementModel from "./GuiElement";
+
+abstract class Parameter extends GuiElementModel {
   private name: string;
   private value: any;
   private units: string|null;
@@ -7,6 +9,7 @@ abstract class Parameter {
     value: string|number|null,
     units: string|null = null
   ) {
+    super(true,false,false,true);
     this.name = name;
     this.value = value;
     this.units = units;
@@ -25,6 +28,9 @@ abstract class Parameter {
   }
   public setUnits(units: string|null): void {
     this.name = `${this.name} (${units})`;
+  }
+  public clickAction(): void {
+    console.log("Parameter clicked");
   }
 
   public toString(): string {

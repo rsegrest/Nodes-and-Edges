@@ -39,7 +39,7 @@ class ChartManager {
   private constructor(p: p5) {
     ChartManager.setP(p);
     this.nodes = CreationManager.createNodes();
-    // this.edges = CreationManager.createEdges(this.nodes);
+    this.edges = CreationManager.createEdges(this.nodes);
   }
 
   repositionElementOnResize(element: ToolboxModel|InspectorModel, windowWidth: number, windowHeight: number):void {
@@ -251,60 +251,17 @@ class ChartManager {
 
     // 7. (DEBUG): RENDER GRID & GUIDES
     RenderGuides.render();
+    const htmlContainer = document.getElementById('htmlContainer');
+    ChartManager.createContainer(p, htmlContainer as HTMLElement);
   }
   
   // 5. RENDER EDGES
   renderEdges(): void {
-    // TEST CASE: Add edges manually and render them
-    const firstNode1 = this.nodes[0] as NodeModel;
-    const secondNode1 = this.nodes[1] as NodeModel;
-    const firstPlug1 = firstNode1.getPlugByPosition('E');
-    const secondPlug1 = secondNode1.getPlugByPosition('W');
-    
-    const oneEdge = new EdgeModel(
-      'e0-1',
-      firstNode1,
-      secondNode1,
-      firstPlug1,
-      secondPlug1
-    );
-
-    const firstNode2 = this.nodes[1] as NodeModel;
-    const secondNode2 = this.nodes[2] as NodeModel;
-    const firstPlug2 = firstNode2.getPlugByPosition('E');
-    const secondPlug2 = secondNode2.getPlugByPosition('W');
-    
-    const anotherEdge = new EdgeModel(
-      'e1-2',
-      firstNode2,
-      secondNode2,
-      firstPlug2,
-      secondPlug2
-    );
-
-
-    const firstNode3 = this.nodes[2] as NodeModel;
-    const secondNode3 = this.nodes[3] as NodeModel;
-    const firstPlug3 = firstNode3.getPlugByPosition('E');
-    const secondPlug3 = secondNode3.getPlugByPosition('W');
-    
-    const yetAnotherEdge = new EdgeModel(
-      'e2-3',
-      firstNode3,
-      secondNode3,
-      firstPlug3,
-      secondPlug3
-    );
-
-    RenderEdge.render(oneEdge)
-    RenderEdge.render(anotherEdge);
-    RenderEdge.render(yetAnotherEdge);
-    // END TEST CASE
 
     // ITERATE THROUGH EDGES
-    // this.edges.forEach((e) => {
-    //   RenderEdge.render(e);
-    // })
+    this.edges.forEach((e) => {
+      RenderEdge.render(e);
+    })
 
     // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
 
@@ -358,8 +315,10 @@ class ChartManager {
     parent: HTMLElement
   ): { container: HTMLDivElement } {
     const container = document.createElement("div");
-    // container.classList.add("p5c-container", "idle");
-    // setDraggable(container);
+    container.setAttribute(
+      'style',
+      "position: absolute; top: 100px; left: 100px; background: #f00; width: 10px; height: 10px;",
+    );
     parent.appendChild(container);
     return { container };
   }

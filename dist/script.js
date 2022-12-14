@@ -214,10 +214,6 @@
       // private parameterSet: any[] = [];
       this.type = "Inspector";
       this.isCollapsed = false;
-
-      // this.toolList.push(new ToolModel("Element", "E", "Element"));
-      // this.toolList.push(new ToolModel("Subelement", "S", "Subelement"));
-      // this.toolList.push(new ToolModel("Edge", "E", "Edge"));
     }
     clickAction() {
       console.log("inspector pane clicked");
@@ -557,6 +553,67 @@
   Layout.BASE_NODE_WIDTH = 100;
   Layout.BASE_NODE_HEIGHT = 50;
 
+  class EdgeModel extends DraggableGuiElementModel {
+    constructor(id, sourceNode, targetNode, sourcePlug, targetPlug) {
+      super(null, null, false);
+      this.type = "Edge";
+      this.sourceNode = null;
+      this.targetNode = null;
+      this.sourcePlug = null;
+      this.targetPlug = null;
+      this.id = id;
+      this.sourceNode = sourceNode;
+      if (targetNode) {
+        this.targetNode = targetNode;
+      }
+      if (sourcePlug) {
+        this.sourcePlug = sourcePlug;
+      }
+      if (targetPlug) {
+        this.targetPlug = targetPlug;
+      }
+    }
+    connectSource(node, plug = null) {
+      this.sourceNode = node;
+      if (plug) {
+        this.sourcePlug = plug;
+      }
+    }
+    connectTarget(node, plug = null) {
+      this.targetNode = node;
+      if (plug) {
+        this.targetPlug = plug;
+      }
+    }
+    getSourceNode() {
+      return this.sourceNode;
+    }
+    getTargetNode() {
+      return this.targetNode;
+    }
+    getSourcePlug() {
+      return this.sourcePlug;
+    }
+    getTargetPlug() {
+      return this.targetPlug;
+    }
+    getId() {
+      return this.id;
+    }
+    dragToPosition(position) {
+      throw new Error("Method not implemented.");
+    }
+    clickAction() {
+      throw new Error("Method not implemented.");
+    }
+    toString() {
+      return `EdgeModel: ${this.id}, sourceNode: ${this.sourceNode}, targetNode: ${this.targetNode}, sourcePlug: ${this.sourcePlug}, targetPlug: ${this.targetPlug}`;
+    }
+    toDyreqtJson() {
+      throw new Error("EdgeModel-- toDyreqtJson: Method not implemented.");
+    }
+  }
+
   class PlugModel extends DraggableGuiElementModel {
     constructor(plugPosition, position, isHighlit = false) {
       super(
@@ -819,8 +876,9 @@
     }
   }
 
-  class Parameter {
+  class Parameter extends GuiElementModel {
     constructor(name, value, units = null) {
+      super(true, false, false, true);
       this.name = name;
       this.value = value;
       this.units = units;
@@ -839,6 +897,9 @@
     }
     setUnits(units) {
       this.name = `${this.name} (${units})`;
+    }
+    clickAction() {
+      console.log("Parameter clicked");
     }
     toString() {
       let outputString = `Parameter: ${this.name}, value: ${this.value}`;
@@ -927,22 +988,22 @@
       const nodes = [];
       const labels = ["Solar Array", "Cable", "Avionics", "Radiator"];
       const inputParameterList = [
-        new InputParameterModel("parameter1", 1000, "meters"),
-        new InputParameterModel("parameter2", 69, null),
-        new InputParameterModel("fuel", 420, "grams"),
+        new InputParameterModel("parameter1", 1000 * Math.random(), "meters"),
+        new InputParameterModel("parameter2", 69 * Math.random(), null),
+        new InputParameterModel("fuel", 420 * Math.random(), "grams"),
         new InputParameterModel(
           "Another fourth param",
-          "aStringValue",
+          "aStringValue: " + (Math.random() * 99999).toFixed(3),
           "count"
         ),
       ];
       const outputParameterList = [
-        new OutputParameterModel("parameter1", 0, "meters"),
-        new OutputParameterModel("parameter2", 6.9, null),
-        new OutputParameterModel("fuelRemaining", 2, "grams"),
+        new OutputParameterModel("parameter1", 0.5 * Math.random(), "meters"),
+        new OutputParameterModel("parameter2", 6.9 * Math.random(), null),
+        new OutputParameterModel("fuelRemaining", 2 * Math.random(), "grams"),
         new OutputParameterModel(
           "Another fourth param",
-          "aStringValue",
+          "aStringValue: " + (Math.random() * 999).toFixed(3),
           "count"
         ),
       ];
@@ -959,86 +1020,45 @@
           inputParameterList,
           outputParameterList
         );
-
-        // console.log('node', node)
-        // console.log('node boundary', node.getBoundary())
         nodes.push(node);
       }
       return nodes;
     }
-
-    // TODO: Use this (temp method) to set up a test case
-    static createEdges() {
-    // nodes: NodeModel[]
-      // TEMP RETURN EMPTY ARRAY
-      // const edge1 = new EdgeModel(
-      //   '1-2',
-      //   nodes[0] as NodeModel,
-      //   nodes[1] as NodeModel
-      // );
-      // return [edge1];
-      return [];
-    }
-  }
-
-  class EdgeModel extends DraggableGuiElementModel {
-    constructor(id, sourceNode, targetNode, sourcePlug, targetPlug) {
-      super(null, null, false);
-      this.type = "Edge";
-      this.sourceNode = null;
-      this.targetNode = null;
-      this.sourcePlug = null;
-      this.targetPlug = null;
-      this.id = id;
-      this.sourceNode = sourceNode;
-      if (targetNode) {
-        this.targetNode = targetNode;
-      }
-      if (sourcePlug) {
-        this.sourcePlug = sourcePlug;
-      }
-      if (targetPlug) {
-        this.targetPlug = targetPlug;
-      }
-    }
-    connectSource(node, plug = null) {
-      this.sourceNode = node;
-      if (plug) {
-        this.sourcePlug = plug;
-      }
-    }
-    connectTarget(node, plug = null) {
-      this.targetNode = node;
-      if (plug) {
-        this.targetPlug = plug;
-      }
-    }
-    getSourceNode() {
-      return this.sourceNode;
-    }
-    getTargetNode() {
-      return this.targetNode;
-    }
-    getSourcePlug() {
-      return this.sourcePlug;
-    }
-    getTargetPlug() {
-      return this.targetPlug;
-    }
-    getId() {
-      return this.id;
-    }
-    dragToPosition(position) {
-      throw new Error("Method not implemented.");
-    }
-    clickAction() {
-      throw new Error("Method not implemented.");
-    }
-    toString() {
-      return `EdgeModel: ${this.id}, sourceNode: ${this.sourceNode}, targetNode: ${this.targetNode}, sourcePlug: ${this.sourcePlug}, targetPlug: ${this.targetPlug}`;
-    }
-    toDyreqtJson() {
-      throw new Error("EdgeModel-- toDyreqtJson: Method not implemented.");
+    static createEdges(nodes) {
+      const firstNode1 = nodes[0];
+      const secondNode1 = nodes[1];
+      const firstPlug1 = firstNode1.getPlugByPosition("E");
+      const secondPlug1 = secondNode1.getPlugByPosition("W");
+      const oneEdge = new EdgeModel(
+        "e0-1",
+        firstNode1,
+        secondNode1,
+        firstPlug1,
+        secondPlug1
+      );
+      const firstNode2 = nodes[1];
+      const secondNode2 = nodes[2];
+      const firstPlug2 = firstNode2.getPlugByPosition("E");
+      const secondPlug2 = secondNode2.getPlugByPosition("W");
+      const anotherEdge = new EdgeModel(
+        "e1-2",
+        firstNode2,
+        secondNode2,
+        firstPlug2,
+        secondPlug2
+      );
+      const firstNode3 = nodes[2];
+      const secondNode3 = nodes[3];
+      const firstPlug3 = firstNode3.getPlugByPosition("E");
+      const secondPlug3 = secondNode3.getPlugByPosition("W");
+      const yetAnotherEdge = new EdgeModel(
+        "e2-3",
+        firstNode3,
+        secondNode3,
+        firstPlug3,
+        secondPlug3
+      );
+      return [oneEdge, anotherEdge, yetAnotherEdge];
     }
   }
 
@@ -1528,11 +1548,28 @@
       p.fill(0);
       p.text(parameter.getName(), 0, 0);
       let secondColumnText = parameter.getValue();
+      if (typeof secondColumnText === "number") {
+        secondColumnText = secondColumnText.toFixed(3);
+      }
       if (parameter.getUnits()) {
         secondColumnText += ` ${parameter.getUnits()}`;
       }
       p.text(secondColumnText, this.NAME_COLUMN_WIDTH, 0);
       p.pop();
+    }
+    static setParameterPosition(parameter, inspector, row) {
+      const inspectorPos = inspector.getPosition();
+      parameter.setPosition(
+        new Position(
+          inspectorPos.x,
+          inspectorPos.y + 7 + row * this.Y_EACH_ROW_OFFSET
+        )
+      );
+    }
+    static setParameterDimensions(parameter, inspector) {
+      parameter.setDimensions(
+        new Dimension(inspector.dimensions.width, this.Y_EACH_ROW_OFFSET)
+      );
     }
     static renderParameterRowInInspector(
       parameter,
@@ -1594,12 +1631,34 @@
       p.pop();
       RenderParameter.rowCount += 1;
     }
+    static drawOverPositionAndDimensions(parameter) {
+      const p = this.p;
+      if (p === null) {
+        throw new Error("p is null in RenderParameter");
+      }
+      p.push();
+      p.translate(parameter.position.x, parameter.position.y);
+      p.fill("rgba(255,100,0,1)");
+      p.circle(0, 0, 5);
+      p.noFill();
+      p.stroke("rgba(0,255,255,0.7)");
+      p.strokeWeight(1);
+      p.rect(0, 0, parameter.dimensions.width, parameter.dimensions.height);
+      p.pop();
+    }
     static render(
       parameter,
       inspector,
       isFirstParameter = false,
       shouldAddHorizontalDivider = false
     ) {
+      RenderParameter.setParameterPosition(
+        parameter,
+        inspector,
+        RenderParameter.rowCount
+      );
+      RenderParameter.setParameterDimensions(parameter, inspector);
+      RenderParameter.drawOverPositionAndDimensions(parameter);
       const p = this.p;
       if (p === null) {
         throw new Error("p is null in RenderParameter");
@@ -1716,8 +1775,7 @@
       this.rolledOverObjects = [];
       ChartManager.setP(p);
       this.nodes = CreationManager.createNodes();
-
-      // this.edges = CreationManager.createEdges(this.nodes);
+      this.edges = CreationManager.createEdges(this.nodes);
     }
     repositionElementOnResize(element, windowWidth, windowHeight) {
       Layout.positionElementBasedOnScreenSize(
@@ -1942,53 +2000,17 @@
 
       // 7. (DEBUG): RENDER GRID & GUIDES
       RenderGuides.render();
+      const htmlContainer = document.getElementById("htmlContainer");
+      ChartManager.createContainer(p, htmlContainer);
     }
 
     // 5. RENDER EDGES
     renderEdges() {
-      // TEST CASE: Add edges manually and render them
-      const firstNode1 = this.nodes[0];
-      const secondNode1 = this.nodes[1];
-      const firstPlug1 = firstNode1.getPlugByPosition("E");
-      const secondPlug1 = secondNode1.getPlugByPosition("W");
-      const oneEdge = new EdgeModel(
-        "e0-1",
-        firstNode1,
-        secondNode1,
-        firstPlug1,
-        secondPlug1
-      );
-      const firstNode2 = this.nodes[1];
-      const secondNode2 = this.nodes[2];
-      const firstPlug2 = firstNode2.getPlugByPosition("E");
-      const secondPlug2 = secondNode2.getPlugByPosition("W");
-      const anotherEdge = new EdgeModel(
-        "e1-2",
-        firstNode2,
-        secondNode2,
-        firstPlug2,
-        secondPlug2
-      );
-      const firstNode3 = this.nodes[2];
-      const secondNode3 = this.nodes[3];
-      const firstPlug3 = firstNode3.getPlugByPosition("E");
-      const secondPlug3 = secondNode3.getPlugByPosition("W");
-      const yetAnotherEdge = new EdgeModel(
-        "e2-3",
-        firstNode3,
-        secondNode3,
-        firstPlug3,
-        secondPlug3
-      );
-      RenderEdge.render(oneEdge);
-      RenderEdge.render(anotherEdge);
-      RenderEdge.render(yetAnotherEdge);
-
-      // END TEST CASE
       // ITERATE THROUGH EDGES
-      // this.edges.forEach((e) => {
-      //   RenderEdge.render(e);
-      // })
+      this.edges.forEach((e) => {
+        RenderEdge.render(e);
+      });
+
       // RenderEdge.renderLines([new Position(0,0), new Position(100,100)]);
       // IF A NODE IS SELECTED, SHOW A CONNECTION PREVIEW
       // this.getSelectedNodes().forEach((node) => {
@@ -2038,9 +2060,10 @@
     // }
     static createContainer(p, parent) {
       const container = document.createElement("div");
-
-      // container.classList.add("p5c-container", "idle");
-      // setDraggable(container);
+      container.setAttribute(
+        "style",
+        "position: absolute; top: 100px; left: 100px; background: #f00; width: 10px; height: 10px;"
+      );
       parent.appendChild(container);
       return { container };
     }

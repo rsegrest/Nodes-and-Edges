@@ -73,16 +73,16 @@ export class CreationManager {
     const nodes: NodeModel[] = [];
     const labels: string[] = ["Solar Array", "Cable", "Avionics", "Radiator"];
     const inputParameterList = [
-      new InputParameterModel('parameter1', 1000, 'meters'),
-      new InputParameterModel('parameter2', 69, null),
-      new InputParameterModel('fuel', 420, 'grams'),
-      new InputParameterModel('Another fourth param', 'aStringValue', 'count')
+      new InputParameterModel('parameter1', 1000*Math.random(), 'meters'),
+      new InputParameterModel('parameter2', 69*Math.random(), null),
+      new InputParameterModel('fuel', 420*Math.random(), 'grams'),
+      new InputParameterModel('Another fourth param', 'aStringValue: '+(Math.random()*99999).toFixed(3), 'count')
     ]
     const outputParameterList = [
-      new OutputParameterModel('parameter1', 0, 'meters'),
-      new OutputParameterModel('parameter2', 6.9, null),
-      new OutputParameterModel('fuelRemaining', 2, 'grams'),
-      new OutputParameterModel('Another fourth param', 'aStringValue', 'count')
+      new OutputParameterModel('parameter1', 0.5*Math.random(), 'meters'),
+      new OutputParameterModel('parameter2', 6.9*Math.random(), null),
+      new OutputParameterModel('fuelRemaining', 2*Math.random(), 'grams'),
+      new OutputParameterModel('Another fourth param', 'aStringValue: '+(Math.random()*999).toFixed(3), 'count')
     ]
     
     for (let i = 0; i < 4; i += 1) {
@@ -98,26 +98,55 @@ export class CreationManager {
         inputParameterList,
         outputParameterList
       );
-      // console.log('node', node)
-      // console.log('node boundary', node.getBoundary())
       nodes.push(node);
     }
     return nodes;
   }
 
-  // TODO: Use this (temp method) to set up a test case
   static createEdges(
-    // nodes: NodeModel[]
+    nodes: NodeModel[]
   ): EdgeModel[] {
-    // TEMP RETURN EMPTY ARRAY
-    // const edge1 = new EdgeModel(
-    //   '1-2',
-    //   nodes[0] as NodeModel,
-    //   nodes[1] as NodeModel
-    // );
+    const firstNode1 = nodes[0] as NodeModel;
+    const secondNode1 = nodes[1] as NodeModel;
+    const firstPlug1 = firstNode1.getPlugByPosition('E');
+    const secondPlug1 = secondNode1.getPlugByPosition('W');
+    
+    const oneEdge = new EdgeModel(
+      'e0-1',
+      firstNode1,
+      secondNode1,
+      firstPlug1,
+      secondPlug1
+    );
 
-    // return [edge1];
-    return [];
+    const firstNode2 = nodes[1] as NodeModel;
+    const secondNode2 = nodes[2] as NodeModel;
+    const firstPlug2 = firstNode2.getPlugByPosition('E');
+    const secondPlug2 = secondNode2.getPlugByPosition('W');
+    
+    const anotherEdge = new EdgeModel(
+      'e1-2',
+      firstNode2,
+      secondNode2,
+      firstPlug2,
+      secondPlug2
+    );
+
+
+    const firstNode3 = nodes[2] as NodeModel;
+    const secondNode3 = nodes[3] as NodeModel;
+    const firstPlug3 = firstNode3.getPlugByPosition('E');
+    const secondPlug3 = secondNode3.getPlugByPosition('W');
+    
+    const yetAnotherEdge = new EdgeModel(
+      'e2-3',
+      firstNode3,
+      secondNode3,
+      firstPlug3,
+      secondPlug3
+    );
+
+    return [oneEdge, anotherEdge, yetAnotherEdge]
   }
 }
 export default CreationManager;

@@ -58,6 +58,9 @@ class RenderParameter {
       0,0
     );
     let secondColumnText = parameter.getValue();
+    if (typeof secondColumnText === 'number') {
+      secondColumnText = secondColumnText.toFixed(3);
+    }
     if (parameter.getUnits()) {
       secondColumnText += ` ${parameter.getUnits()}`;
     }
@@ -66,7 +69,31 @@ class RenderParameter {
       this.NAME_COLUMN_WIDTH,0
     );
     p.pop();
+  }
+  static setParameterPosition(
+    parameter:InputParameterModel|OutputParameterModel,
+    inspector:InspectorModel,
+    row:number
+  ):void {
+    const inspectorPos:Position = inspector.getPosition() as Position;
 
+    parameter.setPosition(new Position(
+      inspectorPos.x,
+      inspectorPos.y
+        +7
+        +(row*this.Y_EACH_ROW_OFFSET)
+    ));
+  }
+  static setParameterDimensions(
+    parameter: InputParameterModel | OutputParameterModel,
+    inspector: InspectorModel
+  ):void {
+    parameter.setDimensions(
+      new Dimension(
+        (inspector.dimensions as Dimension).width as number,
+        this.Y_EACH_ROW_OFFSET
+      )
+    )
   }
   static renderParameterRowInInspector(
     parameter:InputParameterModel|OutputParameterModel,
@@ -126,12 +153,36 @@ class RenderParameter {
     p.pop();
     RenderParameter.rowCount += 1;
   }
+  static drawOverPositionAndDimensions(parameter:InputParameterModel|OutputParameterModel):void {
+    const p = this.p;
+    if (p === null) { throw(new Error('p is null in RenderParameter')); }
+    p.push();
+    p.translate(
+      (parameter.position as Position).x,
+      (parameter.position as Position).y
+    );
+    p.fill('rgba(255,100,0,1)');
+    p.circle(0,0,5);
+    p.noFill();
+    p.stroke('rgba(0,255,255,0.7)');
+    p.strokeWeight(1);
+    p.rect(
+      0,0,
+      (parameter.dimensions as Dimension).width,
+      (parameter.dimensions as Dimension).height,
+    );
+    p.pop();
+  }
+
   static render(
     parameter:InputParameterModel|OutputParameterModel,
     inspector:InspectorModel,
     isFirstParameter=false,
     shouldAddHorizontalDivider=false,
   ):void {
+    RenderParameter.setParameterPosition(parameter, inspector, RenderParameter.rowCount);
+    RenderParameter.setParameterDimensions(parameter, inspector);
+    RenderParameter.drawOverPositionAndDimensions(parameter);
     const p = this.p;
     if (p === null) { throw(new Error('p is null in RenderParameter')); }
     p.push();
@@ -146,7 +197,6 @@ class RenderParameter {
         isFirstParameter,
         shouldAddHorizontalDivider,
     );
-
   }
 }
 export default RenderParameter;
