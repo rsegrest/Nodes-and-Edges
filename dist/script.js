@@ -1361,10 +1361,7 @@
     static dragDynamicTool(appModel, pos, tool = null) {
       let dynamicTool = appModel.getDynamicTool();
       if (dynamicTool === null) {
-        console.warn("#1: SHOULD HIT");
-
         // CREATE NEW
-        console.warn(`tool: ${tool}`);
         dynamicTool = new DynamicToolModel(
           tool === null || tool === void 0 ? void 0 : tool.getName(),
           tool === null || tool === void 0 ? void 0 : tool.getIcon(),
@@ -1372,10 +1369,8 @@
           tool === null || tool === void 0 ? void 0 : tool.position,
           tool === null || tool === void 0 ? void 0 : tool.dimensions
         );
-        console.warn(`dTool: ${dynamicTool}`);
         appModel.setDynamicTool(dynamicTool);
       }
-      console.warn("#2: SHOULD HIT : " + dynamicTool);
       dynamicTool.dragToPosition(pos);
     }
 
@@ -1547,7 +1542,6 @@
             continue;
           }
           if (plug.getIsRolledOver()) {
-            // console.warn(`plug: ${plug.toString()} is rolled over`);
             return plug;
           }
         }
@@ -1564,7 +1558,6 @@
           if (
             edge === null || edge === void 0 ? void 0 : edge.getIsRolledOver()
           ) {
-            // console.warn(`edge: ${edge.toString()} is rolled over`);
             return edge;
           }
         }
@@ -1581,7 +1574,6 @@
           if (
             node === null || node === void 0 ? void 0 : node.getIsRolledOver()
           ) {
-            // console.warn(`node: ${node.toString()} is rolled over`);
             return node;
           }
         }
@@ -2196,65 +2188,6 @@
       p.pop();
       RenderToolbox.renderTitle(tbm);
     }
-
-    // static calcNumToolGridColumns(
-    //   // tbm: ToolboxModel
-    // ):number {
-    //   return 2;
-    // }
-    // static calcNumToolGridRows(
-    //   // tbm: ToolboxModel
-    // ):number {
-    //   return 6;
-    // }
-    // static ROW_SPACING = 60;
-    // static findFirstRowOffset(tbm: ToolboxModel):number {
-    //   const pos = tbm.getPosition();
-    //   if (!pos) return 0;
-    //   const FIRST_ROW_OFFSET_Y = 70 + pos.y;
-    //   return FIRST_ROW_OFFSET_Y;
-    // }
-    // static findHorizontalCenterLine(
-    //   tbm: ToolboxModel
-    // ):number {
-    //   const pos = tbm.getPosition();
-    //   if (!pos) return 0;
-    //   return pos.x+95;
-    // }
-    // should this be in the model?
-    // static findRowCenterLine(tbm:ToolboxModel, row:number):number {
-    //   return RenderToolbox.findFirstRowOffset(tbm)+(row*RenderToolbox.ROW_SPACING);
-    // }
-    // static buildLocationSet(tbm: ToolboxModel):Position[]|null {
-    //   const p = RenderToolbox.getP();
-    //   const pos = tbm.getPosition();
-    //   if (!pos) return null;
-    //   // const dim = tbm.getDimensions();
-    //   const toolList = tbm.getToolList();
-    //   const toolLocations:Position[] = [];
-    //   const CENTER_OFFSET_X = 45;
-    //   // TODO: Use row and column count to calculate position
-    //   // const rows = RenderToolbox.calcNumToolGridRows();
-    //   // const columns = RenderToolbox.calcNumToolGridColumns();
-    //   // find center line
-    //   // find row center lines
-    //   toolList.forEach((tool,i) => {
-    //     let thisX = this.findHorizontalCenterLine(tbm)-CENTER_OFFSET_X;
-    //     if (i%2 !== 0) {
-    //       thisX += (CENTER_OFFSET_X*2);
-    //     }
-    //     toolLocations.push(
-    //       new Position(
-    //         // if two rows, center plus or minus horizontal offset
-    //         thisX,
-    //         pos.y+(
-    //           RenderToolbox.findFirstRowOffset(tbm)
-    //         )+(Math.floor(i/2)*60)
-    //       )
-    //     );
-    //   })
-    //   return toolLocations;
-    // }
     static renderTools(tbm) {
       const toolList = tbm.getToolList();
       toolList.forEach((tool, i) => {
@@ -2264,9 +2197,6 @@
 
     // TEST
     static render(tbm) {
-      // const p = RenderToolbox.getP();
-      // const pos = tbm.getPosition();
-      // const dim = tbm.getDimensions();
       if (tbm) {
         RenderToolbox.renderBackground(tbm);
         RenderToolbox.renderTBBorder(tbm);
@@ -2284,7 +2214,7 @@
 
       // background
       p.push();
-      p.fill("rgba(255,255,255,0.2)");
+      p.fill("rgba(255,255,255,0.85)");
       p.noStroke();
       p.rect(pos.x, pos.y + 30, dim.width, dim.height - 30);
       p.pop();
