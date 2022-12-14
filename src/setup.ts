@@ -46,8 +46,12 @@ const initializeRenderers = (p: p5): void => {
 export const mouseDragged = (p: p5): void => {
   MouseManager.mouseDragged(p, applicationModel as ApplicationModel);
 };
-export const mousePressed = (p: p5): void => {
-  MouseManager.mousePressed(p);
+export const mousePressed = (
+  // p: p5
+): void => {
+  MouseManager.mousePressed(
+    // p
+  );
 };
 export const mouseReleased = (p: p5): void => {
   MouseManager.mouseReleased(p, applicationModel as ApplicationModel);

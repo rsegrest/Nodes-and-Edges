@@ -44,7 +44,7 @@ class RenderToolbox {
 
   static renderTools(tbm: ToolboxModel):void {
     const toolList = tbm.getToolList();
-    toolList.forEach((tool,i) => {
+    toolList.forEach((tool) => {
       RenderTool.render(tool);
     })
   }

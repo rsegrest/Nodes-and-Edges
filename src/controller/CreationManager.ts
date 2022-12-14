@@ -18,7 +18,8 @@ export class CreationManager {
   public static createNewObjectFromDynamicTool(dynamicTool: DynamicToolModel|null):NodeModel {
     const objectsNewPos = dynamicTool?.getPosition();
     const objectsNewDim = dynamicTool?.getDimensions();
-    const objectType = dynamicTool?.getObjectType();
+    // const objectType = dynamicTool?.getObjectType();
+
     // get object types from looking at where tools are created
     // need to have a master list of new object types
     // Element, Subelement, Edge

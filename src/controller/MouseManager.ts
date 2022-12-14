@@ -48,7 +48,7 @@ class MouseManager {
       // );
     }
     const nodes:NodeModel[] = appModel.getNodes();
-    nodes.forEach((n, i) => {
+    nodes.forEach((n) => {
       const plugs = n.getPlugs();
       const p = ApplicationModel.getP() as p5;
       plugs.forEach((plug) => {
@@ -61,7 +61,9 @@ class MouseManager {
   }
 
   // INTERACTION (MOUSE -- STUB)
-  static mousePressed(p: p5): void {
+  static mousePressed(
+    // p: p5
+  ): void {
     // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
   }
 

@@ -23,7 +23,7 @@ class RenderApplication {
   // RENDER
   static renderNodes(p: p5, appModel: ApplicationModel): void {
     const nodes = appModel?.getNodes();
-    nodes?.forEach((n, index) => {
+    nodes?.forEach((n) => {
       // check for rollover
       // TODO: Move this logic to abstract GuiElement class
       const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
