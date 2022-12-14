@@ -1359,19 +1359,23 @@
 
     // INTERACTION
     static dragDynamicTool(appModel, pos, tool = null) {
-      const dynamicTool = appModel.getDynamicTool();
+      let dynamicTool = appModel.getDynamicTool();
       if (dynamicTool === null) {
+        console.warn("#1: SHOULD HIT");
+
         // CREATE NEW
-        appModel.setDynamicTool(
-          new DynamicToolModel(
-            tool === null || tool === void 0 ? void 0 : tool.getName(),
-            tool === null || tool === void 0 ? void 0 : tool.getIcon(),
-            tool === null || tool === void 0 ? void 0 : tool.getObjectType(),
-            tool === null || tool === void 0 ? void 0 : tool.position,
-            tool === null || tool === void 0 ? void 0 : tool.dimensions
-          )
+        console.warn(`tool: ${tool}`);
+        dynamicTool = new DynamicToolModel(
+          tool === null || tool === void 0 ? void 0 : tool.getName(),
+          tool === null || tool === void 0 ? void 0 : tool.getIcon(),
+          tool === null || tool === void 0 ? void 0 : tool.getObjectType(),
+          tool === null || tool === void 0 ? void 0 : tool.position,
+          tool === null || tool === void 0 ? void 0 : tool.dimensions
         );
+        console.warn(`dTool: ${dynamicTool}`);
+        appModel.setDynamicTool(dynamicTool);
       }
+      console.warn("#2: SHOULD HIT : " + dynamicTool);
       dynamicTool.dragToPosition(pos);
     }
 
@@ -2127,7 +2131,7 @@
       } else if (
         (tool === null || tool === void 0 ? void 0 : tool.type) === "Tool"
       ) {
-        p.fill("rgba(255,2,100,1)");
+        p.fill("rgba(100,100,255,1)");
       } else {
         p.fill("rgba(128,0,255,1)");
       }
@@ -2141,7 +2145,7 @@
         boundary.getBottom() - boundary.getTop()
       );
       p.noStroke();
-      p.fill(0);
+      p.fill(255);
       p.text(
         tool.getName(),
         5,
@@ -2416,8 +2420,9 @@
 
       // 7. (DEBUG): RENDER GRID & GUIDES
       RenderGuides.render();
-      const htmlContainer = document.getElementById("htmlContainer");
-      CreationManager.createContainer(p, htmlContainer);
+
+      // const htmlContainer = document.getElementById('htmlContainer');
+      // CreationManager.createContainer(p, htmlContainer as HTMLElement);
     }
 
     // 5. RENDER EDGES
@@ -2518,13 +2523,6 @@
 
     // Classes with static methods that need access to p5.js
     initializeRenderers(p);
-
-    // const uxRect = UX.createUxRect(10,10,100,100);
-    // UX.setUxFill(uxRect, 'rgb(255,0,0)');
-    // UX.setUxEvent(uxRect, () => {
-    //   ('CLICKED!')
-    // });
-    // const gui = createGui("My awesome GUI");
   };
 
   let p;

@@ -50,7 +50,7 @@ class RenderTool {
     if (tool?.type === 'DynamicTool') {
       p.fill('rgba(255,255,0,1)');
     } else if ( tool?.type === 'Tool') {
-      p.fill('rgba(255,2,100,1)');
+      p.fill('rgba(100,100,255,1)');
     } else {
       p.fill('rgba(128,0,255,1)');
     }
@@ -65,7 +65,7 @@ class RenderTool {
       (boundary as Boundary).getBottom() - (boundary as Boundary).getTop()
     );
     p.noStroke();
-    p.fill(0);
+    p.fill(255);
     p.text(
       tool.getName(),
       5, 5, // start

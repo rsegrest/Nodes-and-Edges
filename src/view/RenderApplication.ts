@@ -94,8 +94,8 @@ class RenderApplication {
 
     // 7. (DEBUG): RENDER GRID & GUIDES
     RenderGuides.render();
-    const htmlContainer = document.getElementById('htmlContainer');
-    CreationManager.createContainer(p, htmlContainer as HTMLElement);
+    // const htmlContainer = document.getElementById('htmlContainer');
+    // CreationManager.createContainer(p, htmlContainer as HTMLElement);
   }
   
   // 5. RENDER EDGES

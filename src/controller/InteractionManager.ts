@@ -37,17 +37,16 @@ class InteractionManager {
     pos: Position,
     tool:ToolModel|null=null
     ):void {
-    const dynamicTool:DynamicToolModel|null = appModel.getDynamicTool();
+    let dynamicTool:DynamicToolModel|null = appModel.getDynamicTool();
     if (dynamicTool === null) {
       // CREATE NEW
-      appModel.setDynamicTool(
-        new DynamicToolModel(
-          tool?.getName() as string,
-          tool?.getIcon() as string,
-          tool?.getObjectType() as string,
-          tool?.position as Position,
-          tool?.dimensions as Dimension,)
-        );
+      dynamicTool = new DynamicToolModel(
+        tool?.getName() as string,
+        tool?.getIcon() as string,
+        tool?.getObjectType() as string,
+        tool?.position as Position,
+        tool?.dimensions as Dimension,)
+      appModel.setDynamicTool(dynamicTool);
     }
     (dynamicTool as DynamicToolModel).dragToPosition(pos);
   }

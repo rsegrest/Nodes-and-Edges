@@ -18,6 +18,7 @@ export let applicationModel: ApplicationModel|null = null;
 export let chartManager: ChartManager | null;
 export let creationManager: CreationManager | null;
 export let fontRegular: p5.Font;
+
 export const nodeTypes = {
   BASIC: "BASIC",
   ELEMENT: "ELEMENT",
@@ -65,12 +66,4 @@ export const setup = (p: p5): void => {
   p.background(248);
   // Classes with static methods that need access to p5.js
   initializeRenderers(p);
-
-  // const uxRect = UX.createUxRect(10,10,100,100);
-  // UX.setUxFill(uxRect, 'rgb(255,0,0)');
-  // UX.setUxEvent(uxRect, () => {
-  //   ('CLICKED!')
-  // });
-  
-  // const gui = createGui("My awesome GUI");
 };

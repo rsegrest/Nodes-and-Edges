@@ -125,7 +125,6 @@ class MouseManager {
         if (typeof plug === 'undefined') { continue; }
         if (plug === null) { continue; }
         if (plug.getIsRolledOver()) {
-          // console.warn(`plug: ${plug.toString()} is rolled over`);
           return plug;
         }
       }
@@ -136,7 +135,6 @@ class MouseManager {
         if (typeof edge === 'undefined') { continue; }
         if (edge === null) { continue; }
         if (edge?.getIsRolledOver()) {
-          // console.warn(`edge: ${edge.toString()} is rolled over`);
           return edge;
         }
       }
@@ -147,7 +145,6 @@ class MouseManager {
         if (typeof node === 'undefined') { continue; }
         if (node === null) { continue; }
         if (node?.getIsRolledOver()) {
-          // console.warn(`node: ${node.toString()} is rolled over`);
           return node;
         }
       }
