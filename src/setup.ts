@@ -1,12 +1,8 @@
 import type p5 from "p5";
-// const exp = require('p5-util/p5.experience.js-master/p5.experience.js')
-import ChartManager from "./controller/ChartManager";
 import CreationManager from "./controller/CreationManager";
 import MouseManager from "./controller/MouseManager";
 import ApplicationModel from "./model/ApplicationModel";
 import RenderApplication from "./view/RenderApplication";
-// import UX from "./exp/ux.js";
-// import Layout from "./model/Layout";
 import RenderEdge from "./view/RenderEdge";
 import RenderGuides from "./view/RenderGuide";
 import RenderInspector from "./view/RenderInspector";
@@ -14,8 +10,7 @@ import RenderNode from "./view/RenderNode";
 import RenderParameter from "./view/RenderParameter";
 import RenderTool from "./view/RenderTool";
 import RenderToolbox from "./view/RenderToolbox";
-export let applicationModel: ApplicationModel|null = null;
-export let chartManager: ChartManager | null;
+export let applicationModel: ApplicationModel | null = null;
 export let creationManager: CreationManager | null;
 export let fontRegular: p5.Font;
 
@@ -38,7 +33,7 @@ export const preload = (p: p5): void => {
 //     height/2, -height/2,
 //     0, 500);
 // }
-const initializeRenderers = (p:p5): void => {
+const initializeRenderers = (p: p5): void => {
   new RenderNode(p);
   new RenderEdge(p);
   new RenderGuides(p);
@@ -47,20 +42,18 @@ const initializeRenderers = (p:p5): void => {
   new RenderInspector(p);
   new RenderParameter(p);
   new RenderApplication(p);
-}
+};
 export const mouseDragged = (p: p5): void => {
   MouseManager.mouseDragged(p, applicationModel as ApplicationModel);
-}
+};
 export const mousePressed = (p: p5): void => {
   MouseManager.mousePressed(p);
-}
+};
 export const mouseReleased = (p: p5): void => {
   MouseManager.mouseReleased(p, applicationModel as ApplicationModel);
-}
+};
 /** This is a setup function. */
 export const setup = (p: p5): void => {
-  chartManager = ChartManager.createInstance(p);
-  creationManager = CreationManager.createInstance();
   p.createCanvas(p.windowWidth, p.windowHeight);
   p.frameRate(30);
   p.background(248);

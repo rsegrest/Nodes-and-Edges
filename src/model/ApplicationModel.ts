@@ -1,11 +1,10 @@
-
-import p5 from 'p5';
-import CreationManager from '../controller/CreationManager';
+import p5 from "p5";
+import CreationManager from "../controller/CreationManager";
 
 // TODO: Manage positions for toolbox and inspector, other?
 
-import Dimension from "./positioning/Dimension";
-import Position from "./positioning/Position";
+// import Dimension from "./positioning/Dimension";
+// import Position from "./positioning/Position";
 
 import NodeModel from "./NodeModel";
 import EdgeModel from "./EdgeModel";
@@ -17,22 +16,20 @@ import ToolModel from "./ToolModel";
 import DynamicToolModel from "./DynamicToolModel";
 
 class ApplicationModel {
-  setDynamicTool(dtool: DynamicToolModel|null):void {
-    this.dynamicTool = dtool;
-  }
-  getDynamicTool():DynamicToolModel|null {
-    return this.dynamicTool;
-  }
   private static instance: ApplicationModel | null = null;
-  private static p:p5|null = null;
+  private static p: p5 | null = null;
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
   private toolbox: ToolboxModel = new ToolboxModel();
   private inspector: InspectorModel = new InspectorModel();
-  private dynamicTool: DynamicToolModel|null = null;
+  private dynamicTool: DynamicToolModel | null = null;
   // getRolledOverObjects
   private rolledOverObjects: (
-    NodeModel | EdgeModel | PlugModel | ToolboxModel | ToolModel
+    | NodeModel
+    | EdgeModel
+    | PlugModel
+    | ToolboxModel
+    | ToolModel
   )[] = [];
 
   private constructor(p: p5) {
@@ -73,7 +70,7 @@ class ApplicationModel {
     });
     return selectedPlugs;
   }
-  
+
   getRolledOverNodes(): NodeModel[] {
     return this.nodes.filter((node) => node.getIsRolledOver());
   }
@@ -84,7 +81,7 @@ class ApplicationModel {
     return this.edges;
   }
   getInspector(): InspectorModel {
-    return this.inspector; 
+    return this.inspector;
   }
   getToolbox(): ToolboxModel {
     return this.toolbox;
@@ -102,13 +99,19 @@ class ApplicationModel {
     }
     return ApplicationModel.instance;
   }
-  static getP(): p5|null {
+  static getP(): p5 | null {
     return ApplicationModel.p;
   }
+  getDynamicTool(): DynamicToolModel | null {
+    return this.dynamicTool;
+  }
   // SETTERS
-  setDynamicSlot(dt:DynamicToolModel):void {
+  setDynamicTool(dtool: DynamicToolModel | null): void {
+    this.dynamicTool = dtool;
+  }
+  setDynamicSlot(dt: DynamicToolModel): void {
     this.dynamicTool = dt;
-  };
+  }
 
   static setP(p: p5): void {
     ApplicationModel.p = p;
