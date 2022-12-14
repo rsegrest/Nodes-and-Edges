@@ -1,13 +1,16 @@
 import type p5 from "p5";
-import { chartManager } from "./setup";
+import { chartManager, applicationModel } from "./setup";
 import ChartManager from "./controller/ChartManager";
+import RenderApplication from "./view/RenderApplication";
+import ApplicationModel from "./model/ApplicationModel";
 let p: p5;
 let lastWindowDimensionX:number|null = null;
 let lastWindowDimensionY:number|null = null;
 
 export function mouseClicked(): void {
   // console.log(`draw.ts: mouseClicked()`);
-  (chartManager as ChartManager).mouseClicked();
+  (chartManager as ChartManager).mouseClicked(
+    applicationModel as ApplicationModel);
 }
 
 export const draw = (_p: p5): void => {
@@ -19,31 +22,5 @@ export const draw = (_p: p5): void => {
     lastWindowDimensionY = p.windowHeight;
   }
   p.background("rgb(180,180,200)");
-  (chartManager as ChartManager).renderElements();
+  RenderApplication.renderElements(applicationModel as ApplicationModel);
 };
-
-// function renderNodes():void {
-//   nodes.forEach((n) => {
-//     RenderNode.render(n);
-//   })
-// }
-
-// INTERFACE?
-// function generatedNodeData(
-//   id:string,
-//   label:string
-// ):{
-//   id:string,
-//   label:string,
-//   position:Position,
-//   dimension:Dimension,
-// } {
-//   // const position = new Position(10, 10);
-//   // const dimension = new Dimension(100, 50);
-//   return {
-//     id,
-//     label,
-//     position,
-//     dimension,
-//   }
-// }

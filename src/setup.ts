@@ -13,6 +13,7 @@ import RenderNode from "./view/RenderNode";
 import RenderParameter from "./view/RenderParameter";
 import RenderTool from "./view/RenderTool";
 import RenderToolbox from "./view/RenderToolbox";
+export let applicationModel: ApplicationModel|null = null;
 export let chartManager: ChartManager | null;
 export let creationManager: CreationManager | null;
 export let fontRegular: p5.Font;
@@ -22,7 +23,7 @@ export const nodeTypes = {
 };
 
 export const preload = (p: p5): void => {
-  ApplicationModel.createInstance(p);
+  applicationModel = ApplicationModel.createInstance(p);
   fontRegular = p.loadFont("./font/Regular.otf");
 };
 
@@ -56,7 +57,6 @@ export const mouseReleased = (p: p5): void => {
 }
 /** This is a setup function. */
 export const setup = (p: p5): void => {
-  ApplicationModel.createInstance(p);
   chartManager = ChartManager.createInstance(p);
   creationManager = CreationManager.createInstance();
   p.createCanvas(p.windowWidth, p.windowHeight);
