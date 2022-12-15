@@ -79,16 +79,25 @@ export class RenderNode {
       strokeWeight = 3;
     }
     // round all corners except top-left
-    p.rect(0, 5, width, height, 0, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
+    const shape = p.rect(0, 5, width, height, 0, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
     p.fill(fillColor);
     p.stroke(strokeColor);
     p.strokeWeight(strokeWeight);
     // TODO: modify gray corner radii to line up with borders on top shape 
     p.rect(3, 0, width, height, 0, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
-    p.fill(0);
+    if (node.getIsEditing()) {
+      p.fill("rgba(200,0,0,1)");
+    } else {
+      p.fill(0);
+    }
     p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);
     p.text(label, 6, 3, width - 6, height - 6);
+    if (node.getIsEditing()) {
+      p.noFill();
+      p.stroke("rgba(0,0,200,1)");
+      p.rect(10,10,width-10,height-20);
+    }
     p.pop();
     // const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
     const showNodes = node.getIsRolledOver();
@@ -96,6 +105,12 @@ export class RenderNode {
     // Draw the bounds of the rollover sensor area
     if (TEST_ROLLOVER_GUIDE) {
       RenderNode.drawRolloverGuide(node.getBoundary() as Boundary, p);
+    }
+    shape.mouseClicked = () => {
+      node.clickAction();
+    }
+    shape.doubleClicked = () => {
+      node.doubleClickAction();
     }
   }
   static drawRolloverGuide(boundary: Boundary, p: p5): void {

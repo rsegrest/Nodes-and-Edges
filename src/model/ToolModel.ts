@@ -3,6 +3,9 @@ import Dimension from "./positioning/Dimension";
 import Position from "./positioning/Position";
 
 class ToolModel extends ElementGenerator {
+  public doubleClickAction(): void {
+    throw new Error("Method not implemented.");
+  }
   
   private icon: string;
   private objectType: string;

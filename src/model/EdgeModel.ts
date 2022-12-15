@@ -4,6 +4,9 @@ import PlugModel from "./PlugModel";
 import Position from "./positioning/Position";
 
 class EdgeModel extends DraggableGuiElementModel {
+  public doubleClickAction(): void {
+    throw new Error("Method not implemented.");
+  }
   public readonly type = "Edge";
   protected id:string;
   protected sourceNode:NodeModel|null = null;

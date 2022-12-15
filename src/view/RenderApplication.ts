@@ -37,21 +37,13 @@ class RenderApplication {
         n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
       }
 
-      if (appModel.getSelectedNodes().length > 0) {
-        // TODO: Only draw line if user is hovering over another node:
-        //  1. iterate through plugs and check closest
-        const plugArray =
-          InteractionManager.getClosestPlugsOnSelectedNode(appModel);
-        // console.log('plugArray: '+plugArray);
-        const closestPlugOnSelectedNode = plugArray[0];
-        const closestPlugPosition = closestPlugOnSelectedNode?.getPosition();
-        const mousePosition = new Position(p.mouseX, p.mouseY);
-        const lineArray = [closestPlugPosition as Position, mousePosition];
-        RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
-      }
-
       RenderNode.render(n, ApplicationModel.getP() as p5);
     });
+  }
+  static drawLeadLine(p: p5, appModel: ApplicationModel,
+    startPosition:Position, mousePosition:Position): void {
+    const lineArray = [startPosition as Position, mousePosition];
+    RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
   }
   // RENDER
   static renderElements(appModel: ApplicationModel): void {
@@ -109,8 +101,6 @@ class RenderApplication {
     edges?.forEach((e) => {
       RenderEdge.render(e);
     });
-
-    // TODO: If a node is selected, show a preview of connection
   }
   // 3. RENDER TOOLS
   static renderTools(p: p5, appModel: ApplicationModel): void {
@@ -139,6 +129,22 @@ class RenderApplication {
   }
 }
 export default RenderApplication;
+
+// Node to node selection -- not using this interaction for now.
+// if (appModel.getSelectedNodes().length > 0) {
+//   // TODO: Only draw line if user is hovering over another node:
+//   //  1. iterate through plugs and check closest
+//   const plugArray =
+//     InteractionManager.getClosestPlugsOnSelectedNode(appModel);
+//   // console.log('plugArray: '+plugArray);
+
+//   // TODO: Draw this line only when dragging or selecting a plug
+//   // const closestPlugOnSelectedNode = plugArray[0];
+//   // const closestPlugPosition = closestPlugOnSelectedNode?.getPosition();
+//   // const mousePosition = new Position(p.mouseX, p.mouseY);
+//   // this.drawLeadLine(p, appModel,
+//   //   closestPlugPosition as Position, mousePosition);
+// }
 
 // static render(
 //   application:ApplicationModel,

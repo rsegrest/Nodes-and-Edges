@@ -4,6 +4,9 @@ import Position from "./positioning/Position";
 import ToolModel from "./ToolModel";
 
 class ToolboxModel extends GuiElementModel {
+  public doubleClickAction(): void {
+    throw new Error("Method not implemented.");
+  }
   public readonly type = "Toolbox";
   private toolList: any[] = [];
   private isCollapsed = false;

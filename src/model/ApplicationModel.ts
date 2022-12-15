@@ -1,10 +1,7 @@
 import p5 from "p5";
 import CreationManager from "../controller/CreationManager";
 
-// TODO: Manage positions for toolbox and inspector, other?
-
-// import Dimension from "./positioning/Dimension";
-// import Position from "./positioning/Position";
+// TODO: Manage positions for toolbox and inspector, other in this class?
 
 import NodeModel from "./NodeModel";
 import EdgeModel from "./EdgeModel";
@@ -14,15 +11,33 @@ import InspectorModel from "./InspectorModel";
 import ToolboxModel from "./ToolboxModel";
 import ToolModel from "./ToolModel";
 import DynamicToolModel from "./DynamicToolModel";
+import InputParameterModel from "./InputParameterModel";
+import OutputParameterModel from "./OutputParameterModel";
 
 class ApplicationModel {
+  static addCharacterToEditTarget(key: string):void {
+    if (this.editTarget === null) return;
+    this.editTarget.setLabel(this.editTarget.getLabel()+key);
+  }
+  static backspaceEditTarget():void {
+    console.log('backspace')
+    if (this.editTarget === null) return;
+    console.log('deleting last character:')
+    const labelContent = this.editTarget.getLabel();
+    console.log('labelContent = ', labelContent)
+    const bsLabelContent = labelContent.slice(0, -1);
+    console.log('bsLabelContent = ', bsLabelContent)
+    this.editTarget.setLabel(bsLabelContent);
+  }
   private static instance: ApplicationModel | null = null;
   private static p: p5 | null = null;
+  private static editTarget: NodeModel | null = null;
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
   private toolbox: ToolboxModel = new ToolboxModel();
   private inspector: InspectorModel = new InspectorModel();
   private dynamicTool: DynamicToolModel | null = null;
+
   // getRolledOverObjects
   private rolledOverObjects: (
     | NodeModel
@@ -36,8 +51,17 @@ class ApplicationModel {
     ApplicationModel.setP(p);
     this.nodes = CreationManager.createNodes();
     this.edges = CreationManager.createEdges(this.nodes);
+
+    // TEMP TEST
+    // ApplicationModel.editTarget = (this.nodes[0] as NodeModel);
   }
 
+  static getEditTarget(): NodeModel | null {
+    return ApplicationModel.editTarget;
+  }
+  static setEditTarget(editingString: NodeModel | null): void {
+    ApplicationModel.editTarget = editingString;
+  }
   addNode(node: NodeModel): void {
     this.nodes.push(node);
   }
@@ -69,6 +93,13 @@ class ApplicationModel {
       selectedPlugs.push(...node.getSelectedPlugs());
     });
     return selectedPlugs;
+  }
+  getSelectedParameters(): (InputParameterModel|OutputParameterModel)[] {
+    const selectedParameters: (InputParameterModel|OutputParameterModel)[] = [];
+    this.nodes.forEach((node) => {
+      selectedParameters.push(...node.getSelectedParameters());
+    });
+    return selectedParameters;
   }
 
   getRolledOverNodes(): NodeModel[] {

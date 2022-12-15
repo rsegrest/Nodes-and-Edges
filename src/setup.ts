@@ -1,5 +1,6 @@
 import type p5 from "p5";
 import CreationManager from "./controller/CreationManager";
+import InteractionManager from "./controller/InteractionManager";
 import MouseManager from "./controller/MouseManager";
 import ApplicationModel from "./model/ApplicationModel";
 import RenderApplication from "./view/RenderApplication";
@@ -8,8 +9,10 @@ import RenderGuides from "./view/RenderGuide";
 import RenderInspector from "./view/RenderInspector";
 import RenderNode from "./view/RenderNode";
 import RenderParameter from "./view/RenderParameter";
+import RenderParameterField from "./view/RenderParameterField";
 import RenderTool from "./view/RenderTool";
 import RenderToolbox from "./view/RenderToolbox";
+
 export let applicationModel: ApplicationModel | null = null;
 export let creationManager: CreationManager | null;
 export let fontRegular: p5.Font;
@@ -42,6 +45,7 @@ const initializeRenderers = (p: p5): void => {
   new RenderInspector(p);
   new RenderParameter(p);
   new RenderApplication(p);
+  new RenderParameterField(p);
 };
 export const mouseDragged = (p: p5): void => {
   MouseManager.mouseDragged(p, applicationModel as ApplicationModel);
@@ -53,9 +57,26 @@ export const mousePressed = (
     // p
   );
 };
+// in draw.ts
+// export const mouseClicked = (p: p5): void => {
+//   MouseManager.mouseClicked(
+//     // p,
+//     applicationModel as ApplicationModel
+//   );
+// };
+// export const doubleClicked = (
+//   p: p5,
+//   applicationModel: ApplicationModel
+// ): void => {
+//   MouseManager.mouseDoubleClicked(p, applicationModel as ApplicationModel);
+// };
+
 export const mouseReleased = (p: p5): void => {
   MouseManager.mouseReleased(p, applicationModel as ApplicationModel);
 };
+export const keyPressed = (p: p5): void => {
+  InteractionManager.handleKeyPress(p);
+}
 /** This is a setup function. */
 export const setup = (p: p5): void => {
   p.createCanvas(p.windowWidth, p.windowHeight);

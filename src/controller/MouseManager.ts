@@ -1,5 +1,4 @@
 import p5 from "p5";
-// import DraggableGuiElementModel from "../model/abstract/DraggableGuiElement";
 import CreationManager from "./CreationManager";
 import ApplicationModel from "../model/ApplicationModel";
 import EdgeModel from "../model/EdgeModel";
@@ -7,48 +6,50 @@ import NodeModel from "../model/NodeModel";
 import PlugModel from "../model/PlugModel";
 import ToolboxModel from "../model/ToolboxModel";
 import ToolModel from "../model/ToolModel";
-import InteractionManager from "./InteractionManager";
+import InputParameterModel from "../model/InputParameterModel";
+import OutputParameterModel from "../model/OutputParameterModel";
+import Position from "../model/positioning/Position";
+// import DraggableGuiElementModel from "../model/abstract/DraggableGuiElement";
+// import InteractionManager from "./InteractionManager";
 
 
 export type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
 
 class MouseManager {
-
+  
   // INTERACTION (MOUSE -- STUB)
   static mouseDragged(
     p: p5,
     appModel:ApplicationModel
-  ): void {
-    // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
-    const dragTarget:DraggableObject|null = this.getDragTarget(appModel);
-    if (dragTarget === null) { return; }
-    if (dragTarget.type === 'Node') {
-      (dragTarget as NodeModel).setIsDragging(true);
-    } else if (dragTarget.type === 'Edge') {
-      (dragTarget as EdgeModel).setIsDragging(true);
+    ): void {
+      // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
+      const dragTarget:DraggableObject|null = this.getDragTarget(appModel);
+      if (dragTarget === null) { return; }
+      if (dragTarget.type === 'Node') {
+        (dragTarget as NodeModel).setIsDragging(true);
+      } else if (dragTarget.type === 'Edge') {
+        (dragTarget as EdgeModel).setIsDragging(true);
     } else if (dragTarget.type === 'Plug') {
       (dragTarget as PlugModel).setIsDragging(true);
     } else if (dragTarget.type === 'Tool') {
       (dragTarget as ToolModel).setIsDragging(true);
     }
-    // console.log(`2. drag target assigned as ${testTarget}`);
-    
   }
-
-  // INTERACTION (MOUSE)
-  static mouseClicked(appModel:ApplicationModel): void {
-    {
-
-      // console.log(
-      //   `ChartManager.mouseClicked() @ ${new Position(
-      //     ChartManager.p.mouseX,
-      //     ChartManager.p.mouseY
-      //   )}`
-      // );
+  
+  static checkForSelectParam(
+    pm:InputParameterModel|OutputParameterModel
+    ):InputParameterModel|OutputParameterModel|null {
+      const p = ApplicationModel.getP() as p5;
+      let pmClicked = null;
+      if (pm.checkMouseOver(p.mouseX, p.mouseY)) {
+        pm.setIsSelected();
+        pmClicked = pm;
+      }
+      return pmClicked;
     }
-    const nodes:NodeModel[] = appModel.getNodes();
-    nodes.forEach((n) => {
+    
+    static checkForSelectPlug(n:NodeModel): void {
       const plugs = n.getPlugs();
       const p = ApplicationModel.getP() as p5;
       plugs.forEach((plug) => {
@@ -56,8 +57,47 @@ class MouseManager {
           plug.setIsSelected();
         }
       })
-      InteractionManager.checkForSelectNode(appModel);
-    });
+    }
+    
+    // INTERACTION (MOUSE)
+    static mouseClicked(appModel:ApplicationModel): void {
+      console.log(`mouse clicked`);
+      const nodes:NodeModel[] = appModel.getNodes();
+      // TODO: Deal with potential for more than one selected node
+      const params:(InputParameterModel|OutputParameterModel)[] = [];
+      let foundParam = false;
+      if (appModel) {
+        const selectedNodes = appModel.getSelectedNodes();
+        if (selectedNodes && selectedNodes.length > 0) {
+          const inputParams = (selectedNodes[0] as NodeModel).getInputParameterList();
+          const outputParams = (selectedNodes[0] as NodeModel).getOutputParameterList();
+          params.push(...inputParams);
+          params.push(...outputParams);
+          console.log(`params.length: ${params.length}`);
+          for (let i = 0; i < params.length; i += 1) {
+            const nextParam:InputParameterModel|OutputParameterModel|undefined = params[i];
+            if (nextParam === undefined) { continue; }
+            foundParam = MouseManager.checkForSelectParam(nextParam) !== null;
+            // if (foundParam) { console.warn("FOUND PARAM, length is now: " + selectedNodes[0]?.getSelectedParameters().length); }
+          }
+        }
+        if (foundParam) { return; }
+        nodes.forEach((n) => {
+          MouseManager.checkForSelectPlug(n);
+          MouseManager.checkForSelectNode(appModel);
+        });
+      }
+    }
+
+    static mouseDoubleClicked(p: p5, arg1: ApplicationModel) {
+      // throw new Error("Method not implemented.");
+    }
+    
+    // LEFT OFF HERE
+    // TODO: Make node editable on double click
+    static doubleClicked(appModel:ApplicationModel): void {
+      console.log(`mouse double clicked`);
+    const nodes:NodeModel[] = appModel.getNodes();
   }
 
   // INTERACTION (MOUSE -- STUB)
@@ -93,6 +133,30 @@ class MouseManager {
     this.clearDragTargets(appModel);
   }
 
+  // INTERACTION
+  // selectedNodes includes node to check if selected
+  static checkForSelectNode(appModel:ApplicationModel): void {
+    const nodes = appModel.getNodes();
+    const mousePosition = new Position(
+      (ApplicationModel.getP() as p5).mouseX,
+      (ApplicationModel.getP() as p5).mouseY
+    );
+    
+    for (let i = 0; i < nodes.length; i += 1) {
+      if (nodes[i] !== null && nodes[i] !== undefined) {
+        const node = nodes[i] as NodeModel;
+        if (node.areParamsSelected() === false) {
+          node.setSelected(false);
+        }
+        if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
+          // console.warn("FOUND NODE")
+          node.setSelected();
+        } else {
+          // console.warn("DIDN'T FIND NODE")
+        }
+      }
+    }
+  }
   // INTERACTION (MOUSE)
   static getDragTarget(
     appModel:ApplicationModel
@@ -101,9 +165,6 @@ class MouseManager {
     const nodeList:NodeModel[] = appModel.getNodes();
     const edgeList:EdgeModel[] = appModel.getEdges();
     const plugList:PlugModel[] = appModel.getNodes().flatMap((node) => node.getPlugs());
-
-    // TODO: Does "dragTarget" need to be a member variable?
-    // const dragTarget = null;
 
     // check tools
     const toolbox = appModel.getToolbox();

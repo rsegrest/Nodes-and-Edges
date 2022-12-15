@@ -1,10 +1,10 @@
-14 December 2022
+15 December 2022
 
-TODO: Interaction manager?
+
+TODO: If param is selected, don't de-select node
 TODO: Class to handle adding input field
 
 TODO: Draw line only when interacting with plug
-TODO: If drawing line, highlight target node on rollover 
 TODO: Create edge when a second node is selected
 
 TODO: Algorithm to plot "cord" path
@@ -26,6 +26,8 @@ UNIT TESTS:
  * TODO: Compare 
 
 DONE:
+: Interaction manager?
+: setContent or something to be function to activate for keyTyped
 : SEND SELECTED NODE (instead of first in array)
 : Rolled-over node member variable in chart manager
 : check tools for rollover

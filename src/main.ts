@@ -6,6 +6,8 @@ import {
   mouseDragged,
   mousePressed,
   mouseReleased,
+  keyPressed,
+  // doubleClicked,
 } from "./setup";
 import {
   draw,
@@ -20,6 +22,8 @@ const sketch = createSketch({
   mouseDragged,
   mousePressed,
   mouseReleased,
+  keyPressed,
+  // doubleClicked,
 });
 
 new p5(sketch);

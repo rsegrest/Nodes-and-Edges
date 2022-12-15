@@ -52,7 +52,13 @@ abstract class GuiElementModel {
     public getIsResizable(): boolean {
       return this._isResizable;
     }
+
+    public rolloverAction(): void {
+      this.isRolledOver = true;
+    }
     public abstract clickAction(): void;
+    public abstract doubleClickAction(): void;
+
     public setPosition(position:Position): void {
       this.position = position;
       this.setUpBoundary();

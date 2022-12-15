@@ -6,13 +6,17 @@ import PlugPosition from "./PlugPosition";
 import DraggableGuiElementModel from "./abstract/DraggableGuiElement";
 import InputParameterModel from "./InputParameterModel";
 import OutputParameterModel from "./OutputParameterModel";
+import { applicationModel } from "../setup";
+import ApplicationModel from "./ApplicationModel";
 
 export class NodeModel extends DraggableGuiElementModel {
   public readonly type = "Node";
   protected showNodes = false;
   protected plugs:PlugModel[];
+  protected isHighlit = false;
+  protected isEditing = false;
   // protected parameterList:ParameterModel[] = [];
-  
+
   constructor(
     protected id: string,
     protected label: string,
@@ -20,7 +24,7 @@ export class NodeModel extends DraggableGuiElementModel {
     public dimensions:Dimension,
     protected inputParameterList:InputParameterModel[] = [],
     protected outputParameterList:OutputParameterModel[] = [],
-
+    
   ) {
     super(position, dimensions);
     this.id = id;
@@ -40,27 +44,38 @@ export class NodeModel extends DraggableGuiElementModel {
       PlugPosition.SW,
       PlugPosition.SE,
       PlugPosition.NE,
-
+      
       PlugPosition.N,
       PlugPosition.S,
       PlugPosition.E,
       PlugPosition.W,
     ];
+
     for (let i = 0; i < 8; i++) {
       const addPlug = new PlugModel(
-        plugPositions[i] as PlugPosition,
-        this.getPlugPosition(plugPositions[i] as PlugPosition) as Position,
+      plugPositions[i] as PlugPosition,
+      this.getPlugPosition(plugPositions[i] as PlugPosition) as Position,
       );
       plugArray.push( addPlug );
     }
     return plugArray;
   }
+  getIsEditing(): boolean {
+    return this.isEditing;
+  }
+  setLabel(newLabel: string):void {
+    this.label = newLabel;
+  }
+  setIsEditing(isEditing:boolean):void {
+    this.isEditing = isEditing;
+  }
   setSelected(isSelected=true):void {
     this.isSelected = isSelected;
   }
-  deselect():void {
-    this.isSelected = false;
-  }
+  // NOT USED (yet)
+  // deselect():void {
+  //   this.isSelected = false;
+  // }
   getIsSelected():boolean {
     return this.isSelected;
   }
@@ -140,11 +155,23 @@ export class NodeModel extends DraggableGuiElementModel {
     return this.isRolledOver;
   }
   // override GUIElementModel
-  // TODO: Use this function for select (currently not called)
-  // TODO: Check other implementations of superclass
+  public rolloverAction(): void {
+    this.isRolledOver = true;
+    this.isHighlit = true;
+    throw('NodeModel rolloverAction not implemented');
+    console.log('NodeModel rolloverAction', this.toString());
+  }
+  // override GUIElementModel
   public clickAction(): void {
-    throw('NodeModel clickAction not implemented');
+    this.isSelected = true;
+    this.isHighlit = true;
     console.log('NodeModel onClick', this.toString());
+  }
+  // override GUIElementModel
+  public doubleClickAction(): void {
+    this.isEditing = true;
+    ApplicationModel.setEditTarget(this);
+    console.log('NodeModel doubleClickAction', this.toString());
   }
   // override setUpBoundary
   public setUpBoundary(): void {
@@ -193,6 +220,13 @@ export class NodeModel extends DraggableGuiElementModel {
   }
   public setOutputParameterList(outputParameterList:OutputParameterModel[]):void {
     this.outputParameterList = outputParameterList;
+  }
+  public getSelectedParameters():(InputParameterModel|OutputParameterModel)[] {
+    return [...this.inputParameterList,...this.outputParameterList]
+      .filter((parameter) => parameter.getIsSelected());
+  }
+  public areParamsSelected():boolean {
+    return this.getSelectedParameters().length > 0;
   }
 
   public toString():string {

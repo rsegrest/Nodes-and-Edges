@@ -109,6 +109,9 @@
     getIsResizable() {
       return this._isResizable;
     }
+    rolloverAction() {
+      this.isRolledOver = true;
+    }
     setPosition(position) {
       this.position = position;
       this.setUpBoundary();
@@ -208,6 +211,9 @@
   }
 
   class EdgeModel extends DraggableGuiElementModel {
+    doubleClickAction() {
+      throw new Error("Method not implemented.");
+    }
     constructor(id, sourceNode, targetNode, sourcePlug, targetPlug) {
       super(null, null, false);
       this.type = "Edge";
@@ -302,14 +308,24 @@
 
       // private parameterSet: any[] = [];
       this.type = "Inspector";
+      this.displayedParamSet = [];
       this.isCollapsed = false;
     }
     clickAction() {
       console.log("inspector pane clicked");
     }
+    rolloverAction() {
+      // do nothing
+    }
+    doubleClickAction() {
+      // do nothing
+    }
   }
 
   class ToolModel extends DraggableGuiElementModel {
+    doubleClickAction() {
+      throw new Error("Method not implemented.");
+    }
     constructor(
       name,
       icon,
@@ -351,6 +367,9 @@
   }
 
   class ToolboxModel extends GuiElementModel {
+    doubleClickAction() {
+      throw new Error("Method not implemented.");
+    }
     constructor() {
       super(
         true,
@@ -615,6 +634,9 @@
   Layout.BASE_NODE_HEIGHT = 50;
 
   class PlugModel extends DraggableGuiElementModel {
+    doubleClickAction() {
+      throw new Error("Method not implemented.");
+    }
     constructor(plugPosition, position, isHighlit = false) {
       super(
         position,
@@ -701,6 +723,8 @@
       this.outputParameterList = outputParameterList;
       this.type = "Node";
       this.showNodes = false;
+      this.isHighlit = false;
+      this.isEditing = false;
       this.id = id;
       this.label = label;
       this.position = position;
@@ -732,12 +756,23 @@
       }
       return plugArray;
     }
+    getIsEditing() {
+      return this.isEditing;
+    }
+    setLabel(newLabel) {
+      this.label = newLabel;
+    }
+    setIsEditing(isEditing) {
+      this.isEditing = isEditing;
+    }
     setSelected(isSelected = true) {
       this.isSelected = isSelected;
     }
-    deselect() {
-      this.isSelected = false;
-    }
+
+    // NOT USED (yet)
+    // deselect():void {
+    //   this.isSelected = false;
+    // }
     getIsSelected() {
       return this.isSelected;
     }
@@ -817,10 +852,24 @@
     }
 
     // override GUIElementModel
-    // TODO: Use this function for select (currently not called)
-    // TODO: Check other implementations of superclass
+    rolloverAction() {
+      this.isRolledOver = true;
+      this.isHighlit = true;
+      throw "NodeModel rolloverAction not implemented";
+    }
+
+    // override GUIElementModel
     clickAction() {
-      throw "NodeModel clickAction not implemented";
+      this.isSelected = true;
+      this.isHighlit = true;
+      console.log("NodeModel onClick", this.toString());
+    }
+
+    // override GUIElementModel
+    doubleClickAction() {
+      this.isEditing = true;
+      ApplicationModel.setEditTarget(this);
+      console.log("NodeModel doubleClickAction", this.toString());
     }
 
     // override setUpBoundary
@@ -869,6 +918,14 @@
     setOutputParameterList(outputParameterList) {
       this.outputParameterList = outputParameterList;
     }
+    getSelectedParameters() {
+      return [...this.inputParameterList, ...this.outputParameterList].filter(
+        (parameter) => parameter.getIsSelected()
+      );
+    }
+    areParamsSelected() {
+      return this.getSelectedParameters().length > 0;
+    }
     toString() {
       return `NodeModel: ${this.id} ${
         this.label
@@ -882,6 +939,9 @@
   class Parameter extends GuiElementModel {
     constructor(name, value, units = null) {
       super(true, false, false, true);
+      this.isHighlit = false;
+      this.editingField = null;
+      this.typeColor = "blue";
       this.name = name;
       this.value = value;
       this.units = units;
@@ -895,14 +955,30 @@
     getUnits() {
       return this.units;
     }
+    getEditingField() {
+      return this.editingField;
+    }
     setValue(value) {
       this.value = value;
     }
     setUnits(units) {
       this.name = `${this.name} (${units})`;
     }
+    setEditingField(pft) {
+      this.editingField = pft;
+    }
     clickAction() {
-      console.log("Parameter clicked");
+      this.isSelected = true;
+      this.isHighlit = true;
+    }
+    doubleClickAction() {
+      this.editingField = this.value;
+      if (this.editingField) {
+        this.typeColor = "red";
+      }
+    }
+    toJson() {
+      return JSON.stringify(this);
     }
     toString() {
       let outputString = `Parameter: ${this.name}, value: ${this.value}`;
@@ -910,9 +986,6 @@
         outputString += `, units: ${this.units}`;
       }
       return outputString;
-    }
-    toJson() {
-      return JSON.stringify(this);
     }
   }
 
@@ -944,10 +1017,8 @@
         dynamicTool === null || dynamicTool === void 0
           ? void 0
           : dynamicTool.getDimensions();
-      dynamicTool === null || dynamicTool === void 0
-        ? void 0
-        : dynamicTool.getObjectType();
 
+      // const objectType = dynamicTool?.getObjectType();
       // get object types from looking at where tools are created
       // need to have a master list of new object types
       // Element, Subelement, Edge
@@ -1077,6 +1148,20 @@
   }
 
   class ApplicationModel {
+    static addCharacterToEditTarget(key) {
+      if (this.editTarget === null) return;
+      this.editTarget.setLabel(this.editTarget.getLabel() + key);
+    }
+    static backspaceEditTarget() {
+      console.log("backspace");
+      if (this.editTarget === null) return;
+      console.log("deleting last character:");
+      const labelContent = this.editTarget.getLabel();
+      console.log("labelContent = ", labelContent);
+      const bsLabelContent = labelContent.slice(0, -1);
+      console.log("bsLabelContent = ", bsLabelContent);
+      this.editTarget.setLabel(bsLabelContent);
+    }
     constructor(p) {
       this.nodes = [];
       this.edges = [];
@@ -1089,6 +1174,15 @@
       ApplicationModel.setP(p);
       this.nodes = CreationManager.createNodes();
       this.edges = CreationManager.createEdges(this.nodes);
+
+      // TEMP TEST
+      // ApplicationModel.editTarget = (this.nodes[0] as NodeModel);
+    }
+    static getEditTarget() {
+      return ApplicationModel.editTarget;
+    }
+    static setEditTarget(editingString) {
+      ApplicationModel.editTarget = editingString;
     }
     addNode(node) {
       this.nodes.push(node);
@@ -1122,6 +1216,13 @@
         selectedPlugs.push(...node.getSelectedPlugs());
       });
       return selectedPlugs;
+    }
+    getSelectedParameters() {
+      const selectedParameters = [];
+      this.nodes.forEach((node) => {
+        selectedParameters.push(...node.getSelectedParameters());
+      });
+      return selectedParameters;
     }
     getRolledOverNodes() {
       return this.nodes.filter((node) => node.getIsRolledOver());
@@ -1186,6 +1287,7 @@
   }
   ApplicationModel.instance = null;
   ApplicationModel.p = null;
+  ApplicationModel.editTarget = null;
 
   class DynamicToolModel extends ToolModel {
     constructor(
@@ -1200,6 +1302,50 @@
   }
 
   class InteractionManager {
+    // 9 - Tab
+    // 13 - Enter
+    // 16-18 - Shift, Ctrl, Alt
+    // 20 - CapsLock
+    // 27 - Escape
+    // 37-40 - arrow keys
+    // 91-93 - left WIN, right WIN, popup
+    // 112-123 - F1-F12
+    // 12 - NumPad 5
+    // 32 - Space
+    static isNonPrintingCharacter(keyCode) {
+      if (keyCode === 12) {
+        return false;
+      } // NumPad 5
+      if (keyCode === 13) {
+        return false;
+      } // Enter
+      if (keyCode === 32) {
+        return false;
+      } // Space
+      return (
+        keyCode <= 47 ||
+        (keyCode >= 91 && keyCode <= 93) || // left WIN, right WIN, popup
+        (keyCode >= 112 && keyCode <= 123) // F1-F12 keys
+      );
+    }
+    static handleKeyPress(p) {
+      if (ApplicationModel.getEditTarget()) {
+        console.log("keyTyped", p.key, p.keyCode);
+        if (p.keyCode === p.ENTER) {
+          ApplicationModel.setEditTarget(null);
+        }
+        if (p.keyCode === p.DELETE || p.keyCode === p.BACKSPACE) {
+          console.log("hit backspace");
+          ApplicationModel.backspaceEditTarget();
+        }
+        if (this.isNonPrintingCharacter(p.keyCode)) {
+          return;
+        } else {
+          ApplicationModel.addCharacterToEditTarget(p.key);
+        }
+      }
+    }
+
     // INTERACTION
     static resizeCanvas(appModel, windowWidth, windowHeight) {
       // const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
@@ -1241,25 +1387,6 @@
     }
 
     // INTERACTION
-    // selectedNodes includes node to check if selected
-    static checkForSelectNode(appModel) {
-      const nodes = appModel.getNodes();
-      const mousePosition = new Position(
-        ApplicationModel.getP().mouseX,
-        ApplicationModel.getP().mouseY
-      );
-      for (let i = 0; i < nodes.length; i += 1) {
-        if (nodes[i] !== null && nodes[i] !== undefined) {
-          const node = nodes[i];
-          node.setSelected(false);
-          if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
-            node.setSelected();
-          }
-        }
-      }
-    }
-
-    // INTERACTION
     static getClosestPlugsOnSelectedNode(appModel) {
       const selectedNodes = appModel.getSelectedNodes();
 
@@ -1284,11 +1411,10 @@
       node.setSelected();
     }
 
-    // INTERACTION
-    deselectNode(node) {
-      node.deselect();
-    }
-
+    // INTERACTION -- NOT USED
+    // deselectNode(node: NodeModel): void {
+    //   node.deselect();
+    // }
     // INTERACTION
     static repositionElementOnResize(element, windowWidth, windowHeight) {
       Layout.positionElementBasedOnScreenSize(
@@ -1300,7 +1426,6 @@
     }
   }
 
-  // import DraggableGuiElementModel from "../model/abstract/DraggableGuiElement";
   class MouseManager {
     // INTERACTION (MOUSE -- STUB)
     static mouseDragged(p, appModel) {
@@ -1318,27 +1443,75 @@
       } else if (dragTarget.type === "Tool") {
         dragTarget.setIsDragging(true);
       }
-
-      // console.log(`2. drag target assigned as ${testTarget}`);
+    }
+    static checkForSelectParam(pm) {
+      const p = ApplicationModel.getP();
+      let pmClicked = null;
+      if (pm.checkMouseOver(p.mouseX, p.mouseY)) {
+        pm.setIsSelected();
+        pmClicked = pm;
+      }
+      return pmClicked;
+    }
+    static checkForSelectPlug(n) {
+      const plugs = n.getPlugs();
+      const p = ApplicationModel.getP();
+      plugs.forEach((plug) => {
+        if (plug.checkMouseOver(p.mouseX, p.mouseY)) {
+          plug.setIsSelected();
+        }
+      });
     }
 
     // INTERACTION (MOUSE)
     static mouseClicked(appModel) {
+      console.log(`mouse clicked`);
       const nodes = appModel.getNodes();
-      nodes.forEach((n, i) => {
-        const plugs = n.getPlugs();
-        const p = ApplicationModel.getP();
-        plugs.forEach((plug) => {
-          if (plug.checkMouseOver(p.mouseX, p.mouseY)) {
-            plug.setIsSelected();
+
+      // TODO: Deal with potential for more than one selected node
+      const params = [];
+      let foundParam = false;
+      if (appModel) {
+        const selectedNodes = appModel.getSelectedNodes();
+        if (selectedNodes && selectedNodes.length > 0) {
+          const inputParams = selectedNodes[0].getInputParameterList();
+          const outputParams = selectedNodes[0].getOutputParameterList();
+          params.push(...inputParams);
+          params.push(...outputParams);
+          console.log(`params.length: ${params.length}`);
+          for (let i = 0; i < params.length; i += 1) {
+            const nextParam = params[i];
+            if (nextParam === undefined) {
+              continue;
+            }
+            foundParam = MouseManager.checkForSelectParam(nextParam) !== null;
+
+            // if (foundParam) { console.warn("FOUND PARAM, length is now: " + selectedNodes[0]?.getSelectedParameters().length); }
           }
+        }
+        if (foundParam) {
+          return;
+        }
+        nodes.forEach((n) => {
+          MouseManager.checkForSelectPlug(n);
+          MouseManager.checkForSelectNode(appModel);
         });
-        InteractionManager.checkForSelectNode(appModel);
-      });
+      }
+    }
+    static mouseDoubleClicked(p, arg1) {
+      // throw new Error("Method not implemented.");
+    }
+
+    // LEFT OFF HERE
+    // TODO: Make node editable on double click
+    static doubleClicked(appModel) {
+      console.log(`mouse double clicked`);
+      appModel.getNodes();
     }
 
     // INTERACTION (MOUSE -- STUB)
-    static mousePressed(p) {
+    static mousePressed() {
+    // p: p5
       // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
     }
 
@@ -1374,6 +1547,28 @@
       this.clearDragTargets(appModel);
     }
 
+    // INTERACTION
+    // selectedNodes includes node to check if selected
+    static checkForSelectNode(appModel) {
+      const nodes = appModel.getNodes();
+      const mousePosition = new Position(
+        ApplicationModel.getP().mouseX,
+        ApplicationModel.getP().mouseY
+      );
+      for (let i = 0; i < nodes.length; i += 1) {
+        if (nodes[i] !== null && nodes[i] !== undefined) {
+          const node = nodes[i];
+          if (node.areParamsSelected() === false) {
+            node.setSelected(false);
+          }
+          if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
+            // console.warn("FOUND NODE")
+            node.setSelected();
+          }
+        }
+      }
+    }
+
     // INTERACTION (MOUSE)
     static getDragTarget(appModel) {
       // const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
@@ -1381,8 +1576,6 @@
       const edgeList = appModel.getEdges();
       const plugList = appModel.getNodes().flatMap((node) => node.getPlugs());
 
-      // TODO: Does "dragTarget" need to be a member variable?
-      // const dragTarget = null;
       // check tools
       const toolbox = appModel.getToolbox();
       if (toolbox) {
@@ -1536,6 +1729,15 @@
     }
   }
 
+  const NAME = "NAME";
+  const VALUE = "VALUE";
+  const UNITS = "UNITS";
+  const ParameterFieldTypes = {
+    NAME,
+    VALUE,
+    UNITS,
+  };
+
   class RenderParameter {
     constructor(p) {
       RenderParameter.p = p;
@@ -1583,6 +1785,11 @@
       if (parameter.getUnits()) {
         secondColumnText += ` ${parameter.getUnits()}`;
       }
+      if (parameter.getEditingField() === ParameterFieldTypes.VALUE) {
+        p.fill("rgba(200,0,0,1)");
+      }
+
+      // display value with units
       p.text(secondColumnText, this.NAME_COLUMN_WIDTH, 0);
       p.pop();
     }
@@ -1672,7 +1879,18 @@
       p.noFill();
       p.stroke("rgba(0,255,255,0.7)");
       p.strokeWeight(1);
-      p.rect(0, 0, parameter.dimensions.width, parameter.dimensions.height);
+      const shape = p.rect(
+        0,
+        0,
+        parameter.dimensions.width,
+        parameter.dimensions.height
+      );
+      shape.mouseClicked = () => {
+        parameter.clickAction();
+      };
+      shape.doubleClicked = () => {
+        parameter.doubleClickAction();
+      };
       p.pop();
     }
     static render(
@@ -1877,7 +2095,7 @@
       }
 
       // round all corners except top-left
-      p.rect(
+      const shape = p.rect(
         0,
         5,
         width,
@@ -1902,10 +2120,19 @@
         CORNER_RADIUS,
         CORNER_RADIUS
       );
-      p.fill(0);
+      if (node.getIsEditing()) {
+        p.fill("rgba(200,0,0,1)");
+      } else {
+        p.fill(0);
+      }
       p.noStroke();
       p.textAlign(p.CENTER, p.CENTER);
       p.text(label, 6, 3, width - 6, height - 6);
+      if (node.getIsEditing()) {
+        p.noFill();
+        p.stroke("rgba(0,0,200,1)");
+        p.rect(10, 10, width - 10, height - 20);
+      }
       p.pop();
 
       // const showNodes = node.checkMouseOver(p.mouseX, p.mouseY);
@@ -1916,6 +2143,12 @@
       {
         RenderNode.drawRolloverGuide(node.getBoundary(), p);
       }
+      shape.mouseClicked = () => {
+        node.clickAction();
+      };
+      shape.doubleClicked = () => {
+        node.doubleClickAction();
+      };
     }
     static drawRolloverGuide(boundary, p) {
       p.push();
@@ -2056,7 +2289,7 @@
     }
     static renderTools(tbm) {
       const toolList = tbm.getToolList();
-      toolList.forEach((tool, i) => {
+      toolList.forEach((tool) => {
         RenderTool.render(tool);
       });
     }
@@ -2114,7 +2347,7 @@
         appModel === null || appModel === void 0 ? void 0 : appModel.getNodes();
       nodes === null || nodes === void 0
         ? void 0
-        : nodes.forEach((n, index) => {
+        : nodes.forEach((n) => {
             // check for rollover
             // TODO: Move this logic to abstract GuiElement class
             const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
@@ -2128,25 +2361,12 @@
             if (n.getIsDragging()) {
               n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
             }
-            if (appModel.getSelectedNodes().length > 0) {
-              // TODO: Only draw line if user is hovering over another node:
-              //  1. iterate through plugs and check closest
-              const plugArray =
-                InteractionManager.getClosestPlugsOnSelectedNode(appModel);
-
-              // console.log('plugArray: '+plugArray);
-              const closestPlugOnSelectedNode = plugArray[0];
-              const closestPlugPosition =
-                closestPlugOnSelectedNode === null ||
-                closestPlugOnSelectedNode === void 0
-                  ? void 0
-                  : closestPlugOnSelectedNode.getPosition();
-              const mousePosition = new Position(p.mouseX, p.mouseY);
-              const lineArray = [closestPlugPosition, mousePosition];
-              RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
-            }
             RenderNode.render(n, ApplicationModel.getP());
           });
+    }
+    static drawLeadLine(p, appModel, startPosition, mousePosition) {
+      const lineArray = [startPosition, mousePosition];
+      RenderEdge.renderLines(lineArray, "rgb(0,128,255)");
     }
 
     // RENDER
@@ -2225,8 +2445,6 @@
         : edges.forEach((e) => {
             RenderEdge.render(e);
           });
-
-      // TODO: If a node is selected, show a preview of connection
     }
 
     // 3. RENDER TOOLS
@@ -2256,6 +2474,20 @@
   }
   RenderApplication.p = null;
 
+  // Node to node selection -- not using this interaction for now.
+  // if (appModel.getSelectedNodes().length > 0) {
+  //   // TODO: Only draw line if user is hovering over another node:
+  //   //  1. iterate through plugs and check closest
+  //   const plugArray =
+  //     InteractionManager.getClosestPlugsOnSelectedNode(appModel);
+  //   // console.log('plugArray: '+plugArray);
+  //   // TODO: Draw this line only when dragging or selecting a plug
+  //   // const closestPlugOnSelectedNode = plugArray[0];
+  //   // const closestPlugPosition = closestPlugOnSelectedNode?.getPosition();
+  //   // const mousePosition = new Position(p.mouseX, p.mouseY);
+  //   // this.drawLeadLine(p, appModel,
+  //   //   closestPlugPosition as Position, mousePosition);
+  // }
   // static render(
   //   application:ApplicationModel,
   //   // inspector:InspectorModel,
@@ -2298,9 +2530,28 @@
   const mouseDragged = (p) => {
     MouseManager.mouseDragged(p, applicationModel);
   };
-  const mousePressed = (p) => {};
+  const mousePressed = () =>
+    // p: p5
+    {};
+
+  // in draw.ts
+  // export const mouseClicked = (p: p5): void => {
+  //   MouseManager.mouseClicked(
+  //     // p,
+  //     applicationModel as ApplicationModel
+  //   );
+  // };
+  // export const doubleClicked = (
+  //   p: p5,
+  //   applicationModel: ApplicationModel
+  // ): void => {
+  //   MouseManager.mouseDoubleClicked(p, applicationModel as ApplicationModel);
+  // };
   const mouseReleased = (p) => {
     MouseManager.mouseReleased(p, applicationModel);
+  };
+  const keyPressed = (p) => {
+    InteractionManager.handleKeyPress(p);
   };
 
   /** This is a setup function. */
@@ -2347,6 +2598,9 @@
     mouseDragged,
     mousePressed,
     mouseReleased,
+    keyPressed,
+
+    // doubleClicked,
   });
   new p5(sketch);
 })(p5);

@@ -1,4 +1,6 @@
 import GuiElementModel from "./abstract/GuiElement";
+import InputParameterModel from "./InputParameterModel";
+import OutputParameterModel from "./OutputParameterModel";
 import Dimension from "./positioning/Dimension";
 import Position from "./positioning/Position";
 
@@ -6,6 +8,7 @@ import Position from "./positioning/Position";
 class InspectorModel extends GuiElementModel {
   // private parameterSet: any[] = [];
   public readonly type = "Inspector";
+  private displayedParamSet:(InputParameterModel|OutputParameterModel)[] = [];
   private isCollapsed = false;
 
   constructor() {
@@ -22,5 +25,18 @@ class InspectorModel extends GuiElementModel {
   public clickAction(): void {
     console.log("inspector pane clicked");
   }
+  public rolloverAction(): void {
+    // do nothing
+  }
+  public doubleClickAction(): void {
+    // do nothing
+  }
+  // For now, parameters held inside Nodes
+  // public setDisplayedParamSet(paramSet: (InputParameterModel|OutputParameterModel)[]): void {
+  //   this.displayedParamSet = paramSet;
+  // }
+  // public getDisplayedParamSet(): (InputParameterModel|OutputParameterModel)[] {
+  //   return this.displayedParamSet;
+  // }
 }
 export default InspectorModel;
