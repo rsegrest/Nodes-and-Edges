@@ -95,7 +95,7 @@ class RenderParameter {
     parameter.setPosition(new Position(
       inspectorPos.x,
       inspectorPos.y
-        +7
+        +30
         +(row*this.Y_EACH_ROW_OFFSET)
     ));
   }
@@ -112,29 +112,19 @@ class RenderParameter {
     )
   }
 
-  static renderParameterRowInInspector(
-    parameter:InputParameterModel|OutputParameterModel,
-    inspector:InspectorModel,
-    isFirstParameter = false,
-    shouldAddHorizontalDivider = false,
-  ):void {
-    if (isFirstParameter) {
-      RenderParameter.rowCount = 0;
-      this.addHorizontalDivider(inspector, "Input Parameters")
-    }
-    if (shouldAddHorizontalDivider) {
-      this.addHorizontalDivider(inspector, "Output Parameters");
-    }
-    if (RenderParameter.rowCount >= 8) { return; }
-    const p = RenderParameter.p;
-    // const inspectorPos = inspector.getPosition();
-    if (p === null) { throw(new Error('p is null in RenderParameter')); }
-    // if (inspectorPos === null) { throw(new Error('inspector position is null in RenderParameter')); }
-    this.renderText(parameter, inspector as InspectorModel);
-    RenderParameter.rowCount += 1;
-  }
+  // static renderParameterText(
+  //   parameter:InputParameterModel|OutputParameterModel,
+  //   inspector:InspectorModel,
+  // ):void {
+  //   if (RenderParameter.rowCount >= 8) { return; }
+  //   const p = RenderParameter.p;
+  //   // const inspectorPos = inspector.getPosition();
+  //   if (p === null) { throw(new Error('p is null in RenderParameter')); }
+  //   // if (inspectorPos === null) { throw(new Error('inspector position is null in RenderParameter')); }
+  //   this.renderText(parameter, inspector as InspectorModel);
+  // }
 
-  static addHorizontalDivider(inspector:InspectorModel, label: string|null=null ):void {
+  static addHorizontalDivider(inspector:InspectorModel, label: string|null=null):void {
     const p = this.p;
     const inspectorPos = inspector.getPosition();
     if (p === null) { throw(new Error('p is null in RenderParameter')); }
@@ -145,6 +135,7 @@ class RenderParameter {
     } else {
       p.fill('rgba(255,255,148,1)');
     }
+    const yDivider = (inspector.boundary as Boundary).getTop()+((this.rowCount)*this.Y_EACH_ROW_OFFSET) +30
     p.translate(
       (
         (inspector.boundary as Boundary).getLeft()+2
@@ -168,7 +159,6 @@ class RenderParameter {
       p.line(5,18,(inspector.dimensions as Dimension).width*.9,18);
     }
     p.pop();
-    RenderParameter.rowCount += 1;
   }
 
   static drawOverPositionAndDimensions(parameter:InputParameterModel|OutputParameterModel):void {
@@ -179,10 +169,13 @@ class RenderParameter {
       (parameter.position as Position).x,
       (parameter.position as Position).y
     );
-    p.fill('rgba(255,100,0,1)');
-    p.circle(0,0,5);
     p.noFill();
-    p.stroke('rgba(0,255,255,0.7)');
+    if (parameter.getIsRolledOver()) {
+      p.stroke('rgba(255,255,0,1)');
+      p.fill('rgba(255,255,0,0.2)');
+    } else {
+      p.stroke('rgba(0,255,255,0.7)');
+    }
     p.strokeWeight(1);
     const shape = p.rect(
       0,0,
@@ -204,23 +197,22 @@ class RenderParameter {
     isFirstParameter=false,
     shouldAddHorizontalDivider=false,
   ):void {
+    if (isFirstParameter) {
+      this.addHorizontalDivider(inspector, "Input Parameters")
+      RenderParameter.rowCount = 1;
+    }
+    if (shouldAddHorizontalDivider) {
+      this.addHorizontalDivider(inspector, "Output Parameters");
+      RenderParameter.rowCount += 1;
+    }
     RenderParameter.setParameterPosition(parameter, inspector, RenderParameter.rowCount);
     RenderParameter.setParameterDimensions(parameter, inspector);
     RenderParameter.drawOverPositionAndDimensions(parameter);
-    const p = this.p;
-    if (p === null) { throw(new Error('p is null in RenderParameter')); }
-    p.push();
-    p.translate(
-      (inspector.boundary as Boundary).getLeft(),
-      (inspector.boundary as Boundary).getTop()
-    );
-    p.pop();
-    this.renderParameterRowInInspector(
+    this.renderText(
         parameter,
         inspector,
-        isFirstParameter,
-        shouldAddHorizontalDivider,
     );
+    RenderParameter.rowCount += 1;
   }
 }
 export default RenderParameter;

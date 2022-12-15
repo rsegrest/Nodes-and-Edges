@@ -69,9 +69,6 @@ export class NodeModel extends DraggableGuiElementModel {
   setIsEditing(isEditing:boolean):void {
     this.isEditing = isEditing;
   }
-  setSelected(isSelected=true):void {
-    this.isSelected = isSelected;
-  }
   // NOT USED (yet)
   // deselect():void {
   //   this.isSelected = false;

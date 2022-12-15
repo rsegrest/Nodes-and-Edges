@@ -148,7 +148,7 @@ class ToolboxModel extends GuiElementModel {
   //     bottom: (this.position as Position).y + this.dimensions.height,
   //   };
   // }
-  public checkMouseOver(mouseX: number, mouseY: number): boolean {
+  public checkBoundary(mouseX: number, mouseY: number): boolean {
     const boundary = this.getBoundary();
     if (!boundary) { return false; }
     const isOver = (

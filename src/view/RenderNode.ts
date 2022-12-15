@@ -16,7 +16,7 @@ export class RenderNode {
     const x = pos.x;
     const y = pos.y;
     // const p = RenderNode.p;
-    const mouseIsOver = plug.checkMouseOver(p.mouseX, p.mouseY);
+    const mouseIsOver = plug.checkBoundary(p.mouseX, p.mouseY);
     let plugStroke = "rgba(200,200,200,0.7)";
     let plugFill = "rgba(255,255,200,0.7)";
     // if mouse is over and user clicks, select plug

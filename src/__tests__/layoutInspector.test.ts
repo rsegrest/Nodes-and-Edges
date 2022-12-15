@@ -2,6 +2,7 @@ import p5 from "p5";
 import { setup } from "../setup";
 import { draw } from "../draw";
 import { createSketch } from "../p5-util/sketch";
+import InspectorModel from "../model/InspectorModel";
 describe("Nodes & Edges tests", () => {
   let p: p5;
 
@@ -21,7 +22,11 @@ describe("Nodes & Edges tests", () => {
     expect(sketch).not.toBeNull();
     p = new p5(sketch);
   });
-  it('should contain one test', () => {
-    expect(true).toBe(true);
+  it('should create inspector', () => {
+    const inspector: InspectorModel = new InspectorModel();
+    expect(inspector).not.toBeNull();
   })
+  // it('should add parameters to inspector', () => {
+    // const 
+  // })
 });

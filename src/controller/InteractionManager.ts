@@ -1,8 +1,10 @@
 import p5 from "p5";
 import ApplicationModel from "../model/ApplicationModel";
 import DynamicToolModel from "../model/DynamicToolModel";
+import InputParameterModel from "../model/InputParameterModel";
 import InspectorModel from "../model/InspectorModel";
 import NodeModel from "../model/NodeModel";
+import OutputParameterModel from "../model/OutputParameterModel";
 import PlugModel from "../model/PlugModel";
 import Dimension from "../model/positioning/Dimension";
 import Layout from "../model/positioning/Layout";
@@ -94,41 +96,29 @@ class InteractionManager {
   }
 
   // INTERACTION
-  static getClosestPlugsOnSelectedNode(appModel:ApplicationModel):PlugModel[] {
-    const selectedNodes = appModel.getSelectedNodes();
-    // Array for if multiple nodes are selected
-    // Right now, one at a time is selected, only
-    const closestPlugArray = [];
-    if (selectedNodes.length > 0) {
-      for (let i = 0; i < selectedNodes.length; i += 1) {
-        const p = ApplicationModel.getP() as p5;
-        const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
-          p.mouseX, p.mouseY
-        );
-        closestPlugArray.push(closestPlug);
-      }
-    }
-    return closestPlugArray as PlugModel[];
-  }
-
-  // INTERACTION
-  selectNode(node: NodeModel): void {
-    node.setSelected();
-  }
-
-  // INTERACTION -- NOT USED
-  // deselectNode(node: NodeModel): void {
-  //   node.deselect();
-  // }
-
-  // INTERACTION
   static repositionElementOnResize(
     element: ToolboxModel|InspectorModel,
     windowWidth: number, windowHeight: number):void {
-    Layout.positionElementBasedOnScreenSize(
-      element, windowWidth, windowHeight );
-    return;
+      Layout.positionElementBasedOnScreenSize(
+        element, windowWidth, windowHeight );
+        return;
+      }
   }
-}
-
+      
 export default InteractionManager;
+// static getClosestPlugsOnSelectedNode(appModel:ApplicationModel):PlugModel[] {
+//   const selectedNodes = appModel.getSelectedNodes();
+//   // Array for if multiple nodes are selected
+//   // Right now, one at a time is selected, only
+//   const closestPlugArray = [];
+//   if (selectedNodes.length > 0) {
+//     for (let i = 0; i < selectedNodes.length; i += 1) {
+//       const p = ApplicationModel.getP() as p5;
+//       const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
+//         p.mouseX, p.mouseY
+//       );
+//       closestPlugArray.push(closestPlug);
+//     }
+//   }
+//   return closestPlugArray as PlugModel[];
+// }

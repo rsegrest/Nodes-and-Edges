@@ -32,7 +32,7 @@ abstract class GuiElementModel {
         dimensions && (this.setDimensions(dimensions));
         boundary && (this.setUpBoundary());
     }
-    public checkMouseOver(mouseX: number, mouseY: number): boolean {
+    public checkBoundary(mouseX: number, mouseY: number): boolean {
       const boundary = this.getBoundary();
       if (!boundary) { return false; }
       const isOver = (
@@ -43,6 +43,7 @@ abstract class GuiElementModel {
       );
       return isOver;
     }
+
     public getIsDraggable(): boolean {
       return this._isDraggable;
     }

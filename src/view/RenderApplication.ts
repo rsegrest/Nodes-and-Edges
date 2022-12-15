@@ -26,7 +26,7 @@ class RenderApplication {
     nodes?.forEach((n) => {
       // check for rollover
       // TODO: Move this logic to abstract GuiElement class
-      const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
+      const mouseIsOverNode = n.checkBoundary(p.mouseX, p.mouseY);
       if (mouseIsOverNode) {
         n.setIsRolledOver();
       } else {
@@ -68,7 +68,7 @@ class RenderApplication {
       inspector,
       appModel?.getSelectedNodes()[0] as NodeModel
     );
-    const mouseIsOverToolbox = toolbox?.checkMouseOver(p.mouseX, p.mouseY);
+    const mouseIsOverToolbox = toolbox?.checkBoundary(p.mouseX, p.mouseY);
     if (mouseIsOverToolbox) {
       toolbox?.setIsRolledOver();
     }
@@ -116,7 +116,7 @@ class RenderApplication {
           t
         );
       }
-      const mouseIsOverTool = (t as ToolModel).checkMouseOver(
+      const mouseIsOverTool = (t as ToolModel).checkBoundary(
         p.mouseX,
         p.mouseY
       );

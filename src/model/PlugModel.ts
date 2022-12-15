@@ -32,7 +32,7 @@ class PlugModel extends DraggableGuiElementModel {
     throw new Error("Method not implemented.");
   }
   // override superclass method
-  checkMouseOver(mouseX:number, mouseY:number):boolean {
+  checkBoundary(mouseX:number, mouseY:number):boolean {
     if (this.position !== null) {
       const distance = Layout.getDistance(
         this.position, new Position(mouseX, mouseY)

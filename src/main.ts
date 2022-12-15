@@ -7,7 +7,7 @@ import {
   mousePressed,
   mouseReleased,
   keyPressed,
-  // doubleClicked,
+  mouseMoved,
 } from "./setup";
 import {
   draw,
@@ -23,7 +23,7 @@ const sketch = createSketch({
   mousePressed,
   mouseReleased,
   keyPressed,
-  // doubleClicked,
+  mouseMoved,
 });
 
 new p5(sketch);

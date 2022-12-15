@@ -47,9 +47,15 @@ const initializeRenderers = (p: p5): void => {
   new RenderApplication(p);
   new RenderParameterField(p);
 };
+
+export const mouseMoved = (p: p5): void => {
+  MouseManager.mouseMoved(p.mouseX, p.mouseY, applicationModel as ApplicationModel);
+}
+
 export const mouseDragged = (p: p5): void => {
   MouseManager.mouseDragged(p, applicationModel as ApplicationModel);
 };
+
 export const mousePressed = (
   // p: p5
 ): void => {
@@ -57,26 +63,15 @@ export const mousePressed = (
     // p
   );
 };
-// in draw.ts
-// export const mouseClicked = (p: p5): void => {
-//   MouseManager.mouseClicked(
-//     // p,
-//     applicationModel as ApplicationModel
-//   );
-// };
-// export const doubleClicked = (
-//   p: p5,
-//   applicationModel: ApplicationModel
-// ): void => {
-//   MouseManager.mouseDoubleClicked(p, applicationModel as ApplicationModel);
-// };
 
 export const mouseReleased = (p: p5): void => {
   MouseManager.mouseReleased(p, applicationModel as ApplicationModel);
 };
+
 export const keyPressed = (p: p5): void => {
   InteractionManager.handleKeyPress(p);
 }
+
 /** This is a setup function. */
 export const setup = (p: p5): void => {
   p.createCanvas(p.windowWidth, p.windowHeight);
