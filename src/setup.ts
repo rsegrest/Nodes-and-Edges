@@ -1,8 +1,10 @@
 import type p5 from "p5";
 import CreationManager from "./controller/CreationManager";
 import InteractionManager from "./controller/InteractionManager";
+import KeyboardManager from "./controller/KeyboardManager";
 import MouseManager from "./controller/MouseManager";
 import ApplicationModel from "./model/ApplicationModel";
+import P5Reference from "./view/P5Reference";
 import RenderApplication from "./view/RenderApplication";
 import RenderEdge from "./view/RenderEdge";
 import RenderGuides from "./view/RenderGuide";
@@ -23,8 +25,9 @@ export const nodeTypes = {
 };
 
 export const preload = (p: p5): void => {
-  applicationModel = ApplicationModel.createInstance(p);
+  applicationModel = ApplicationModel.createInstance();
   fontRegular = p.loadFont("./font/Regular.otf");
+  P5Reference.createInstance(p);
 };
 
 // FOR 3D orthographic
@@ -52,28 +55,38 @@ export const mouseMoved = (p: p5): void => {
   MouseManager.mouseMoved(p.mouseX, p.mouseY, applicationModel as ApplicationModel);
 }
 
+export const mouseClicked = (p: p5): void => {
+  MouseManager.mouseClicked(p.mouseX, p.mouseY, applicationModel as ApplicationModel);
+}
+
 export const mouseDragged = (p: p5): void => {
-  MouseManager.mouseDragged(p, applicationModel as ApplicationModel);
+  MouseManager.mouseDragged(
+    p.mouseX, p.mouseY,
+    applicationModel as ApplicationModel
+  );
 };
 
 export const mousePressed = (
-  // p: p5
+  p: p5
 ): void => {
   MouseManager.mousePressed(
-    // p
+    p.mouseX, p.mouseY, applicationModel as ApplicationModel
   );
 };
 
 export const mouseReleased = (p: p5): void => {
-  MouseManager.mouseReleased(p, applicationModel as ApplicationModel);
+  MouseManager.mouseReleased(p.mouseX, p.mouseY, applicationModel as ApplicationModel);
 };
 
 export const keyPressed = (p: p5): void => {
-  InteractionManager.handleKeyPress(p);
+  KeyboardManager.handleKeyPress(
+    p.keyCode, p.key
+  );
 }
 
 /** This is a setup function. */
 export const setup = (p: p5): void => {
+
   p.createCanvas(p.windowWidth, p.windowHeight);
   p.frameRate(30);
   p.background(248);

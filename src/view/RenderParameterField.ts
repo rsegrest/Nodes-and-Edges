@@ -1,5 +1,5 @@
 import p5 from 'p5';
-import ParameterFieldModel from '../model/ParameterFieldModel';
+import InspectorFieldModel from '../model/inspector/InspectorFieldModel';
 import Boundary from '../model/positioning/Boundary';
 import ToolModel from '../model/ToolModel';
 
@@ -35,7 +35,7 @@ class RenderParameterField {
     );
     p.pop();
   }
-  static render(pfm: ParameterFieldModel): void {
+  static render(pfm: InspectorFieldModel): void {
     const p = RenderParameterField.getP();
     const boundary = pfm?.getBoundary();
 

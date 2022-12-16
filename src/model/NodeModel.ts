@@ -6,7 +6,6 @@ import PlugPosition from "./PlugPosition";
 import DraggableGuiElementModel from "./abstract/DraggableGuiElement";
 import InputParameterModel from "./InputParameterModel";
 import OutputParameterModel from "./OutputParameterModel";
-import { applicationModel } from "../setup";
 import ApplicationModel from "./ApplicationModel";
 
 export class NodeModel extends DraggableGuiElementModel {
@@ -160,8 +159,12 @@ export class NodeModel extends DraggableGuiElementModel {
   }
   // override GUIElementModel
   public clickAction(): void {
+    console.log('clickAction: ');
+    console.log('this: ', this);
     this.isSelected = true;
     this.isHighlit = true;
+    const inspector = ApplicationModel.getInstance().getInspector();
+    inspector.createTable(this);
     console.log('NodeModel onClick', this.toString());
   }
   // override GUIElementModel

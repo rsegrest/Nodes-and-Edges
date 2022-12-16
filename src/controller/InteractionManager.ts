@@ -1,60 +1,18 @@
-import p5 from "p5";
+// import p5 from "p5";
 import ApplicationModel from "../model/ApplicationModel";
 import DynamicToolModel from "../model/DynamicToolModel";
-import InputParameterModel from "../model/InputParameterModel";
-import InspectorModel from "../model/InspectorModel";
-import NodeModel from "../model/NodeModel";
-import OutputParameterModel from "../model/OutputParameterModel";
-import PlugModel from "../model/PlugModel";
+import InspectorModel from "../model/inspector/InspectorModel";
 import Dimension from "../model/positioning/Dimension";
 import Layout from "../model/positioning/Layout";
 import Position from "../model/positioning/Position";
 import ToolboxModel from "../model/ToolboxModel";
 import ToolModel from "../model/ToolModel";
 
+import InputParameterModel from "../model/InputParameterModel";
+import NodeModel from "../model/NodeModel";
+import OutputParameterModel from "../model/OutputParameterModel";
+import PlugModel from "../model/PlugModel";
 class InteractionManager {
-
-  // 9 - Tab
-  // 13 - Enter
-  // 16-18 - Shift, Ctrl, Alt
-  // 20 - CapsLock
-  // 27 - Escape
-  // 37-40 - arrow keys
-  // 91-93 - left WIN, right WIN, popup
-  // 112-123 - F1-F12
-
-  // 12 - NumPad 5
-  // 32 - Space
-  static isNonPrintingCharacter(keyCode: number): boolean {
-    if (keyCode === 12) { return false; } // NumPad 5
-    if (keyCode === 13) { return false; } // Enter
-    if (keyCode === 32) { return false; } // Space
-    return (
-      (keyCode <= 47)
-      || (keyCode >= 91 && keyCode <= 93) // left WIN, right WIN, popup
-      || (keyCode >= 112 && keyCode <= 123) // F1-F12 keys
-    );
-  }
-
-  static handleKeyPress(p: p5):void {
-    if (ApplicationModel.getEditTarget()) {
-      console.log('keyTyped', p.key, p.keyCode)
-      if (p.keyCode === p.ENTER) {
-        ApplicationModel.setEditTarget(null);
-      }
-      if (
-        (p.keyCode === p.DELETE)
-        || (p.keyCode === p.BACKSPACE)) {
-          console.log('hit backspace');
-          ApplicationModel.backspaceEditTarget();
-      }
-      if (this.isNonPrintingCharacter(p.keyCode)) {
-        return;
-      } else {
-        ApplicationModel.addCharacterToEditTarget(p.key);
-      }
-    }
-  }
 
   // INTERACTION
   static resizeCanvas(
@@ -99,8 +57,8 @@ class InteractionManager {
   static repositionElementOnResize(
     element: ToolboxModel|InspectorModel,
     windowWidth: number, windowHeight: number):void {
-      Layout.positionElementBasedOnScreenSize(
-        element, windowWidth, windowHeight );
+      Layout.resizeCanvas(windowWidth, windowHeight);
+      Layout.positionPanel(element);
         return;
       }
   }

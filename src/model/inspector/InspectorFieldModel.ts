@@ -1,9 +1,9 @@
-import EditableField from "./abstract/EditableField";
-import Position from "./positioning/Position";
-import Dimension from "./positioning/Dimension";
-import ParameterFieldType from "./abstract/ParameterFieldType";
+import EditableField from "../abstract/EditableField";
+import Position from "../positioning/Position";
+import Dimension from "../positioning/Dimension";
+import ParameterFieldType from "../abstract/ParameterFieldType";
 
-class ParameterFieldModel extends EditableField {
+class InspectorFieldModel extends EditableField {
     protected dimension: Dimension;
     protected content:string;
     public constructor(
@@ -39,4 +39,4 @@ class ParameterFieldModel extends EditableField {
         return `ParameterFieldModel[fieldType: ${this.fieldType}, content: ${this.content.toString()}, position: ${this.position?.toString()}, dimension: ${this.dimension.toString()}]`;
     }
 }
-export default ParameterFieldModel;
+export default InspectorFieldModel;

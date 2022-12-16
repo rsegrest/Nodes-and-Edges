@@ -88,7 +88,7 @@
       dimensions && this.setDimensions(dimensions);
       boundary && this.setUpBoundary();
     }
-    checkMouseOver(mouseX, mouseY) {
+    checkBoundary(mouseX, mouseY) {
       const boundary = this.getBoundary();
       if (!boundary) {
         return false;
@@ -294,22 +294,281 @@
     }
   }
 
+  class InspectorRow extends GuiElementModel {
+    constructor(rowNum) {
+      super(true, false, false, false);
+      this.rowNum = rowNum;
+    }
+  }
+
+  class InspectorHeadingRow extends InspectorRow {
+    constructor(content, rowNum) {
+      super(rowNum);
+      this.content = content;
+    }
+    clickAction() {
+      // do nothing for now -- later expand / collapse
+    }
+    doubleClickAction() {
+      // no op
+    }
+    getContent() {
+      return this.content;
+    }
+    setContent(content) {
+      this.content = content;
+    }
+    toString() {
+      return `InspectorRowHeading[${this.content}]`;
+    }
+  }
+
+  class InspectorInfoColumn extends GuiElementModel {
+    constructor(content, columnNum) {
+      super(true, false, false, true);
+      this.content = content;
+      this.columnNum = columnNum;
+    }
+    getContent() {
+      return this.content;
+    }
+    setContent(content) {
+      this.content = content;
+    }
+    clickAction() {
+      // do nothing for now -- later expand / collapse
+      console.log("Inspector Info Column: click action");
+    }
+    doubleClickAction() {
+      // make editable
+      console.log("Inspector Info Column: double-click action");
+    }
+    getColumnNum() {
+      return this.columnNum;
+    }
+    setColumnNum(columnNum) {
+      this.columnNum = columnNum;
+    }
+  }
+
+  class InspectorInfoRow extends InspectorRow {
+    constructor(parameter, rowNum) {
+      super(rowNum);
+      this.columns = [
+        new InspectorInfoColumn(parameter.getName(), 0),
+        new InspectorInfoColumn(
+          `${parameter.getValue()} ${parameter.getUnits()}`,
+          1
+        ),
+      ];
+    }
+    getColumns() {
+      return this.columns;
+    }
+    clickAction() {
+      throw new Error("Method not implemented.");
+    }
+    doubleClickAction() {
+      throw new Error("Method not implemented.");
+    }
+    toString() {
+      var _a;
+      return `InspectorRowInfo[${
+        (_a = this.columns[0]) === null || _a === void 0
+          ? void 0
+          : _a.getContent()
+      }]`;
+    }
+  }
+
+  class LayoutInspector {
+    constructor(pos, dim) {
+      LayoutInspector.position = pos;
+      LayoutInspector.dimensions = dim;
+      LayoutInspector.Y_POSITION = Layout.getHeight() - 200;
+      LayoutInspector.layout = Layout.getInstance();
+    }
+    static createInstance(pos, dim) {
+      // const newPos = new Position(10,400);
+      // const newDim = new Dimension(300, 190);
+      LayoutInspector.instance = new LayoutInspector(pos, dim);
+      return LayoutInspector.instance;
+    }
+    static getInstance() {
+      if (LayoutInspector.instance === null) {
+        throw new Error("InspectorLayout instance is null");
+      }
+      return LayoutInspector.instance;
+    }
+    static getPosition() {
+      return LayoutInspector.position;
+    }
+    static getDimensions() {
+      return LayoutInspector.dimensions;
+    }
+    static createRowsFromInputAndOutputParameters(inputParams, outputParams) {
+      let rowCount = 0;
+      const createdRows = [];
+      const inputHeading = new InspectorHeadingRow(
+        "Input Parameters",
+        (rowCount += 1)
+      );
+      const inputRows = inputParams.map((param) => {
+        return new InspectorInfoRow(param, (rowCount += 1));
+      });
+      const outputHeading = new InspectorHeadingRow(
+        "Output Parameters",
+        (rowCount += 1)
+      );
+      const outputRows = outputParams.map((param) => {
+        return new InspectorInfoRow(param, (rowCount += 1));
+      });
+      createdRows.push(inputHeading);
+      createdRows.push(...inputRows);
+      createdRows.push(outputHeading);
+      createdRows.push(...outputRows);
+      return createdRows;
+    }
+    static assignDimensionsToRows(
+      rows,
+      rowWidth = this.ROW_WIDTH,
+      rowHeight = this.ROW_HEIGHT
+    ) {
+      rows.forEach((row) =>
+        row.setDimensions(new Dimension(rowWidth, rowHeight))
+      );
+      return rows;
+    }
+    static assignPositionsToRows(
+      rows,
+      rowHeight = LayoutInspector.ROW_HEIGHT,
+      xInspectorLeft = 0,
+      yInspectorTop = 0,
+      yTableOffset = this.Y_FIRST_ROW_OFFSET
+    ) {
+      rows.forEach((row, index) =>
+        row.setPosition(
+          LayoutInspector.calcRowPosition(
+            index,
+            rowHeight,
+            xInspectorLeft,
+            yInspectorTop,
+            yTableOffset
+          )
+        )
+      );
+      return rows;
+    }
+    static calcRowPosition(
+      rowNum,
+      rowHeight,
+      xInspectorLeft = 0,
+      yInspectorTop = 0,
+      yTableOffset = 0
+    ) {
+      const yCalc = yInspectorTop + rowNum * rowHeight + yTableOffset;
+      console.log("yCalc", yCalc);
+      const rowPos = new Position(xInspectorLeft, yCalc);
+      return rowPos;
+    }
+    static setParameterDimensions(parameter, inspector) {
+      parameter.setDimensions(
+        new Dimension(inspector.dimensions.width, this.ROW_HEIGHT)
+      );
+    }
+  }
+
+  // private static rowCount = 0;
+  LayoutInspector.DEFAULT_INSPECTOR_WIDTH = 600;
+  LayoutInspector.DEFAULT_INSPECTOR_HEIGHT = 300;
+
+  // SPIRAL 3 TODO: Make panel draggable using title bar
+  LayoutInspector.X_POSITION = 10;
+  LayoutInspector.Y_FIRST_ROW_OFFSET = 30;
+  LayoutInspector.ROW_HEIGHT = 30;
+  LayoutInspector.ROW_WIDTH = 600;
+  LayoutInspector.Y_TABLE_START = 20;
+
+  // Parameter row constants
+  LayoutInspector.PARAM_NAME_COLUMN_WIDTH = 150;
+
+  // public static readonly PARAM_VALUE_COLUMN_WIDTH = 150;
+  LayoutInspector.instance = null;
+  LayoutInspector.position = new Position(0, 0);
+  LayoutInspector.dimensions = new Dimension(0, 0);
+
+  // TODO: paging, num rows to display
+  class InspectorTable {
+    constructor(node) {
+      const inputs = node.getInputParameterList();
+      const outputs = node.getOutputParameterList();
+      this.numCols = 2;
+      this.rows = this.buildTable(inputs, outputs);
+    }
+    getNumRows() {
+      return this.rows.length;
+    }
+    getNumCols() {
+      return this.numCols;
+    }
+    buildTable(inputParams, outputParams) {
+      const rows = LayoutInspector.createRowsFromInputAndOutputParameters(
+        inputParams,
+        outputParams
+      );
+      LayoutInspector.assignDimensionsToRows(rows);
+      LayoutInspector.assignPositionsToRows(rows);
+      return rows;
+    }
+    getRow(rowNum) {
+      if (this.rows[rowNum] instanceof InspectorHeadingRow) {
+        return this.rows[rowNum];
+      }
+      if (this.rows[rowNum] instanceof InspectorInfoRow) {
+        return this.rows[rowNum];
+      }
+      return null;
+    }
+    toString() {
+      var _a;
+      let str = "";
+      for (let i = 0; i < this.rows.length; i++) {
+        str +=
+          ((_a = this.rows[i]) === null || _a === void 0
+            ? void 0
+            : _a.toString()) + "\n";
+      }
+      return str;
+    }
+  }
+
   // TODO: Create panel model that is collapsible
   class InspectorModel extends GuiElementModel {
+    // TODO: Use InspectorLayout to set position and dimensions
     constructor() {
       super(
         true,
         false, // _isDraggable: fixed for now, might make this draggable later
         false, // _isResizable: future feature
         false, // _isSelectable: future feature
-        new Position(10, 400),
-        new Dimension(300, 190)
+        LayoutInspector.getPosition(),
+        LayoutInspector.getDimensions()
       );
 
       // private parameterSet: any[] = [];
       this.type = "Inspector";
       this.displayedParamSet = [];
       this.isCollapsed = false;
+      this.inspectorTable = null;
+    }
+
+    // TODO: ****** set up table using node params
+    // TODO: test this
+    createTable(node) {
+      this.inspectorTable = new InspectorTable(node);
+    }
+    getTable() {
+      return this.inspectorTable;
     }
     clickAction() {
       console.log("inspector pane clicked");
@@ -507,7 +766,7 @@
     //     bottom: (this.position as Position).y + this.dimensions.height,
     //   };
     // }
-    checkMouseOver(mouseX, mouseY) {
+    checkBoundary(mouseX, mouseY) {
       const boundary = this.getBoundary();
       if (!boundary) {
         return false;
@@ -528,30 +787,27 @@
   ToolboxModel.ROW_SPACING = 60;
 
   class Layout {
-    constructor(p) {
-      this.width = 0;
-      this.height = 0;
-      this.width = p.width;
-      this.height = p.height;
+    constructor(width, height) {
+      Layout.width = width;
+      Layout.height = height;
+      Layout.positionPanel(ApplicationModel.getInstance().getInspector());
+      Layout.positionPanel(ApplicationModel.getInstance().getToolbox());
     }
-    static positionInspector(
-      inspector,
-      // currently inspector is only in bottom left, so don't need width (yet)
-      screenHeight
-    ) {
+    static resizeCanvas(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+    static calcInspectorPosition(inspector) {
       if (inspector === null) {
         return;
       }
-      const dim = inspector.getDimensions();
-      if (dim === null) {
-        return;
-      }
-
-      // const inspectorWidth = dim.width;
-      const inspectorHeight = dim.height;
+      const inspectorWidth = 600;
+      const inspectorHeight = 300;
+      inspector.setDimensions(new Dimension(inspectorWidth, inspectorHeight));
+      console.log("Layout.height : " + Layout.height);
       const inspectorPosition = new Position(
         10,
-        screenHeight - (inspectorHeight + 10)
+        this.height - (inspectorHeight + 10)
       );
       inspector.setPosition(inspectorPosition);
     }
@@ -597,29 +853,28 @@
         );
       }
     }
-    static positionElementBasedOnScreenSize(
-      element,
-      screenWidth,
-      screenHeight
-    ) {
+    static positionPanel(element) {
+      if (this.width === 0 || this.height === 0) {
+        throw new Error("Layout dimensions are not set");
+      }
       if (element instanceof ToolboxModel) {
-        Layout.positionToolboxAndTools(element, screenWidth);
+        Layout.positionToolboxAndTools(element, this.width);
       }
       if (element instanceof InspectorModel) {
-        Layout.positionInspector(element, screenHeight);
+        Layout.calcInspectorPosition(element);
       }
     }
 
     // Boilerplate getters and setters
-    createInstance(p) {
+    static createInstance(width, height) {
       if (Layout.instance === null) {
-        Layout.instance = new Layout(p);
+        Layout.instance = new Layout(width, height);
       }
       return Layout.instance;
     }
-    getInstance() {
+    static getInstance() {
       if (Layout.instance === null) {
-        throw new Error("Layout instance is not created yet");
+        Layout.instance = new Layout(0, 0);
       }
       return Layout.instance;
     }
@@ -628,10 +883,18 @@
       const y = position1.y - position2.y;
       return Math.sqrt(x * x + y * y);
     }
+    static getWidth() {
+      return Layout.width;
+    }
+    static getHeight() {
+      return Layout.height;
+    }
   }
   Layout.instance = null;
   Layout.BASE_NODE_WIDTH = 100;
   Layout.BASE_NODE_HEIGHT = 50;
+  Layout.width = 0;
+  Layout.height = 0;
 
   class PlugModel extends DraggableGuiElementModel {
     doubleClickAction() {
@@ -661,7 +924,7 @@
     }
 
     // override superclass method
-    checkMouseOver(mouseX, mouseY) {
+    checkBoundary(mouseX, mouseY) {
       if (this.position !== null) {
         const distance = Layout.getDistance(
           this.position,
@@ -765,9 +1028,6 @@
     setIsEditing(isEditing) {
       this.isEditing = isEditing;
     }
-    setSelected(isSelected = true) {
-      this.isSelected = isSelected;
-    }
 
     // NOT USED (yet)
     // deselect():void {
@@ -860,8 +1120,12 @@
 
     // override GUIElementModel
     clickAction() {
+      console.log("clickAction: ");
+      console.log("this: ", this);
       this.isSelected = true;
       this.isHighlit = true;
+      const inspector = ApplicationModel.getInstance().getInspector();
+      inspector.createTable(this);
       console.log("NodeModel onClick", this.toString());
     }
 
@@ -1148,6 +1412,24 @@
   }
 
   class ApplicationModel {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    constructor() {
+      this.nodes = [];
+      this.edges = [];
+      this.toolbox = new ToolboxModel();
+      this.inspector = new InspectorModel();
+      this.dynamicTool = null;
+
+      // getRolledOverObjects
+      this.rolledOverObjects = [];
+      this.initializeForDev();
+    }
+
+    // FOR DEVELOPMENT TESTING
+    initializeForDev() {
+      this.nodes = CreationManager.createNodes();
+      this.edges = CreationManager.createEdges(this.nodes);
+    }
     static addCharacterToEditTarget(key) {
       if (this.editTarget === null) return;
       this.editTarget.setLabel(this.editTarget.getLabel() + key);
@@ -1161,22 +1443,6 @@
       const bsLabelContent = labelContent.slice(0, -1);
       console.log("bsLabelContent = ", bsLabelContent);
       this.editTarget.setLabel(bsLabelContent);
-    }
-    constructor(p) {
-      this.nodes = [];
-      this.edges = [];
-      this.toolbox = new ToolboxModel();
-      this.inspector = new InspectorModel();
-      this.dynamicTool = null;
-
-      // getRolledOverObjects
-      this.rolledOverObjects = [];
-      ApplicationModel.setP(p);
-      this.nodes = CreationManager.createNodes();
-      this.edges = CreationManager.createEdges(this.nodes);
-
-      // TEMP TEST
-      // ApplicationModel.editTarget = (this.nodes[0] as NodeModel);
     }
     static getEditTarget() {
       return ApplicationModel.editTarget;
@@ -1239,21 +1505,18 @@
     getToolbox() {
       return this.toolbox;
     }
-    static createInstance(p) {
+    static createInstance() {
       if (ApplicationModel.instance === null) {
-        ApplicationModel.instance = new ApplicationModel(p);
+        ApplicationModel.instance = new ApplicationModel();
       }
       return ApplicationModel.instance;
     }
-    static getInstance(p) {
+    static getInstance() {
       if (ApplicationModel.instance === null) {
         console.warn("ApplicationModel instance is null");
-        ApplicationModel.instance = new ApplicationModel(p);
+        ApplicationModel.instance = new ApplicationModel();
       }
       return ApplicationModel.instance;
-    }
-    static getP() {
-      return ApplicationModel.p;
     }
     getDynamicTool() {
       return this.dynamicTool;
@@ -1265,9 +1528,6 @@
     }
     setDynamicSlot(dt) {
       this.dynamicTool = dt;
-    }
-    static setP(p) {
-      ApplicationModel.p = p;
     }
 
     // OVERLOADS
@@ -1286,22 +1546,9 @@
     }
   }
   ApplicationModel.instance = null;
-  ApplicationModel.p = null;
   ApplicationModel.editTarget = null;
 
-  class DynamicToolModel extends ToolModel {
-    constructor(
-      name,
-      icon,
-      objectType, // describes object to create
-      position = null,
-      dimensions = null
-    ) {
-      super(name, icon, objectType, position, dimensions, "DynamicTool");
-    }
-  }
-
-  class InteractionManager {
+  class KeyboardManager {
     // 9 - Tab
     // 13 - Enter
     // 16-18 - Shift, Ctrl, Alt
@@ -1328,24 +1575,465 @@
         (keyCode >= 112 && keyCode <= 123) // F1-F12 keys
       );
     }
-    static handleKeyPress(p) {
+    static handleKeyPress(keyCode, key) {
       if (ApplicationModel.getEditTarget()) {
-        console.log("keyTyped", p.key, p.keyCode);
-        if (p.keyCode === p.ENTER) {
+        // console.log('keyTyped', keyCode)
+        if (keyCode === 13) {
           ApplicationModel.setEditTarget(null);
         }
-        if (p.keyCode === p.DELETE || p.keyCode === p.BACKSPACE) {
-          console.log("hit backspace");
+        if (keyCode === 13 || keyCode === 8) {
+          // console.log('hit backspace');
           ApplicationModel.backspaceEditTarget();
         }
-        if (this.isNonPrintingCharacter(p.keyCode)) {
+        if (this.isNonPrintingCharacter(keyCode)) {
           return;
         } else {
-          ApplicationModel.addCharacterToEditTarget(p.key);
+          ApplicationModel.addCharacterToEditTarget(key);
         }
       }
     }
+  }
 
+  class RolloverManager {
+    static checkForRollover(mouseX, mouseY, appModel) {
+      // console.log(`MouseManager.mouseMoved(): mouseX: ${mouseX}, mouseY: ${mouseY}`);
+      // Check all elements for rollover
+      const foundPlug = this.checkForPlugRollover(mouseX, mouseY, appModel);
+      if (foundPlug) {
+        return;
+      }
+      const foundParam = this.checkForParamRollover(mouseX, mouseY, appModel);
+      if (foundParam) {
+        return;
+      }
+      const foundTool = this.checkForToolsRollover(mouseX, mouseY, appModel);
+      if (foundTool) {
+        return;
+      }
+      const foundNode = this.checkForNodeRollover(mouseX, mouseY, appModel);
+      if (foundNode) {
+        return;
+      }
+      const foundEdge = this.checkForEdgeRollover(mouseX, mouseY, appModel);
+      if (foundEdge) {
+        return;
+      }
+
+      // Toolbox
+      if (appModel.getToolbox().checkBoundary(mouseX, mouseY)) {
+        console.warn(`MouseManager.mouseMoved(): toolbox->setIsRolledOver()}]`);
+        appModel.getToolbox().setIsRolledOver();
+      }
+
+      // Inspector
+      if (appModel.getInspector().checkBoundary(mouseX, mouseY)) {
+        console.warn(
+          `MouseManager.mouseMoved(): inspector->setIsRolledOver()}]`
+        );
+        appModel.getInspector().setIsRolledOver();
+      }
+    }
+    static checkForPlugRollover(mouseX, mouseY, appModel) {
+      let foundPlug = false;
+      appModel.getNodes().forEach((node) => {
+        node.getPlugs().forEach((plug) => {
+          if (plug.checkBoundary(mouseX, mouseY)) {
+            console.warn(
+              `MouseManager.mouseMoved(): plug.setIsRolledOver(): [\n\t${plug}\n\t]()}]`
+            );
+            plug.setIsRolledOver();
+            foundPlug = true;
+          } else {
+            plug.setIsRolledOver(false);
+          }
+        });
+      });
+      return foundPlug;
+    }
+    static checkForParamRollover(mouseX, mouseY, appModel) {
+      let foundParam = false;
+
+      // Input Params
+      appModel.getSelectedNodes().forEach((node) => {
+        node.getInputParameterList().forEach((inputParam) => {
+          if (inputParam.checkBoundary(mouseX, mouseY)) {
+            console.warn(
+              `MouseManager.mouseMoved(): inputParam->setIsRolledOver(): [\n\t${inputParam}\n\t]()}]`
+            );
+            inputParam.setIsRolledOver();
+            foundParam = true;
+          } else {
+            inputParam.setIsRolledOver(false);
+          }
+        });
+      });
+
+      // Output Params
+      appModel.getSelectedNodes().forEach((node) => {
+        node.getInputParameterList().forEach((outputParam) => {
+          if (outputParam.checkBoundary(mouseX, mouseY)) {
+            console.warn(
+              `MouseManager.mouseMoved(): outputParam->setIsRolledOver(): [\n\t${outputParam}\n\t]()}]`
+            );
+            outputParam.setIsRolledOver();
+            foundParam = true;
+          } else {
+            outputParam.setIsRolledOver(false);
+          }
+        });
+      });
+      return foundParam;
+    }
+    static checkForNodeRollover(mouseX, mouseY, appModel) {
+      let foundNode = false;
+
+      // Nodes
+      appModel.getNodes().forEach((node) => {
+        if (node.checkBoundary(mouseX, mouseY)) {
+          console.warn(
+            `MouseManager.mouseMoved(): getNodes->setIsRolledOver(): [\n\t${node}\n\t]()}]`
+          );
+          foundNode = true;
+          node.setIsRolledOver();
+        } else {
+          node.setIsRolledOver(false);
+        }
+      });
+      return foundNode;
+    }
+    static checkForToolsRollover(mouseX, mouseY, appModel) {
+      let foundTool = false;
+
+      // Tools
+      appModel
+        .getToolbox()
+        .getToolList()
+        .forEach((tool) => {
+          if (tool.checkBoundary(mouseX, mouseY)) {
+            console.warn(
+              `MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`
+            );
+            foundTool = true;
+            tool.setIsRolledOver();
+          } else {
+            tool.setIsRolledOver(false);
+          }
+        });
+      return foundTool;
+    }
+    static checkForEdgeRollover(mouseX, mouseY, appModel) {
+      const foundEdge = false;
+
+      // Edges
+      appModel.getEdges().forEach((edge) => {
+        if (edge.checkBoundary(mouseX, mouseY)) {
+          console.warn(
+            `MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${edge}\n\t]()}]`
+          );
+          edge.setIsRolledOver();
+        } else {
+          edge.setIsRolledOver(false);
+        }
+      });
+      return foundEdge;
+    }
+  }
+
+  class ClickManager {
+    static checkElementsForClick(mouseX, mouseY, appModel) {
+      const nodes = appModel.getNodes();
+      let foundParam = false;
+
+      // Params currently added to inspector
+      if (appModel) {
+        foundParam = this.checkForClickOnParam(mouseX, mouseY, appModel);
+
+        // TODO: Deal with potential for more than one selected node
+        // END Check for click on param
+        if (foundParam) {
+          return;
+        }
+        nodes.forEach((n) => {
+          this.checkForSelectPlug(mouseX, mouseY, n);
+          this.checkForSelectNode(mouseX, mouseY, appModel);
+        });
+      }
+    }
+
+    // TODO: Rename or simplify
+    static checkForSelectParam(mouseX, mouseY, pm) {
+      // const p = ApplicationModel.getP() as p5;
+      let pmClicked = null;
+      if (pm.checkBoundary(mouseX, mouseY)) {
+        pm.setIsSelected();
+        pmClicked = pm;
+      }
+      return pmClicked;
+    }
+    static checkForSelectPlug(mouseX, mouseY, n) {
+      const plugs = n.getPlugs();
+
+      // const p = ApplicationModel.getP() as p5;
+      plugs.forEach((plug) => {
+        if (plug.checkBoundary(mouseX, mouseY)) {
+          plug.setIsSelected();
+        }
+      });
+    }
+
+    // Move to InteractionManager?
+    static checkForClickOnParam(mouseX, mouseY, appModel) {
+      let foundParam = false;
+      const params = [];
+
+      // Check for click on param
+      const selectedNodes = appModel.getSelectedNodes();
+      if (selectedNodes && selectedNodes.length > 0) {
+        const inputParams = selectedNodes[0].getInputParameterList();
+        const outputParams = selectedNodes[0].getOutputParameterList();
+        params.push(...inputParams);
+        params.push(...outputParams);
+        console.log(`params.length: ${params.length}`);
+        for (let i = 0; i < params.length; i += 1) {
+          const nextParam = params[i];
+          if (nextParam === undefined) {
+            continue;
+          }
+          foundParam =
+            this.checkForSelectParam(mouseX, mouseY, nextParam) !== null;
+
+          // if (foundParam) { console.warn("FOUND PARAM, length is now: " + selectedNodes[0]?.getSelectedParameters().length); }
+        }
+      }
+      return foundParam;
+    }
+
+    // INTERACTION
+    // selectedNodes includes node to check if selected
+    static checkForSelectNode(mouseX, mouseY, appModel) {
+      console.log("checkForSelectNode");
+      const nodes = appModel.getNodes();
+      const mousePosition = new Position(mouseX, mouseY);
+      for (let i = 0; i < nodes.length; i += 1) {
+        if (nodes[i] !== null && nodes[i] !== undefined) {
+          const node = nodes[i];
+          if (node.areParamsSelected() === false) {
+            node.setIsSelected(false);
+          }
+          if (node.checkBoundary(mousePosition.x, mousePosition.y)) {
+            // console.warn("FOUND NODE")
+            // node.setIsSelected();
+            node.clickAction();
+          }
+        }
+      }
+    }
+  }
+
+  class DragManager {
+    static checkForEdgeDragTargets(appModel) {
+      const edgeList = appModel.getEdges();
+
+      // find edge drag targets
+      if (edgeList.length > 0) {
+        for (let i = 0; i < edgeList.length; i += 1) {
+          const edge = edgeList[i];
+          if (typeof edge === "undefined") {
+            continue;
+          }
+          if (edge === null) {
+            continue;
+          }
+          if (
+            edge === null || edge === void 0 ? void 0 : edge.getIsRolledOver()
+          ) {
+            return edge;
+          }
+        }
+      }
+      return null;
+    }
+    static checkForPlugDragTargets(appModel) {
+      const plugList = appModel.getNodes().flatMap((node) => node.getPlugs());
+
+      // find plug drag targets
+      if (plugList.length > 0) {
+        for (let i = 0; i < plugList.length; i += 1) {
+          const plug = plugList[i];
+          if (typeof plug === "undefined") {
+            continue;
+          }
+          if (plug === null) {
+            continue;
+          }
+          if (plug.getIsRolledOver()) {
+            return plug;
+          }
+        }
+      }
+      return null;
+    }
+    static checkForNodeDragTargets(appModel) {
+      const nodeList = appModel.getNodes();
+
+      // find node drag targets
+      if (nodeList.length > 0) {
+        for (let i = 0; i < nodeList.length; i += 1) {
+          const node = nodeList[i];
+          if (typeof node === "undefined") {
+            continue;
+          }
+          if (node === null) {
+            continue;
+          }
+          if (
+            node === null || node === void 0 ? void 0 : node.getIsRolledOver()
+          ) {
+            return node;
+          }
+        }
+      }
+      return null;
+    }
+    static checkForToolsDragTargets(appModel) {
+      // check tools for drag targets
+      const toolbox = appModel.getToolbox();
+      if (toolbox) {
+        if (toolbox.getIsRolledOver()) {
+          const toolList = toolbox.getToolList();
+
+          // toolList.forEach((tool) => {
+          for (let i = 0; i < toolList.length; i += 1) {
+            const tool = toolList[i];
+            if (tool.getIsRolledOver()) {
+              return tool;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    // INTERACTION (MOUSE)
+    static clearDragTargets(appModel) {
+      // const appModel:ApplicationModel = (ChartManager.getApplicationModel() as ApplicationModel);
+      appModel.getNodes().forEach((node) => {
+        node.setIsDragging(false);
+        node.getPlugs().forEach((plug) => plug.setIsDragging(false));
+      });
+      appModel.getEdges().forEach((edge) => edge.setIsDragging(false));
+      appModel
+        .getToolbox()
+        .getToolList()
+        .forEach((tool) => tool.setIsDragging(false));
+    }
+
+    // INTERACTION (MOUSE)
+    static getDragTarget(appModel) {
+      // const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+      const tool = DragManager.checkForToolsDragTargets(appModel);
+      if (tool) {
+        tool.setIsDragging(true);
+        return tool;
+      }
+      const plug = DragManager.checkForPlugDragTargets(appModel);
+      if (plug) {
+        plug.setIsDragging(true);
+        return plug;
+      }
+      const edge = DragManager.checkForEdgeDragTargets(appModel);
+      if (edge) {
+        edge.setIsDragging(true);
+        return edge;
+      }
+      const node = DragManager.checkForNodeDragTargets(appModel);
+      if (node) {
+        node.setIsDragging(true);
+        return node;
+      }
+      return null;
+    }
+  }
+
+  class MouseManager {
+    static mouseMoved(mouseX, mouseY, appModel) {
+      RolloverManager.checkForRollover(mouseX, mouseY, appModel);
+    }
+
+    // INTERACTION (MOUSE)
+    static mouseDragged(mouseX, mouseY, appModel) {
+      // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
+      DragManager.getDragTarget(appModel);
+    }
+
+    // INTERACTION (MOUSE)
+    static mouseClicked(mouseX, mouseY, appModel) {
+      ClickManager.checkElementsForClick(mouseX, mouseY, appModel);
+    }
+
+    // LEFT OFF HERE
+    // TODO: Make node editable on double click
+    static doubleClicked(mouseX, mouseY, appModel) {
+      console.log(`mouse double clicked`);
+
+      // const nodes:NodeModel[] = appModel.getNodes();
+    }
+
+    // INTERACTION (MOUSE -- STUB)
+    static mousePressed(mouseX, mouseY, appModel) {
+      // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
+    }
+
+    // INTERACTION (MOUSE)
+    static mouseReleased(mouseX, mouseY, appModel) {
+      // const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
+      if (appModel.getDynamicTool() !== null) {
+        const newlyMintedNode = CreationManager.createNewObjectFromDynamicTool(
+          appModel.getDynamicTool()
+        );
+        appModel.getNodes().push(newlyMintedNode);
+        appModel.setDynamicTool(null);
+      }
+      appModel.setDynamicTool(null);
+
+      // if there is a dynamicTool in the slot,
+      //  set the dynamicTool to null
+      //  then create the new class (has info?)
+      DragManager.clearDragTargets(appModel);
+    }
+  }
+
+  class P5Reference {
+    constructor(p) {
+      P5Reference.p = p;
+    }
+    static createInstance(p) {
+      P5Reference.instance = new P5Reference(p);
+      return P5Reference.instance;
+    }
+    static getInstance() {
+      if (P5Reference.instance === null) {
+        throw new Error("P5Reference instance is null");
+      }
+      return P5Reference.instance;
+    }
+  }
+  P5Reference.instance = null;
+  P5Reference.p = null;
+
+  class DynamicToolModel extends ToolModel {
+    constructor(
+      name,
+      icon,
+      objectType, // describes object to create
+      position = null,
+      dimensions = null
+    ) {
+      super(name, icon, objectType, position, dimensions, "DynamicTool");
+    }
+  }
+
+  class InteractionManager {
     // INTERACTION
     static resizeCanvas(appModel, windowWidth, windowHeight) {
       // const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
@@ -1387,261 +2075,29 @@
     }
 
     // INTERACTION
-    static getClosestPlugsOnSelectedNode(appModel) {
-      const selectedNodes = appModel.getSelectedNodes();
-
-      // Array for if multiple nodes are selected
-      // Right now, one at a time is selected, only
-      const closestPlugArray = [];
-      if (selectedNodes.length > 0) {
-        for (let i = 0; i < selectedNodes.length; i += 1) {
-          const p = ApplicationModel.getP();
-          const closestPlug = selectedNodes[i].getPlugClosestToMouse(
-            p.mouseX,
-            p.mouseY
-          );
-          closestPlugArray.push(closestPlug);
-        }
-      }
-      return closestPlugArray;
-    }
-
-    // INTERACTION
-    selectNode(node) {
-      node.setSelected();
-    }
-
-    // INTERACTION -- NOT USED
-    // deselectNode(node: NodeModel): void {
-    //   node.deselect();
-    // }
-    // INTERACTION
     static repositionElementOnResize(element, windowWidth, windowHeight) {
-      Layout.positionElementBasedOnScreenSize(
-        element,
-        windowWidth,
-        windowHeight
-      );
+      Layout.resizeCanvas(windowWidth, windowHeight);
+      Layout.positionPanel(element);
       return;
     }
   }
 
-  class MouseManager {
-    // INTERACTION (MOUSE -- STUB)
-    static mouseDragged(p, appModel) {
-      // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
-      const dragTarget = this.getDragTarget(appModel);
-      if (dragTarget === null) {
-        return;
-      }
-      if (dragTarget.type === "Node") {
-        dragTarget.setIsDragging(true);
-      } else if (dragTarget.type === "Edge") {
-        dragTarget.setIsDragging(true);
-      } else if (dragTarget.type === "Plug") {
-        dragTarget.setIsDragging(true);
-      } else if (dragTarget.type === "Tool") {
-        dragTarget.setIsDragging(true);
-      }
-    }
-    static checkForSelectParam(pm) {
-      const p = ApplicationModel.getP();
-      let pmClicked = null;
-      if (pm.checkMouseOver(p.mouseX, p.mouseY)) {
-        pm.setIsSelected();
-        pmClicked = pm;
-      }
-      return pmClicked;
-    }
-    static checkForSelectPlug(n) {
-      const plugs = n.getPlugs();
-      const p = ApplicationModel.getP();
-      plugs.forEach((plug) => {
-        if (plug.checkMouseOver(p.mouseX, p.mouseY)) {
-          plug.setIsSelected();
-        }
-      });
-    }
-
-    // INTERACTION (MOUSE)
-    static mouseClicked(appModel) {
-      console.log(`mouse clicked`);
-      const nodes = appModel.getNodes();
-
-      // TODO: Deal with potential for more than one selected node
-      const params = [];
-      let foundParam = false;
-      if (appModel) {
-        const selectedNodes = appModel.getSelectedNodes();
-        if (selectedNodes && selectedNodes.length > 0) {
-          const inputParams = selectedNodes[0].getInputParameterList();
-          const outputParams = selectedNodes[0].getOutputParameterList();
-          params.push(...inputParams);
-          params.push(...outputParams);
-          console.log(`params.length: ${params.length}`);
-          for (let i = 0; i < params.length; i += 1) {
-            const nextParam = params[i];
-            if (nextParam === undefined) {
-              continue;
-            }
-            foundParam = MouseManager.checkForSelectParam(nextParam) !== null;
-
-            // if (foundParam) { console.warn("FOUND PARAM, length is now: " + selectedNodes[0]?.getSelectedParameters().length); }
-          }
-        }
-        if (foundParam) {
-          return;
-        }
-        nodes.forEach((n) => {
-          MouseManager.checkForSelectPlug(n);
-          MouseManager.checkForSelectNode(appModel);
-        });
-      }
-    }
-    static mouseDoubleClicked(p, arg1) {
-      // throw new Error("Method not implemented.");
-    }
-
-    // LEFT OFF HERE
-    // TODO: Make node editable on double click
-    static doubleClicked(appModel) {
-      console.log(`mouse double clicked`);
-      appModel.getNodes();
-    }
-
-    // INTERACTION (MOUSE -- STUB)
-    static mousePressed() {
-    // p: p5
-      // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
-    }
-
-    // INTERACTION (MOUSE)
-    static clearDragTargets(appModel) {
-      // const appModel:ApplicationModel = (ChartManager.getApplicationModel() as ApplicationModel);
-      appModel.getNodes().forEach((node) => {
-        node.setIsDragging(false);
-        node.getPlugs().forEach((plug) => plug.setIsDragging(false));
-      });
-      appModel.getEdges().forEach((edge) => edge.setIsDragging(false));
-      appModel
-        .getToolbox()
-        .getToolList()
-        .forEach((tool) => tool.setIsDragging(false));
-    }
-
-    // INTERACTION (MOUSE)
-    static mouseReleased(p, appModel) {
-      // const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
-      if (appModel.getDynamicTool() !== null) {
-        const newlyMintedNode = CreationManager.createNewObjectFromDynamicTool(
-          appModel.getDynamicTool()
-        );
-        appModel.getNodes().push(newlyMintedNode);
-        appModel.setDynamicTool(null);
-      }
-      appModel.setDynamicTool(null);
-
-      // if there is a dynamicTool in the slot,
-      //  set the dynamicTool to null
-      //  then create the new class (has info?)
-      this.clearDragTargets(appModel);
-    }
-
-    // INTERACTION
-    // selectedNodes includes node to check if selected
-    static checkForSelectNode(appModel) {
-      const nodes = appModel.getNodes();
-      const mousePosition = new Position(
-        ApplicationModel.getP().mouseX,
-        ApplicationModel.getP().mouseY
-      );
-      for (let i = 0; i < nodes.length; i += 1) {
-        if (nodes[i] !== null && nodes[i] !== undefined) {
-          const node = nodes[i];
-          if (node.areParamsSelected() === false) {
-            node.setSelected(false);
-          }
-          if (node.checkMouseOver(mousePosition.x, mousePosition.y)) {
-            // console.warn("FOUND NODE")
-            node.setSelected();
-          }
-        }
-      }
-    }
-
-    // INTERACTION (MOUSE)
-    static getDragTarget(appModel) {
-      // const appModel:ApplicationModel = (ChartManager.applicationModel as ApplicationModel);
-      const nodeList = appModel.getNodes();
-      const edgeList = appModel.getEdges();
-      const plugList = appModel.getNodes().flatMap((node) => node.getPlugs());
-
-      // check tools
-      const toolbox = appModel.getToolbox();
-      if (toolbox) {
-        if (toolbox.getIsRolledOver()) {
-          const toolList = toolbox.getToolList();
-
-          // toolList.forEach((tool) => {
-          for (let i = 0; i < toolList.length; i += 1) {
-            const tool = toolList[i];
-            if (tool.getIsRolledOver()) {
-              return tool;
-            }
-          }
-        }
-      }
-      if (plugList.length > 0) {
-        for (let i = 0; i < plugList.length; i += 1) {
-          const plug = plugList[i];
-          if (typeof plug === "undefined") {
-            continue;
-          }
-          if (plug === null) {
-            continue;
-          }
-          if (plug.getIsRolledOver()) {
-            return plug;
-          }
-        }
-      }
-      if (edgeList.length > 0) {
-        for (let i = 0; i < edgeList.length; i += 1) {
-          const edge = edgeList[i];
-          if (typeof edge === "undefined") {
-            continue;
-          }
-          if (edge === null) {
-            continue;
-          }
-          if (
-            edge === null || edge === void 0 ? void 0 : edge.getIsRolledOver()
-          ) {
-            return edge;
-          }
-        }
-      }
-      if (nodeList.length > 0) {
-        for (let i = 0; i < nodeList.length; i += 1) {
-          const node = nodeList[i];
-          if (typeof node === "undefined") {
-            continue;
-          }
-          if (node === null) {
-            continue;
-          }
-          if (
-            node === null || node === void 0 ? void 0 : node.getIsRolledOver()
-          ) {
-            return node;
-          }
-        }
-      }
-
-      // return object that is being dragged, or null
-      return null;
-    }
-  }
+  // static getClosestPlugsOnSelectedNode(appModel:ApplicationModel):PlugModel[] {
+  //   const selectedNodes = appModel.getSelectedNodes();
+  //   // Array for if multiple nodes are selected
+  //   // Right now, one at a time is selected, only
+  //   const closestPlugArray = [];
+  //   if (selectedNodes.length > 0) {
+  //     for (let i = 0; i < selectedNodes.length; i += 1) {
+  //       const p = ApplicationModel.getP() as p5;
+  //       const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
+  //         p.mouseX, p.mouseY
+  //       );
+  //       closestPlugArray.push(closestPlug);
+  //     }
+  //   }
+  //   return closestPlugArray as PlugModel[];
+  // }
 
   class RenderEdge {
     constructor(p) {
@@ -1729,231 +2185,92 @@
     }
   }
 
-  const NAME = "NAME";
-  const VALUE = "VALUE";
-  const UNITS = "UNITS";
-  const ParameterFieldTypes = {
-    NAME,
-    VALUE,
-    UNITS,
-  };
-
-  class RenderParameter {
-    constructor(p) {
-      RenderParameter.p = p;
-    }
-    static drawColumnDivider(inspector) {
-      const p = this.p;
-      const inspectorPos = inspector.getPosition();
-      if (p === null) {
-        throw new Error("p is null in RenderParameter");
-      }
-      p.push();
-      p.noStroke();
-      p.translate(inspectorPos.x + 5, inspectorPos.y + this.Y_FIRST_ROW_OFFSET);
-
-      // draw divider
-      p.stroke(72);
-      p.strokeWeight(1);
-      const xStartLine = this.NAME_COLUMN_WIDTH - 10;
-      const xEndLine = xStartLine;
-      const yStartLine = -15;
-      const yEndLine = inspector.boundary.getBottom();
-      p.line(xStartLine, yStartLine, xEndLine, yEndLine);
-      p.noStroke();
-      p.pop();
-    }
-    static renderText(parameter, inspector) {
-      const p = this.p;
-      const inspectorPos = inspector.getPosition();
-      if (p === null) {
-        throw new Error("p is null in RenderParameter");
-      }
-      p.push();
-      p.translate(
-        inspectorPos.x + 5,
-        inspectorPos.y +
-          this.Y_FIRST_ROW_OFFSET +
-          this.rowCount * this.Y_EACH_ROW_OFFSET
-      );
-      p.fill(0);
-      p.text(parameter.getName(), 0, 0);
-      let secondColumnText = parameter.getValue();
-      if (typeof secondColumnText === "number") {
-        secondColumnText = secondColumnText.toFixed(3);
-      }
-      if (parameter.getUnits()) {
-        secondColumnText += ` ${parameter.getUnits()}`;
-      }
-      if (parameter.getEditingField() === ParameterFieldTypes.VALUE) {
-        p.fill("rgba(200,0,0,1)");
-      }
-
-      // display value with units
-      p.text(secondColumnText, this.NAME_COLUMN_WIDTH, 0);
-      p.pop();
-    }
-    static setParameterPosition(parameter, inspector, row) {
-      const inspectorPos = inspector.getPosition();
-      parameter.setPosition(
-        new Position(
-          inspectorPos.x,
-          inspectorPos.y + 7 + row * this.Y_EACH_ROW_OFFSET
-        )
-      );
-    }
-    static setParameterDimensions(parameter, inspector) {
-      parameter.setDimensions(
-        new Dimension(inspector.dimensions.width, this.Y_EACH_ROW_OFFSET)
-      );
-    }
-    static renderParameterRowInInspector(
-      parameter,
-      inspector,
-      isFirstParameter = false,
-      shouldAddHorizontalDivider = false
-    ) {
-      if (isFirstParameter) {
-        RenderParameter.rowCount = 0;
-        this.addHorizontalDivider(inspector, "Input Parameters");
-      }
-      if (shouldAddHorizontalDivider) {
-        this.addHorizontalDivider(inspector, "Output Parameters");
-      }
-      if (RenderParameter.rowCount >= 8) {
-        return;
-      }
-      const p = RenderParameter.p;
-
-      // const inspectorPos = inspector.getPosition();
-      if (p === null) {
-        throw new Error("p is null in RenderParameter");
-      }
-
-      // if (inspectorPos === null) { throw(new Error('inspector position is null in RenderParameter')); }
-      this.renderText(parameter, inspector);
-      RenderParameter.rowCount += 1;
-    }
-    static addHorizontalDivider(inspector, label = null) {
-      const p = this.p;
-      const inspectorPos = inspector.getPosition();
-      if (p === null) {
-        throw new Error("p is null in RenderParameter");
-      }
-      if (inspectorPos === null) {
-        throw new Error("inspector position is null in RenderParameter");
-      }
-      p.push();
-      if (label === "Output Parameters") {
-        p.fill("rgba(11,255,11,1)");
-      } else {
-        p.fill("rgba(255,255,148,1)");
-      }
-      p.translate(
-        inspector.boundary.getLeft() + 2,
-        inspector.boundary.getTop() +
-          this.rowCount * this.Y_EACH_ROW_OFFSET +
-          30
-      );
-      p.rect(0, 0, inspector.boundary.getRight() - 15, this.Y_EACH_ROW_OFFSET);
-      p.fill(0);
-      if (label !== null) {
-        // const textWidth =
-        p.text(label, 5, 15);
-        p.stroke(0);
-        p.strokeWeight(0.5);
-        p.line(5, 18, inspector.dimensions.width * 0.9, 18);
-      }
-      p.pop();
-      RenderParameter.rowCount += 1;
-    }
-    static drawOverPositionAndDimensions(parameter) {
-      const p = this.p;
-      if (p === null) {
-        throw new Error("p is null in RenderParameter");
-      }
-      p.push();
-      p.translate(parameter.position.x, parameter.position.y);
-      p.fill("rgba(255,100,0,1)");
-      p.circle(0, 0, 5);
-      p.noFill();
-      p.stroke("rgba(0,255,255,0.7)");
-      p.strokeWeight(1);
-      const shape = p.rect(
-        0,
-        0,
-        parameter.dimensions.width,
-        parameter.dimensions.height
-      );
-      shape.mouseClicked = () => {
-        parameter.clickAction();
-      };
-      shape.doubleClicked = () => {
-        parameter.doubleClickAction();
-      };
-      p.pop();
-    }
-    static render(
-      parameter,
-      inspector,
-      isFirstParameter = false,
-      shouldAddHorizontalDivider = false
-    ) {
-      RenderParameter.setParameterPosition(
-        parameter,
-        inspector,
-        RenderParameter.rowCount
-      );
-      RenderParameter.setParameterDimensions(parameter, inspector);
-      RenderParameter.drawOverPositionAndDimensions(parameter);
-      const p = this.p;
-      if (p === null) {
-        throw new Error("p is null in RenderParameter");
-      }
-      p.push();
-      p.translate(inspector.boundary.getLeft(), inspector.boundary.getTop());
-      p.pop();
-      this.renderParameterRowInInspector(
-        parameter,
-        inspector,
-        isFirstParameter,
-        shouldAddHorizontalDivider
-      );
-    }
-  }
-  RenderParameter.p = null;
-  RenderParameter.rowCount = 0;
-  RenderParameter.Y_FIRST_ROW_OFFSET = 45;
-  RenderParameter.Y_EACH_ROW_OFFSET = 20;
-  RenderParameter.NAME_COLUMN_WIDTH = 150;
-
+  // import InputParameterModel from '../model/InputParameterModel';
+  // import NodeModel from '../model/NodeModel';
+  // import OutputParameterModel from '../model/OutputParameterModel';
+  // import RenderParameter from './RenderParameter';
   class RenderInspector {
     constructor(p) {
       RenderInspector.p = p;
     }
-
-    // TEST
-    static render(ipm, node) {
-      let inputParameterList = [];
-      let outputParameterList = [];
-      if (node) {
-        inputParameterList = node.getInputParameterList();
-        outputParameterList = node.getOutputParameterList();
+    static renderInfoRow(row) {
+      const p = this.p;
+      const thisRowsColumns = row.getColumns();
+      if (p === null) {
+        throw new Error("p is null in RenderParameter");
       }
+      p.push();
+      p.translate(row.position.x, row.position.y);
+      p.noFill();
+      if (row.getIsRolledOver()) {
+        p.stroke("rgba(255,255,0,1)");
+        p.fill("rgba(255,255,0,0.2)");
+      } else {
+        p.stroke("rgba(0,255,255,0.7)");
+      }
+      p.strokeWeight(1);
+      p.rect(0, 0, row.dimensions.width, row.dimensions.height);
+      p.fill(0);
+      p.noStroke();
+      p.text(thisRowsColumns[0].getContent(), 10, 20);
+      p.text(
+        thisRowsColumns[1].getContent(),
+        LayoutInspector.PARAM_NAME_COLUMN_WIDTH,
+        20
+      );
+      p.pop();
+    }
+    static renderTable(ipm) {
+      var _a;
+
+      // console.log('renderTable', ipm.getTable());
+      const p = RenderInspector.getP();
+      const pos = ipm.getPosition();
+      const table = ipm.getTable();
+      const numRows =
+        table === null || table === void 0 ? void 0 : table.getNumRows();
+
+      // console.log('renderTable:pos', pos)
+      if (!pos) return;
+      p.push();
+      p.translate(pos.x, pos.y);
+      for (let i = 0; i < numRows; i++) {
+        // RenderInspector.renderRow(ipm.getTable()?.getRow(i));
+        const row =
+          (_a = ipm.getTable()) === null || _a === void 0
+            ? void 0
+            : _a.getRow(i);
+        if (row instanceof InspectorInfoRow) {
+          RenderInspector.renderInfoRow(row);
+        }
+        if (row instanceof InspectorHeadingRow) {
+          RenderInspector.renderHeadingRow(row);
+        }
+      }
+      p.pop();
+    }
+    static renderHeadingRow(row) {
+      const p = this.p;
+      if (p === null) {
+        throw new Error("p is null in RenderHeadingRow");
+      }
+      p.push();
+      p.translate(row.position.x, row.position.y);
+      p.noFill();
+      p.fill("rgba(200,255,200,1)");
+
+      // p.strokeWeight(1);
+      p.rect(0, 0, row.dimensions.width, row.dimensions.height);
+      p.fill(0);
+      p.text(row.getContent(), 10, 20);
+      p.pop();
+    }
+    static render(ipm) {
       if (ipm) {
         RenderInspector.renderBackground(ipm);
         RenderInspector.renderInspectorBorder(ipm);
         RenderInspector.renderTitleBar(ipm);
-        const inputParamLength = inputParameterList.length;
-        for (let i = 0; i < inputParamLength; i += 1) {
-          RenderParameter.render(inputParameterList[i], ipm, i === 0);
-        }
-        const outputParamLength = outputParameterList.length;
-        for (let i = 0; i < outputParamLength; i += 1) {
-          RenderParameter.render(outputParameterList[i], ipm, false, i === 0);
-        }
-      } else {
-        console.warn("InspectorModel is null");
+        RenderInspector.renderTable(ipm);
       }
     }
 
@@ -2021,6 +2338,7 @@
 
   class RenderNode {
     constructor(p) {
+      // private static clickHotSpots:unknown[] = [];
       this.isSelected = false;
       RenderNode.p = p;
     }
@@ -2037,7 +2355,7 @@
       const y = pos.y;
 
       // const p = RenderNode.p;
-      const mouseIsOver = plug.checkMouseOver(p.mouseX, p.mouseY);
+      const mouseIsOver = plug.checkBoundary(p.mouseX, p.mouseY);
       let plugStroke = "rgba(200,200,200,0.7)";
       let plugFill = "rgba(255,255,200,0.7)";
 
@@ -2064,12 +2382,16 @@
       }
       p.pop();
     }
+
+    // static getClickHotSpots():unknown[] {
+    //   return RenderNode.clickHotSpots;
+    // }
     static showNodes(node, p, showNodes) {
       node.getPlugs().forEach((plug) => {
         this.renderPlug(plug, p, showNodes);
       });
     }
-    static render(node, p, highlit = false) {
+    static render(node, p) {
       const CORNER_RADIUS = 10;
       node.getBoundary();
 
@@ -2089,13 +2411,13 @@
       p.fill("rgba(0,0,0,0.5)");
       let strokeColor = "rgb(128,128,128)";
       let strokeWeight = 1;
-      if (highlit) {
+      if (node.getIsSelected()) {
         strokeColor = "rgb(255,200,0)";
         strokeWeight = 3;
       }
 
       // round all corners except top-left
-      const shape = p.rect(
+      p.rect(
         0,
         5,
         width,
@@ -2143,12 +2465,16 @@
       {
         RenderNode.drawRolloverGuide(node.getBoundary(), p);
       }
-      shape.mouseClicked = () => {
-        node.clickAction();
-      };
-      shape.doubleClicked = () => {
-        node.doubleClickAction();
-      };
+
+      // shape.mouseClicked = () => {
+      //   console.log('setting up click actions in RenderNode.render:')
+      //   console.log(node);
+      //   node.clickAction(node);
+      // }
+      // shape.doubleClicked = () => {
+      //   node.doubleClickAction();
+      // }
+      // this.clickHotSpots.push(shape);
     }
     static drawRolloverGuide(boundary, p) {
       p.push();
@@ -2349,20 +2675,23 @@
         ? void 0
         : nodes.forEach((n) => {
             // check for rollover
-            // TODO: Move this logic to abstract GuiElement class
-            const mouseIsOverNode = n.checkMouseOver(p.mouseX, p.mouseY);
-            if (mouseIsOverNode) {
-              n.setIsRolledOver();
-            } else {
-              n.setIsRolledOver(false);
-            }
-
+            // TODO: Move this logic to MouseManager / GuiElement class
+            // const mouseIsOverNode = n.checkBoundary(p.mouseX, p.mouseY);
+            // if (mouseIsOverNode) {
+            //   n.setIsRolledOver();
+            // } else {
+            //   n.setIsRolledOver(false);
+            // }
             // if node is being dragged, update its position
-            if (n.getIsDragging()) {
-              n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
-            }
-            RenderNode.render(n, ApplicationModel.getP());
+            // TODO: Move to Mouse Manager
+            // if (n.getIsDragging()) {
+            //   n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
+            // }
+            RenderNode.render(n, P5Reference.p);
           });
+
+      // const hotSpots = RenderNode.getClickHotSpots();
+      // console.log("hotSpots: ", hotSpots);
     }
     static drawLeadLine(p, appModel, startPosition, mousePosition) {
       const lineArray = [startPosition, mousePosition];
@@ -2371,7 +2700,7 @@
 
     // RENDER
     static renderElements(appModel) {
-      const p = ApplicationModel.getP();
+      const p = P5Reference.p;
 
       // const appModel:ApplicationModel = (ChartManager.getApplicationModel() as ApplicationModel);
       const toolbox =
@@ -2398,22 +2727,13 @@
       RenderToolbox.render(toolbox);
 
       // 2. RENDER INSPECTOR (and parameters in node)
-      RenderInspector.render(
-        inspector,
-        appModel === null || appModel === void 0
-          ? void 0
-          : appModel.getSelectedNodes()[0]
-      );
-      const mouseIsOverToolbox =
-        toolbox === null || toolbox === void 0
-          ? void 0
-          : toolbox.checkMouseOver(p.mouseX, p.mouseY);
-      if (mouseIsOverToolbox) {
-        toolbox === null || toolbox === void 0
-          ? void 0
-          : toolbox.setIsRolledOver();
-      }
+      RenderInspector.render(inspector);
 
+      // Do this in MouseManager
+      // const mouseIsOverToolbox = toolbox?.checkBoundary(p.mouseX, p.mouseY);
+      // if (mouseIsOverToolbox) {
+      //   toolbox?.setIsRolledOver();
+      // }
       // 3. RENDER TOOLS
       this.renderTools(p, appModel);
 
@@ -2463,49 +2783,27 @@
                 t
               );
             }
-            const mouseIsOverTool = t.checkMouseOver(p.mouseX, p.mouseY);
-            if (mouseIsOverTool) {
-              t.setIsRolledOver();
-            } else {
-              t.setIsRolledOver(false);
-            }
+
+            // TODO: This should be done in MouseManager -- Verify if this is done there
+            // const mouseIsOverTool = (t as ToolModel).checkBoundary(
+            //   p.mouseX,
+            //   p.mouseY
+            // );
+            // if (mouseIsOverTool) {
+            //   t.setIsRolledOver();
+            // } else {
+            //   t.setIsRolledOver(false);
+            // }
           });
     }
   }
   RenderApplication.p = null;
 
-  // Node to node selection -- not using this interaction for now.
-  // if (appModel.getSelectedNodes().length > 0) {
-  //   // TODO: Only draw line if user is hovering over another node:
-  //   //  1. iterate through plugs and check closest
-  //   const plugArray =
-  //     InteractionManager.getClosestPlugsOnSelectedNode(appModel);
-  //   // console.log('plugArray: '+plugArray);
-  //   // TODO: Draw this line only when dragging or selecting a plug
-  //   // const closestPlugOnSelectedNode = plugArray[0];
-  //   // const closestPlugPosition = closestPlugOnSelectedNode?.getPosition();
-  //   // const mousePosition = new Position(p.mouseX, p.mouseY);
-  //   // this.drawLeadLine(p, appModel,
-  //   //   closestPlugPosition as Position, mousePosition);
-  // }
-  // static render(
-  //   application:ApplicationModel,
-  //   // inspector:InspectorModel,
-  //   // isFirstParameter=false,
-  //   // shouldAddHorizontalDivider=false,
-  // ):void {
-  //   const p = this.p;
-  //   if (p === null) { throw(new Error('p is null in RenderApplication')); }
-  //   p.push();
-  //   // p.translate(
-  //   // );
-  //   p.pop();
-  // }
-
   let applicationModel = null;
   const preload = (p) => {
-    applicationModel = ApplicationModel.createInstance(p);
+    applicationModel = ApplicationModel.createInstance();
     p.loadFont("./font/Regular.otf");
+    P5Reference.createInstance(p);
   };
 
   // FOR 3D orthographic
@@ -2524,34 +2822,25 @@
     new RenderTool(p);
     new RenderToolbox(p);
     new RenderInspector(p);
-    new RenderParameter(p);
     new RenderApplication(p);
   };
-  const mouseDragged = (p) => {
-    MouseManager.mouseDragged(p, applicationModel);
+  const mouseMoved = (p) => {
+    MouseManager.mouseMoved(p.mouseX, p.mouseY, applicationModel);
   };
-  const mousePressed = () =>
-    // p: p5
-    {};
-
-  // in draw.ts
-  // export const mouseClicked = (p: p5): void => {
-  //   MouseManager.mouseClicked(
-  //     // p,
-  //     applicationModel as ApplicationModel
-  //   );
-  // };
-  // export const doubleClicked = (
-  //   p: p5,
-  //   applicationModel: ApplicationModel
-  // ): void => {
-  //   MouseManager.mouseDoubleClicked(p, applicationModel as ApplicationModel);
-  // };
+  const mouseClicked = (p) => {
+    MouseManager.mouseClicked(p.mouseX, p.mouseY, applicationModel);
+  };
+  const mouseDragged = (p) => {
+    MouseManager.mouseDragged(p.mouseX, p.mouseY, applicationModel);
+  };
+  const mousePressed = (p) => {
+    MouseManager.mousePressed(p.mouseX, p.mouseY, applicationModel);
+  };
   const mouseReleased = (p) => {
-    MouseManager.mouseReleased(p, applicationModel);
+    MouseManager.mouseReleased(p.mouseX, p.mouseY, applicationModel);
   };
   const keyPressed = (p) => {
-    InteractionManager.handleKeyPress(p);
+    KeyboardManager.handleKeyPress(p.keyCode, p.key);
   };
 
   /** This is a setup function. */
@@ -2567,10 +2856,6 @@
   let p;
   let lastWindowDimensionX = null;
   let lastWindowDimensionY = null;
-  function mouseClicked() {
-    // console.log(`draw.ts: mouseClicked()`);
-    MouseManager.mouseClicked(applicationModel);
-  }
   const draw = (_p) => {
     p = _p;
     if (
@@ -2578,6 +2863,7 @@
       lastWindowDimensionY !== p.windowHeight
     ) {
       p.resizeCanvas(p.windowWidth, p.windowHeight);
+      Layout.resizeCanvas(p.windowWidth, p.windowHeight);
       InteractionManager.resizeCanvas(
         applicationModel,
         p.windowWidth,
@@ -2599,8 +2885,7 @@
     mousePressed,
     mouseReleased,
     keyPressed,
-
-    // doubleClicked,
+    mouseMoved,
   });
   new p5(sketch);
 })(p5);

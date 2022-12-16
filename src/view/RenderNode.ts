@@ -3,7 +3,9 @@ import NodeModel from "../model/NodeModel";
 import PlugModel from "../model/PlugModel";
 import Boundary from "../model/positioning/Boundary";
 export class RenderNode {
+
   public static p: p5;
+  // private static clickHotSpots:unknown[] = [];
   private isSelected = false;
   constructor(p: p5) {
     RenderNode.p = p;
@@ -42,14 +44,17 @@ export class RenderNode {
     }
     p.pop();
   }
-
+  // static getClickHotSpots():unknown[] {
+  //   return RenderNode.clickHotSpots;
+  // }
   static showNodes(node: NodeModel, p: p5, showNodes:boolean): void {
     node.getPlugs().forEach((plug) => {
       this.renderPlug(plug, p, showNodes);
     });
   }
 
-  static render(node: NodeModel, p: p5, highlit=false): void {
+  static render(node: NodeModel, p: p5): void {
+    // console.log('RenderNode.render : ', node.toString());
     // test variables
     const TEST_ROLLOVER_GUIDE = true;
     const CORNER_RADIUS = 10;
@@ -74,7 +79,7 @@ export class RenderNode {
 
     let strokeColor = 'rgb(128,128,128)';
     let strokeWeight = 1;
-    if (highlit) {
+    if (node.getIsSelected()) {
       strokeColor = 'rgb(255,200,0)';
       strokeWeight = 3;
     }
@@ -106,12 +111,15 @@ export class RenderNode {
     if (TEST_ROLLOVER_GUIDE) {
       RenderNode.drawRolloverGuide(node.getBoundary() as Boundary, p);
     }
-    shape.mouseClicked = () => {
-      node.clickAction();
-    }
-    shape.doubleClicked = () => {
-      node.doubleClickAction();
-    }
+    // shape.mouseClicked = () => {
+    //   console.log('setting up click actions in RenderNode.render:')
+    //   console.log(node);
+    //   node.clickAction(node);
+    // }
+    // shape.doubleClicked = () => {
+    //   node.doubleClickAction();
+    // }
+    // this.clickHotSpots.push(shape);
   }
   static drawRolloverGuide(boundary: Boundary, p: p5): void {
     p.push();

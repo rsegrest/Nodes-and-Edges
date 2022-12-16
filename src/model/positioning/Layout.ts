@@ -1,7 +1,8 @@
-import p5 from "p5";
 import GuiElementModel from "../abstract/GuiElement";
-import InspectorModel from "../InspectorModel";
+import ApplicationModel from "../ApplicationModel";
+import InspectorModel from "../inspector/InspectorModel";
 import ToolboxModel from "../ToolboxModel";
+import Dimension from "./Dimension";
 import Position from "./Position";
 
 export class Layout {
@@ -9,27 +10,33 @@ export class Layout {
   public static readonly BASE_NODE_WIDTH = 100;
   public static readonly BASE_NODE_HEIGHT = 50;
 
-  private width = 0;
-  private height = 0;
+  private static width = 0;
+  private static height = 0;
 
-  private constructor(p:p5) {
-    this.width = p.width;
-    this.height = p.height;
+  private constructor(width:number, height:number) {
+    Layout.width = width;
+    Layout.height = height;
+    Layout.positionPanel(ApplicationModel.getInstance().getInspector());
+    Layout.positionPanel(ApplicationModel.getInstance().getToolbox());
   }
 
-  private static positionInspector(
+  public static resizeCanvas(width:number, height:number):void {
+    this.width = width;
+    this.height = height;
+  }
+
+  private static calcInspectorPosition(
     inspector:InspectorModel,
-    // currently inspector is only in bottom left, so don't need width (yet)
-    screenHeight:number
   ):void {
     if (inspector === null) { return; }
-    const dim = inspector.getDimensions();
-    if (dim === null) { return; }
-    // const inspectorWidth = dim.width;
-    const inspectorHeight = dim.height;
+    const inspectorWidth = 600;
+    const inspectorHeight = 300;
+    inspector.setDimensions(new Dimension(inspectorWidth, inspectorHeight));
+    
+    console.log('Layout.height : ' + Layout.height);
     const inspectorPosition = new Position(
       10,
-      screenHeight - (inspectorHeight+10)
+      this.height - (inspectorHeight+10)
     );
     inspector.setPosition(inspectorPosition);
   }
@@ -69,28 +76,29 @@ export class Layout {
       );
     }
   }
-  public static positionElementBasedOnScreenSize(
-    element:GuiElementModel,
-    screenWidth:number,
-    screenHeight:number
+  public static positionPanel(
+    element:GuiElementModel
   ):void {
+    if ((this.width === 0) || (this.height === 0)) {
+      throw new Error('Layout dimensions are not set');
+    }
     if (element instanceof ToolboxModel) {
-      Layout.positionToolboxAndTools(element, screenWidth);
+      Layout.positionToolboxAndTools(element, this.width);
     }
     if (element instanceof InspectorModel) {
-      Layout.positionInspector(element, screenHeight);
+      Layout.calcInspectorPosition(element);
     }
   }
   // Boilerplate getters and setters
-  public createInstance(p:p5):Layout {
+  public static createInstance(width:number, height:number):Layout {
     if (Layout.instance === null) {
-      Layout.instance = new Layout(p);
+      Layout.instance = new Layout(width, height);
     }
     return Layout.instance;
   }
-  public getInstance():Layout {
+  public static getInstance():Layout {
     if (Layout.instance === null) {
-      throw new Error('Layout instance is not created yet');
+      Layout.instance = new Layout(0,0);
     }
     return Layout.instance;
   }
@@ -101,6 +109,12 @@ export class Layout {
     const x = position1.x - position2.x;
     const y = position1.y - position2.y;
     return Math.sqrt(x*x + y*y);
+  }
+  public static getWidth():number {
+    return Layout.width;
+  }
+  public static getHeight():number {
+    return Layout.height;
   }
 }
 export default Layout;

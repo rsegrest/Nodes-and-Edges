@@ -1,9 +1,15 @@
 import p5 from 'p5';
-import InputParameterModel from '../model/InputParameterModel';
-import InspectorModel from '../model/InspectorModel';
-import NodeModel from '../model/NodeModel';
-import OutputParameterModel from '../model/OutputParameterModel';
-import RenderParameter from './RenderParameter';
+import InspectorHeadingRow from '../model/inspector/InspectorHeadingRow';
+import InspectorInfoColumn from '../model/inspector/InspectorInfoColumn';
+import InspectorInfoRow from '../model/inspector/InspectorInfoRow';
+import InspectorModel from '../model/inspector/InspectorModel';
+import LayoutInspector from '../model/inspector/LayoutInspector';
+import Dimension from '../model/positioning/Dimension';
+import Position from '../model/positioning/Position';
+// import InputParameterModel from '../model/InputParameterModel';
+// import NodeModel from '../model/NodeModel';
+// import OutputParameterModel from '../model/OutputParameterModel';
+// import RenderParameter from './RenderParameter';
 
 class RenderInspector {
 
@@ -13,39 +19,87 @@ class RenderInspector {
     RenderInspector.p = p;
   }
 
-  // TEST
-
-  static render(ipm:InspectorModel, node:NodeModel|null):void {
-    let inputParameterList:InputParameterModel[] = [];
-    let outputParameterList:OutputParameterModel[] = [];
-    if (node) {
-      inputParameterList = node.getInputParameterList();
-      outputParameterList = node.getOutputParameterList();
+  static renderInfoRow(
+    row:InspectorInfoRow
+  ):void {
+    const p = this.p;
+    const thisRowsColumns = row.getColumns();
+    if (p === null) { throw(new Error('p is null in RenderParameter')); }
+    p.push();
+    p.translate(
+      (row.position as Position).x,
+      (row.position as Position).y
+    );
+    p.noFill();
+    if (row.getIsRolledOver()) {
+      p.stroke('rgba(255,255,0,1)');
+      p.fill('rgba(255,255,0,0.2)');
+    } else {
+      p.stroke('rgba(0,255,255,0.7)');
     }
+    p.strokeWeight(1);
+    p.rect(
+      0,0,
+      (row.dimensions as Dimension).width,
+      (row.dimensions as Dimension).height,
+    );
+    p.fill(0);
+    p.noStroke();
+    p.text((thisRowsColumns[0] as InspectorInfoColumn).getContent(), 10, 20);
+    p.text((thisRowsColumns[1] as InspectorInfoColumn).getContent(), LayoutInspector.PARAM_NAME_COLUMN_WIDTH, 20);
+    p.pop();
+  }
+
+  static renderTable(ipm:InspectorModel):void {
+    // console.log('renderTable', ipm.getTable());
+    const p = RenderInspector.getP();
+    const pos = ipm.getPosition();
+    const table = ipm.getTable();
+    const numRows = table?.getNumRows() as number;
+    // console.log('renderTable:pos', pos)
+    if (!pos) return;
+    p.push();
+    p.translate(pos.x, pos.y);
+    for (let i = 0; i < numRows; i++) {
+      // RenderInspector.renderRow(ipm.getTable()?.getRow(i));
+      const row = ipm.getTable()?.getRow(i);
+      if (row instanceof InspectorInfoRow) { RenderInspector.renderInfoRow(row); }
+      if (row instanceof InspectorHeadingRow) { RenderInspector.renderHeadingRow(row); }
+    }
+    p.pop();
+  }
+  static renderHeadingRow(row: InspectorHeadingRow):void {
+    const p = this.p;
+    if (p === null) { throw(new Error('p is null in RenderHeadingRow')); }
+    p.push();
+    p.translate(
+      (row.position as Position).x,
+      (row.position as Position).y
+    );
+    p.noFill();
+    p.fill('rgba(200,255,200,1)');
+    
+    // p.strokeWeight(1);
+    p.rect(
+      0,0,
+      (row.dimensions as Dimension).width,
+      (row.dimensions as Dimension).height,
+    );
+    p.fill(0);
+    p.text(
+      row.getContent(),
+      10,
+      20,
+    )
+    p.pop();
+  }
+  static render(ipm:InspectorModel):void {
+    
     if (ipm) {
       RenderInspector.renderBackground(ipm);
       RenderInspector.renderInspectorBorder(ipm);
       RenderInspector.renderTitleBar(ipm);
-      const inputParamLength = inputParameterList.length;
-      for (let i = 0; i < inputParamLength; i += 1) {
-        RenderParameter.render(
-          inputParameterList[i] as InputParameterModel,
-          ipm,
-          (i === 0)
-        );
-      }
-
-      const outputParamLength = outputParameterList.length;
-      for (let i = 0; i < outputParamLength; i += 1) {
-        RenderParameter.render(
-          outputParameterList[i] as OutputParameterModel,
-          ipm,
-          false,
-          (i === 0)
-        );
-      }
-    } else {
-      console.warn('InspectorModel is null');
+      RenderInspector.renderTable(ipm);
     }
   }
   // calculate column position
@@ -71,7 +125,6 @@ class RenderInspector {
     p.noStroke();
     p.rect(pos.x, pos.y, dim.width, 30);
     p.pop();
-
 
     RenderInspector.renderTitle(ipm);
   }

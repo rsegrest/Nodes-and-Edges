@@ -57,8 +57,8 @@ abstract class GuiElementModel {
     public rolloverAction(): void {
       this.isRolledOver = true;
     }
-    public abstract clickAction(): void;
-    public abstract doubleClickAction(): void;
+    public abstract clickAction(info:any): void;
+    public abstract doubleClickAction(info:any): void;
 
     public setPosition(position:Position): void {
       this.position = position;

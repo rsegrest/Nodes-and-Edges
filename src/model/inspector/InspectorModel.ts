@@ -1,8 +1,11 @@
-import GuiElementModel from "./abstract/GuiElement";
-import InputParameterModel from "./InputParameterModel";
-import OutputParameterModel from "./OutputParameterModel";
-import Dimension from "./positioning/Dimension";
-import Position from "./positioning/Position";
+import GuiElementModel from "../abstract/GuiElement";
+import InputParameterModel from "../InputParameterModel";
+import NodeModel from "../NodeModel";
+import OutputParameterModel from "../OutputParameterModel";
+// import Dimension from "../positioning/Dimension";
+// import Position from "../positioning/Position";
+import InspectorTable from "./InspectorTable";
+import LayoutInspector from "./LayoutInspector";
 
 // TODO: Create panel model that is collapsible
 class InspectorModel extends GuiElementModel {
@@ -10,18 +13,30 @@ class InspectorModel extends GuiElementModel {
   public readonly type = "Inspector";
   private displayedParamSet:(InputParameterModel|OutputParameterModel)[] = [];
   private isCollapsed = false;
+  private inspectorTable:InspectorTable|null = null;
 
+  // TODO: Use InspectorLayout to set position and dimensions
   constructor() {
     super(
       true,
       false, // _isDraggable: fixed for now, might make this draggable later
       false, // _isResizable: future feature
       false, // _isSelectable: future feature
-      new Position(10,400),
-      new Dimension(300, 190)
+      LayoutInspector.getPosition(),
+      LayoutInspector.getDimensions(),
+      // new Position(10,400),
+      // new Dimension(300, 190)
     );
   }
 
+  // TODO: ****** set up table using node params
+  // TODO: test this
+  public createTable(node:NodeModel): void {
+    this.inspectorTable = new InspectorTable(node);
+  }
+  public getTable(): InspectorTable|null {
+    return this.inspectorTable;
+  }
   public clickAction(): void {
     console.log("inspector pane clicked");
   }

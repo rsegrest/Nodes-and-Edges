@@ -4,6 +4,7 @@ import ApplicationModel from "../model/ApplicationModel";
 import NodeModel from "../model/NodeModel";
 import Position from "../model/positioning/Position";
 import ToolModel from "../model/ToolModel";
+import P5Reference from "./P5Reference";
 import RenderEdge from "./RenderEdge";
 import RenderGuides from "./RenderGuide";
 import RenderInspector from "./RenderInspector";
@@ -25,20 +26,28 @@ class RenderApplication {
     const nodes = appModel?.getNodes();
     nodes?.forEach((n) => {
       // check for rollover
-      // TODO: Move this logic to abstract GuiElement class
-      const mouseIsOverNode = n.checkBoundary(p.mouseX, p.mouseY);
-      if (mouseIsOverNode) {
-        n.setIsRolledOver();
-      } else {
-        n.setIsRolledOver(false);
-      }
+      
+      // TODO: Move this logic to MouseManager / GuiElement class
+      // const mouseIsOverNode = n.checkBoundary(p.mouseX, p.mouseY);
+      // if (mouseIsOverNode) {
+      //   n.setIsRolledOver();
+      // } else {
+      //   n.setIsRolledOver(false);
+      // }
+      
+      
       // if node is being dragged, update its position
-      if (n.getIsDragging()) {
-        n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
-      }
+      
+      
+      // TODO: Move to Mouse Manager
+      // if (n.getIsDragging()) {
+      //   n.dragToPosition(new Position(p.mouseX - 40, p.mouseY - 20));
+      // }
 
-      RenderNode.render(n, ApplicationModel.getP() as p5);
+      RenderNode.render(n, P5Reference.p as p5);
     });
+    // const hotSpots = RenderNode.getClickHotSpots();
+    // console.log("hotSpots: ", hotSpots);
   }
   static drawLeadLine(p: p5, appModel: ApplicationModel,
     startPosition:Position, mousePosition:Position): void {
@@ -47,7 +56,7 @@ class RenderApplication {
   }
   // RENDER
   static renderElements(appModel: ApplicationModel): void {
-    const p = ApplicationModel.getP() as p5;
+    const p = P5Reference.p as p5;
     // const appModel:ApplicationModel = (ChartManager.getApplicationModel() as ApplicationModel);
 
     const toolbox = appModel?.getToolbox();
@@ -66,12 +75,13 @@ class RenderApplication {
     // 2. RENDER INSPECTOR (and parameters in node)
     RenderInspector.render(
       inspector,
-      appModel?.getSelectedNodes()[0] as NodeModel
+      // appModel?.getSelectedNodes()[0] as NodeModel
     );
-    const mouseIsOverToolbox = toolbox?.checkBoundary(p.mouseX, p.mouseY);
-    if (mouseIsOverToolbox) {
-      toolbox?.setIsRolledOver();
-    }
+    // Do this in MouseManager
+    // const mouseIsOverToolbox = toolbox?.checkBoundary(p.mouseX, p.mouseY);
+    // if (mouseIsOverToolbox) {
+    //   toolbox?.setIsRolledOver();
+    // }
 
     // 3. RENDER TOOLS
     this.renderTools(p, appModel);
@@ -116,48 +126,17 @@ class RenderApplication {
           t
         );
       }
-      const mouseIsOverTool = (t as ToolModel).checkBoundary(
-        p.mouseX,
-        p.mouseY
-      );
-      if (mouseIsOverTool) {
-        t.setIsRolledOver();
-      } else {
-        t.setIsRolledOver(false);
-      }
+      // TODO: This should be done in MouseManager -- Verify if this is done there
+      // const mouseIsOverTool = (t as ToolModel).checkBoundary(
+      //   p.mouseX,
+      //   p.mouseY
+      // );
+      // if (mouseIsOverTool) {
+      //   t.setIsRolledOver();
+      // } else {
+      //   t.setIsRolledOver(false);
+      // }
     });
   }
 }
 export default RenderApplication;
-
-// Node to node selection -- not using this interaction for now.
-// if (appModel.getSelectedNodes().length > 0) {
-//   // TODO: Only draw line if user is hovering over another node:
-//   //  1. iterate through plugs and check closest
-//   const plugArray =
-//     InteractionManager.getClosestPlugsOnSelectedNode(appModel);
-//   // console.log('plugArray: '+plugArray);
-
-//   // TODO: Draw this line only when dragging or selecting a plug
-//   // const closestPlugOnSelectedNode = plugArray[0];
-//   // const closestPlugPosition = closestPlugOnSelectedNode?.getPosition();
-//   // const mousePosition = new Position(p.mouseX, p.mouseY);
-//   // this.drawLeadLine(p, appModel,
-//   //   closestPlugPosition as Position, mousePosition);
-// }
-
-// static render(
-//   application:ApplicationModel,
-//   // inspector:InspectorModel,
-//   // isFirstParameter=false,
-//   // shouldAddHorizontalDivider=false,
-// ):void {
-//   const p = this.p;
-//   if (p === null) { throw(new Error('p is null in RenderApplication')); }
-//   p.push();
-//   // p.translate(
-
-//   // );
-//   p.pop();
-
-// }
