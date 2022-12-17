@@ -88,8 +88,9 @@
       dimensions && this.setDimensions(dimensions);
       boundary && this.setUpBoundary();
     }
-    checkBoundary(mouseX, mouseY) {
+    checkBoundary(mouseX, mouseY, output = false) {
       const boundary = this.getBoundary();
+      if (output) console.log("checkBoundary: " + boundary);
       if (!boundary) {
         return false;
       }
@@ -145,6 +146,7 @@
       );
 
       // if (checkOutput) { console.table(boundary); }
+      // console.log("setUpBoundary: " + boundary)
       this.boundary = boundary;
     }
     getBoundary() {
@@ -382,6 +384,18 @@
   }
 
   class LayoutInspector {
+    static assignBoundariesToRows(rows) {
+      rows.forEach((row) => {
+        // const pos = row.getPosition() as Position;
+        // const dim = row.getDimensions() as Dimension;
+        row.setUpBoundary();
+
+        // new Boundary(
+        // pos.x as number, pos.y as number,
+        // (pos.x as number)+(dim.width as number),
+        // (pos.y as number)+(dim.height as number)));
+      });
+    }
     constructor(pos, dim) {
       LayoutInspector.position = pos;
       LayoutInspector.dimensions = dim;
@@ -515,6 +529,8 @@
       );
       LayoutInspector.assignDimensionsToRows(rows);
       LayoutInspector.assignPositionsToRows(rows);
+      LayoutInspector.assignBoundariesToRows(rows);
+      console.log(`row[1] boundary: ${rows[1].getBoundary()}`);
       return rows;
     }
     getRow(rowNum) {
@@ -525,6 +541,9 @@
         return this.rows[rowNum];
       }
       return null;
+    }
+    getInfoRows() {
+      return this.rows.filter((row) => row instanceof InspectorInfoRow);
     }
     toString() {
       var _a;
@@ -1024,6 +1043,7 @@
       this.label = newLabel;
     }
     setIsEditing(isEditing) {
+      console.log("setIsEditing: " + isEditing);
       this.isEditing = isEditing;
     }
 
@@ -1237,12 +1257,6 @@
       this.isSelected = true;
       this.isHighlit = true;
     }
-    doubleClickAction() {
-      this.editingField = this.value;
-      if (this.editingField) {
-        this.typeColor = "red";
-      }
-    }
     toJson() {
       return JSON.stringify(this);
     }
@@ -1256,16 +1270,51 @@
   }
 
   class InputParameterModel extends Parameter {
-    constructor(name, value, units = null) {
+    doubleClickAction(info) {
+      this.isEditing = true;
+      ApplicationModel.setEditTarget(this.value);
+    }
+    constructor(name, value, units = null, isEditing = false) {
       super(name, value, units);
+      this.isEditing = isEditing;
       this.type = "InputParameter";
+    }
+    getValue() {
+      return this.value;
+    }
+    setValue(value) {
+      this.value = value;
+    }
+    getIsEditing() {
+      return this.isEditing;
+    }
+    setIsEditing(isEditing) {
+      this.isEditing = isEditing;
     }
   }
 
   class OutputParameterModel extends Parameter {
-    constructor(name, value, units = null) {
+    doubleClickAction(info) {
+      this.isEditing = true;
+      ApplicationModel.setEditTarget(this.value);
+    }
+    constructor(name, value, units = null, isEditing = false) {
       super(name, value, units);
+      this.isEditing = isEditing;
       this.type = "OutputParameter";
+      this.isEditing = isEditing;
+    }
+    getValue() {
+      return this.value;
+    }
+    setValue(value) {
+      this.value = value;
+    }
+    getIsEditing() {
+      return this.isEditing;
+    }
+    setIsEditing(isEditing) {
+      this.isEditing = isEditing;
     }
   }
 
@@ -1486,23 +1535,52 @@
     }
     static addCharacterToEditTarget(key) {
       if (this.editTarget === null) return;
-      this.editTarget.setLabel(this.editTarget.getLabel() + key);
+      if (this.editTarget instanceof NodeModel) {
+        this.editTarget.setLabel(this.editTarget.getLabel() + key);
+      }
+      if (
+        this.editTarget instanceof InputParameterModel ||
+        this.editTarget instanceof OutputParameterModel
+      ) {
+        this.editTarget.setValue(this.editTarget.getValue() + key);
+      }
     }
     static backspaceEditTarget() {
-      console.log("backspace");
       if (this.editTarget === null) return;
-      console.log("deleting last character:");
-      const labelContent = this.editTarget.getLabel();
-      console.log("labelContent = ", labelContent);
-      const bsLabelContent = labelContent.slice(0, -1);
-      console.log("bsLabelContent = ", bsLabelContent);
-      this.editTarget.setLabel(bsLabelContent);
+      let content = null;
+      let setFunction = null;
+      if (this.editTarget instanceof NodeModel) {
+        content = this.editTarget.getLabel();
+        setFunction = this.editTarget.setLabel;
+      } else if (
+        this.editTarget instanceof InputParameterModel ||
+        this.editTarget instanceof OutputParameterModel
+      ) {
+        content = this.editTarget.getValue();
+        setFunction = this.editTarget.setValue;
+      }
+      if (content === null) return;
+      if (setFunction === null) return;
+      const bsLabelContent = content.toString().slice(0, -1);
+      setFunction(bsLabelContent);
     }
     static getEditTarget() {
       return ApplicationModel.editTarget;
     }
     static setEditTarget(editingString) {
       ApplicationModel.editTarget = editingString;
+    }
+    static clearEditTarget() {
+      ApplicationModel.editTarget = null;
+
+      // nodes
+      ApplicationModel.getInstance()
+        .getNodes()
+        .forEach((node) => {
+          node.setIsEditing(false);
+        });
+
+      // TODO: clear edit target for parameters (edge labels?)
     }
     addNode(node) {
       this.nodes.push(node);
@@ -1630,10 +1708,14 @@
       );
     }
     static handleKeyPress(keyCode, key) {
-      if (ApplicationModel.getEditTarget()) {
+      const editTarget = ApplicationModel.getEditTarget();
+      console.log("editTarget", editTarget);
+      if (editTarget) {
         // console.log('keyTyped', keyCode)
         if (keyCode === 13) {
-          ApplicationModel.setEditTarget(null);
+          ApplicationModel.clearEditTarget();
+
+          // do parameters
         }
         if (keyCode === 13 || keyCode === 8) {
           // console.log('hit backspace');
@@ -1649,6 +1731,22 @@
   }
 
   class RolloverManager {
+    static checkForInspectorInfoRowRollover(mouseX, mouseY, appModel) {
+      // console.log(`MouseManager.checkForInspectorInfoRowRollover(): mouseX: ${mouseX}, mouseY: ${mouseY}`)
+      const inspector = appModel.getInspector();
+      const inspectorTable = inspector.getTable();
+      const infoRows = inspectorTable.getInfoRows();
+
+      // working above, but not below
+      for (let i = 0; i < infoRows.length; i += 1) {
+        const infoRow = infoRows[i];
+        console.log(`infoRow: ${infoRow}`);
+        if (infoRow.checkBoundary(mouseX, mouseY, true)) {
+          return infoRow;
+        }
+      }
+      return null;
+    }
     static checkForRollover(mouseX, mouseY, appModel) {
       // console.log(`MouseManager.mouseMoved(): mouseX: ${mouseX}, mouseY: ${mouseY}`);
       // Check all elements for rollover
@@ -1686,95 +1784,106 @@
       }
     }
     static checkForPlugRollover(mouseX, mouseY, appModel) {
-      let foundPlug = false;
-      appModel.getNodes().forEach((node) => {
-        node.getPlugs().forEach((plug) => {
+      let foundPlug = null;
+      const nodes = appModel.getNodes();
+      for (let i = 0; i < nodes.length; i += 1) {
+        const node = nodes[i];
+        const plugs = node.getPlugs();
+        for (let i = 0; i < plugs.length; i += 1) {
+          const plug = plugs[i];
           if (plug.checkBoundary(mouseX, mouseY)) {
-            // console.warn(`MouseManager.mouseMoved(): plug.setIsRolledOver(): [\n\t${plug}\n\t]()}]`);
             plug.setIsRolledOver();
-            foundPlug = true;
+            foundPlug = plug;
           } else {
             plug.setIsRolledOver(false);
           }
-        });
-      });
+        }
+      }
       return foundPlug;
     }
     static checkForParamRollover(mouseX, mouseY, appModel) {
-      let foundParam = false;
+      let foundParam = null;
 
       // Input Params
-      appModel.getSelectedNodes().forEach((node) => {
-        node.getInputParameterList().forEach((inputParam) => {
+      const selectedNodes = appModel.getSelectedNodes();
+      for (let i = 0; i < selectedNodes.length; i += 1) {
+        const node = selectedNodes[i];
+        const inputParams = node.getInputParameterList();
+        for (let i = 0; i < inputParams.length; i += 1) {
+          const inputParam = inputParams[i];
           if (inputParam.checkBoundary(mouseX, mouseY)) {
             // console.warn(`MouseManager.mouseMoved(): inputParam->setIsRolledOver(): [\n\t${inputParam}\n\t]()}]`);
             inputParam.setIsRolledOver();
-            foundParam = true;
+            foundParam = inputParam;
           } else {
             inputParam.setIsRolledOver(false);
           }
-        });
-      });
+        }
+      }
 
       // Output Params
-      appModel.getSelectedNodes().forEach((node) => {
-        node.getInputParameterList().forEach((outputParam) => {
+      for (let i = 0; i < selectedNodes.length; i += 1) {
+        const node = selectedNodes[i];
+        const outputParams = node.getOutputParameterList();
+        for (let i = 0; i < outputParams.length; i += 1) {
+          const outputParam = outputParams[i];
           if (outputParam.checkBoundary(mouseX, mouseY)) {
-            // console.warn(`MouseManager.mouseMoved(): outputParam->setIsRolledOver(): [\n\t${outputParam}\n\t]()}]`);
             outputParam.setIsRolledOver();
-            foundParam = true;
+            foundParam = outputParam;
           } else {
             outputParam.setIsRolledOver(false);
           }
-        });
-      });
+        }
+      }
       return foundParam;
     }
     static checkForNodeRollover(mouseX, mouseY, appModel) {
-      let foundNode = false;
+      let foundNode = null;
 
       // Nodes
-      appModel.getNodes().forEach((node) => {
+      const nodes = appModel.getNodes();
+      for (let i = 0; i < nodes.length; i += 1) {
+        const node = nodes[i];
         if (node.checkBoundary(mouseX, mouseY)) {
-          // console.warn(`MouseManager.mouseMoved(): getNodes->setIsRolledOver(): [\n\t${node}\n\t]()}]`);
-          foundNode = true;
+          foundNode = node;
           node.setIsRolledOver();
         } else {
           node.setIsRolledOver(false);
         }
-      });
+      }
       return foundNode;
     }
     static checkForToolsRollover(mouseX, mouseY, appModel) {
-      let foundTool = false;
+      let foundTool = null;
 
       // Tools
-      appModel
-        .getToolbox()
-        .getToolList()
-        .forEach((tool) => {
-          if (tool.checkBoundary(mouseX, mouseY)) {
-            // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`);
-            foundTool = true;
-            tool.setIsRolledOver();
-          } else {
-            tool.setIsRolledOver(false);
-          }
-        });
+      const toolList = appModel.getToolbox().getToolList();
+      for (let i = 0; i < toolList.length; i += 1) {
+        const tool = toolList[i];
+        if (tool.checkBoundary(mouseX, mouseY)) {
+          // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`);
+          foundTool = tool;
+          tool.setIsRolledOver();
+        } else {
+          tool.setIsRolledOver(false);
+        }
+      }
       return foundTool;
     }
     static checkForEdgeRollover(mouseX, mouseY, appModel) {
-      const foundEdge = false;
+      const foundEdge = null;
 
       // Edges
-      appModel.getEdges().forEach((edge) => {
+      const edges = appModel.getEdges();
+      for (let i = 0; i < edges.length; i += 1) {
+        const edge = edges[i];
         if (edge.checkBoundary(mouseX, mouseY)) {
           // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${edge}\n\t]()}]`);
           edge.setIsRolledOver();
         } else {
           edge.setIsRolledOver(false);
         }
-      });
+      }
       return foundEdge;
     }
   }
@@ -2006,10 +2115,6 @@
     static mouseDragged(mouseX, mouseY, appModel) {
       // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
       DragManager.getDragTarget(appModel);
-
-      // DragManager.dragTargets.forEach((dragTarget:DraggableObject) => {
-      //   dragTarget.setPosition(mouseX, mouseY);
-      // }
       ApplicationModel.getInstance()
         .getDraggingNodes()
         .forEach((draggingNode) => {
@@ -2019,6 +2124,7 @@
 
     // INTERACTION (MOUSE)
     static mouseClicked(mouseX, mouseY, appModel) {
+      ApplicationModel.clearEditTarget();
       ClickManager.checkElementsForClick(mouseX, mouseY, appModel);
     }
 
@@ -2026,8 +2132,31 @@
     // TODO: Make node editable on double click
     static doubleClicked(mouseX, mouseY, appModel) {
       console.log(`mouse double clicked`);
-
-      // const nodes:NodeModel[] = appModel.getNodes();
+      const node = RolloverManager.checkForNodeRollover(
+        mouseX,
+        mouseY,
+        appModel
+      );
+      if (node) {
+        // node.setIsEditing(true);
+        node.doubleClickAction();
+      }
+      console.log("about to call checkforInspectorInfoRowRollover");
+      const infoRow = RolloverManager.checkForInspectorInfoRowRollover(
+        mouseX,
+        mouseY,
+        appModel
+      );
+      console.log(`parameter: ${infoRow}`);
+      if (infoRow) {
+        console.log(`parameter double clicked`);
+        if (infoRow instanceof InputParameterModel) {
+          infoRow.doubleClickAction(null);
+        }
+        if (infoRow instanceof OutputParameterModel) {
+          infoRow.doubleClickAction(null);
+        }
+      }
     }
 
     // INTERACTION (MOUSE -- STUB)
@@ -2837,6 +2966,7 @@
   }
   RenderApplication.p = null;
 
+  // import InteractionManager from "./controller/InteractionManager";
   let applicationModel = null;
   const preload = (p) => {
     applicationModel = ApplicationModel.createInstance();
@@ -2880,6 +3010,9 @@
   const keyPressed = (p) => {
     KeyboardManager.handleKeyPress(p.keyCode, p.key);
   };
+  const doubleClicked = (p) => {
+    MouseManager.doubleClicked(p.mouseX, p.mouseY, applicationModel);
+  };
 
   /** This is a setup function. */
   const setup = (p) => {
@@ -2920,6 +3053,7 @@
     setup,
     draw,
     mouseClicked,
+    doubleClicked,
     mouseDragged,
     mousePressed,
     mouseReleased,

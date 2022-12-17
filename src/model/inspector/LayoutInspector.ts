@@ -8,8 +8,20 @@ import InspectorHeadingRow from "./InspectorHeadingRow";
 import InspectorInfoRow from "./InspectorInfoRow";
 import InspectorInfoColumn from "./InspectorInfoColumn";
 import PlugModel from "../PlugModel";
+import Boundary from "../positioning/Boundary";
 
 class LayoutInspector {
+  static assignBoundariesToRows(rows: (InspectorHeadingRow | InspectorInfoRow)[]):void {
+    rows.forEach((row) => {
+      // const pos = row.getPosition() as Position;
+      // const dim = row.getDimensions() as Dimension;
+      row.setUpBoundary();
+        // new Boundary(
+        // pos.x as number, pos.y as number,
+        // (pos.x as number)+(dim.width as number),
+        // (pos.y as number)+(dim.height as number)));
+    });
+  }
 
   private static readonly DEFAULT_INSPECTOR_WIDTH = 600;
   private static readonly DEFAULT_INSPECTOR_HEIGHT = 300;

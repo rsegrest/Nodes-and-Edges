@@ -1,6 +1,5 @@
 import type p5 from "p5";
 import CreationManager from "./controller/CreationManager";
-import InteractionManager from "./controller/InteractionManager";
 import KeyboardManager from "./controller/KeyboardManager";
 import MouseManager from "./controller/MouseManager";
 import ApplicationModel from "./model/ApplicationModel";
@@ -14,6 +13,7 @@ import RenderParameter from "./view/RenderParameter";
 import RenderParameterField from "./view/RenderParameterField";
 import RenderTool from "./view/RenderTool";
 import RenderToolbox from "./view/RenderToolbox";
+// import InteractionManager from "./controller/InteractionManager";
 
 export let applicationModel: ApplicationModel | null = null;
 export let creationManager: CreationManager | null;
@@ -82,6 +82,10 @@ export const keyPressed = (p: p5): void => {
   KeyboardManager.handleKeyPress(
     p.keyCode, p.key
   );
+}
+
+export const doubleClicked = (p: p5): void => {
+  MouseManager.doubleClicked(p.mouseX, p.mouseY, applicationModel as ApplicationModel);
 }
 
 /** This is a setup function. */

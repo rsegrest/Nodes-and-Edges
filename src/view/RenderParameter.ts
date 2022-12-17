@@ -149,7 +149,7 @@ class RenderParameter {
       parameter.clickAction();
     }
     shape.doubleClicked = () => {
-      parameter.doubleClickAction();
+      parameter.doubleClickAction(null);
     }
     p.pop();
   }

@@ -66,6 +66,7 @@ export class NodeModel extends DraggableGuiElementModel {
     this.label = newLabel;
   }
   setIsEditing(isEditing:boolean):void {
+    console.log("setIsEditing: " + isEditing)
     this.isEditing = isEditing;
   }
   // NOT USED (yet)

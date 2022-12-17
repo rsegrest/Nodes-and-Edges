@@ -1,6 +1,29 @@
+import EdgeModel from "../../model/EdgeModel";
+import NodeModel from "../../model/NodeModel";
+import PlugModel from "../../model/PlugModel";
+import ToolModel from "../../model/ToolModel";
 import ApplicationModel from "../../model/ApplicationModel";
+import InputParameterModel from "../../model/InputParameterModel";
+import OutputParameterModel from "../../model/OutputParameterModel";
+import InspectorInfoRow from "../../model/inspector/InspectorInfoRow";
+import InspectorTable from "../../model/inspector/InspectorTable";
 
 class RolloverManager {
+  static checkForInspectorInfoRowRollover(mouseX: number, mouseY: number, appModel: ApplicationModel):InspectorInfoRow|null {
+    // console.log(`MouseManager.checkForInspectorInfoRowRollover(): mouseX: ${mouseX}, mouseY: ${mouseY}`)
+    const inspector = appModel.getInspector();
+    const inspectorTable = inspector.getTable() as InspectorTable;
+    const infoRows = inspectorTable.getInfoRows();
+    // working above, but not below
+    for (let i = 0; i < infoRows.length; i += 1) {
+      const infoRow = infoRows[i] as InspectorInfoRow;
+      console.log(`infoRow: ${infoRow}`)
+      if (infoRow.checkBoundary(mouseX, mouseY, true)) {
+        return infoRow;
+      }
+    }
+    return null;
+  }
   static checkForRollover(
     mouseX: number, mouseY: number,
     appModel: ApplicationModel
@@ -33,105 +56,119 @@ class RolloverManager {
   static checkForPlugRollover(
     mouseX:number, mouseY:number,
     appModel:ApplicationModel
-  ):boolean {
-    let foundPlug = false;
-    appModel.getNodes().forEach((node) => {
-      node.getPlugs().forEach((plug) => {
+  ):PlugModel|null {
+    let foundPlug = null;
+    const nodes = appModel.getNodes();
+    for (let i = 0; i < nodes.length; i += 1) {
+      const node = nodes[i] as NodeModel;
+      const plugs = node.getPlugs();
+      for (let i = 0; i < plugs.length; i += 1) {
+        const plug = plugs[i] as PlugModel;
         if (plug.checkBoundary(mouseX, mouseY)) {
-          // console.warn(`MouseManager.mouseMoved(): plug.setIsRolledOver(): [\n\t${plug}\n\t]()}]`);
           plug.setIsRolledOver();
-          foundPlug = true;
+          foundPlug = plug;
         } else {
           plug.setIsRolledOver(false);
         }
-      })
-    });
+      }
+    };
     return foundPlug;
   }
   static checkForParamRollover(
     mouseX:number, mouseY:number,
     appModel:ApplicationModel
-  ):boolean {
+  ):InputParameterModel|OutputParameterModel|null {
 
-    let foundParam = false;
+    let foundParam = null;
     // Input Params
-    appModel.getSelectedNodes().forEach((node) => {
-      node.getInputParameterList().forEach((inputParam) => {
+    const selectedNodes = appModel.getSelectedNodes();
+    for (let i = 0; i < selectedNodes.length; i += 1) {
+      const node = selectedNodes[i] as NodeModel;
+      const inputParams = node.getInputParameterList();
+      for (let i = 0; i < inputParams.length; i += 1) {
+        const inputParam = inputParams[i] as InputParameterModel;
         if (inputParam.checkBoundary(mouseX, mouseY)) {
           // console.warn(`MouseManager.mouseMoved(): inputParam->setIsRolledOver(): [\n\t${inputParam}\n\t]()}]`);
           inputParam.setIsRolledOver();
-          foundParam = true;
+          foundParam = inputParam;
         } else {
           inputParam.setIsRolledOver(false);
         }
-      })
-    })
+      }
+    }
 
     // Output Params
-    appModel.getSelectedNodes().forEach((node) => {
-      node.getInputParameterList().forEach((outputParam) => {
+    for (let i = 0; i < selectedNodes.length; i += 1) {
+      const node = selectedNodes[i] as NodeModel;
+      const outputParams = node.getOutputParameterList();
+      for (let i = 0; i < outputParams.length; i += 1) {
+        const outputParam = outputParams[i] as OutputParameterModel;
         if (outputParam.checkBoundary(mouseX, mouseY)) {
-          // console.warn(`MouseManager.mouseMoved(): outputParam->setIsRolledOver(): [\n\t${outputParam}\n\t]()}]`);
           outputParam.setIsRolledOver();
-          foundParam = true;
+          foundParam = outputParam;
         } else {
           outputParam.setIsRolledOver(false);
         }
-      })
-    });
+      }
+    };
     return foundParam;
   }
 
   static checkForNodeRollover(
     mouseX:number, mouseY:number,
     appModel:ApplicationModel
-  ):boolean {
-    let foundNode = false;
+  ):NodeModel|null {
+    let foundNode = null;
     // Nodes
-    appModel.getNodes().forEach((node) => {
+    const nodes = appModel.getNodes();
+    for (let i = 0; i < nodes.length; i += 1) {
+      const node = nodes[i] as NodeModel;
       if (node.checkBoundary(mouseX, mouseY)) {
-        // console.warn(`MouseManager.mouseMoved(): getNodes->setIsRolledOver(): [\n\t${node}\n\t]()}]`);
-        foundNode = true;
+        foundNode = node;
         node.setIsRolledOver();
       } else {
         node.setIsRolledOver(false);
       }
-    });
+    };
     return foundNode;
   };
 
   static checkForToolsRollover(
     mouseX:number, mouseY:number,
     appModel:ApplicationModel
-  ):boolean {
-    let foundTool = false;
+  ):ToolModel|null {
+    let foundTool = null;
     // Tools
-    appModel.getToolbox().getToolList().forEach((tool) => {
+    const toolList = appModel.getToolbox().getToolList();
+    for (let i = 0; i < toolList.length; i += 1) {
+      const tool = toolList[i] as ToolModel;
       if (tool.checkBoundary(mouseX, mouseY)) {
         // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`);
-        foundTool = true;
+        foundTool = tool;
         tool.setIsRolledOver();
       } else {
         tool.setIsRolledOver(false);
       }
-    });
+    };
     return foundTool;
   }
 
   static checkForEdgeRollover(
     mouseX:number, mouseY:number,
     appModel:ApplicationModel
-  ):boolean {
-    const foundEdge = false;
+  ):EdgeModel|null {
+    const foundEdge = null;
     // Edges
-    appModel.getEdges().forEach((edge) => {
+    const edges = appModel.getEdges();
+    for (let i = 0; i < edges.length; i += 1) {
+      const edge = edges[i] as EdgeModel;
       if (edge.checkBoundary(mouseX, mouseY)) {
         // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${edge}\n\t]()}]`);
         edge.setIsRolledOver();
       } else {
         edge.setIsRolledOver(false);
       }
-    });
+    };
     return foundEdge;
   }
 

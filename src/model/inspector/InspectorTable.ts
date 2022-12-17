@@ -28,6 +28,9 @@ class InspectorTable {
     );
     LayoutInspector.assignDimensionsToRows(rows);
     LayoutInspector.assignPositionsToRows(rows);
+    LayoutInspector.assignBoundariesToRows(rows);
+    // TODO: ********* DEBUG ********* -- boundary is not set correctly
+    console.log(`row[1] boundary: ${(rows[1] as InspectorRow).getBoundary()}`);
     return rows;
   }
 
@@ -35,6 +38,9 @@ class InspectorTable {
     if (this.rows[rowNum] instanceof InspectorHeadingRow) { return this.rows[rowNum] as InspectorHeadingRow; }
     if (this.rows[rowNum] instanceof InspectorInfoRow) { return this.rows[rowNum] as InspectorInfoRow; }
     return null;
+  }
+  public getInfoRows():InspectorInfoRow[] {
+    return this.rows.filter((row) => row instanceof InspectorInfoRow) as InspectorInfoRow[];
   }
 
   public toString():string {

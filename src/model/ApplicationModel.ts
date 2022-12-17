@@ -42,7 +42,7 @@ class ApplicationModel {
   }
 
   private static instance: ApplicationModel | null = null;
-  private static editTarget: NodeModel | null = null;
+  private static editTarget: NodeModel | InputParameterModel | OutputParameterModel | null = null;
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
   private toolbox: ToolboxModel = new ToolboxModel();
@@ -72,25 +72,46 @@ class ApplicationModel {
 
   static addCharacterToEditTarget(key: string):void {
     if (this.editTarget === null) return;
-    this.editTarget.setLabel(this.editTarget.getLabel()+key);
+    if (this.editTarget instanceof NodeModel) {
+      this.editTarget.setLabel(this.editTarget.getLabel()+key);
+    }
+    if ((this.editTarget instanceof InputParameterModel)
+      || (this.editTarget instanceof OutputParameterModel)) {
+      this.editTarget.setValue(this.editTarget.getValue()+key);
+    }
   }
 
   static backspaceEditTarget():void {
-    console.log('backspace')
     if (this.editTarget === null) return;
-    console.log('deleting last character:')
-    const labelContent = this.editTarget.getLabel();
-    console.log('labelContent = ', labelContent)
-    const bsLabelContent = labelContent.slice(0, -1);
-    console.log('bsLabelContent = ', bsLabelContent)
-    this.editTarget.setLabel(bsLabelContent);
+    let content = null;
+    let setFunction = null;
+    if (this.editTarget instanceof NodeModel) {
+      content = this.editTarget.getLabel();
+      setFunction = this.editTarget.setLabel;
+    } else if ((this.editTarget instanceof InputParameterModel)
+      || (this.editTarget instanceof OutputParameterModel)) {
+      content = this.editTarget.getValue();
+      setFunction = this.editTarget.setValue;
+    }
+    if (content === null) return;
+    if (setFunction === null) return;
+    const bsLabelContent = content.toString().slice(0, -1);
+    setFunction(bsLabelContent);
   }
 
-  static getEditTarget(): NodeModel | null {
+  static getEditTarget(): NodeModel | InputParameterModel | OutputParameterModel | null {
     return ApplicationModel.editTarget;
   }
-  static setEditTarget(editingString: NodeModel | null): void {
+  static setEditTarget(editingString: NodeModel | InputParameterModel | OutputParameterModel | null): void {
     ApplicationModel.editTarget = editingString;
+  }
+  static clearEditTarget(): void {
+    ApplicationModel.editTarget = null;
+    // nodes
+    ApplicationModel.getInstance().getNodes().forEach((node) => {
+      node.setIsEditing(false);
+    });
+    // TODO: clear edit target for parameters (edge labels?)
   }
   addNode(node: NodeModel): void {
     this.nodes.push(node);

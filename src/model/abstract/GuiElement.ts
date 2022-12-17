@@ -32,8 +32,9 @@ abstract class GuiElementModel {
         dimensions && (this.setDimensions(dimensions));
         boundary && (this.setUpBoundary());
     }
-    public checkBoundary(mouseX: number, mouseY: number): boolean {
+    public checkBoundary(mouseX: number, mouseY: number, output=false): boolean {
       const boundary = this.getBoundary();
+      if (output) console.log("checkBoundary: " + boundary)
       if (!boundary) { return false; }
       const isOver = (
         mouseX >= (boundary.getLeft()) &&
@@ -88,6 +89,7 @@ abstract class GuiElementModel {
         (this.position as Position).y + (this.dimensions as Dimension).height + addMargin,
       );
       // if (checkOutput) { console.table(boundary); }
+      // console.log("setUpBoundary: " + boundary)
       this.boundary = boundary;
     }
     public getBoundary(): Boundary|null {

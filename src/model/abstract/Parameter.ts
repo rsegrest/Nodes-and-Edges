@@ -44,12 +44,6 @@ abstract class Parameter extends GuiElementModel {
     this.isSelected = true;
     this.isHighlit = true;
   }
-  public doubleClickAction(): void {
-    this.editingField = this.value;
-    if (this.editingField) {
-      this.typeColor = "red";
-    }
-  }
   public toJson(): string {
     return JSON.stringify(this);
   }

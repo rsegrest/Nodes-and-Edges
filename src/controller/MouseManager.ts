@@ -9,6 +9,8 @@ import RolloverManager from "./mouse/RolloverManager";
 import ClickManager from "./mouse/ClickManager";
 import DragManager from "./mouse/DragManager";
 import Position from "../model/positioning/Position";
+import InputParameterModel from "../model/InputParameterModel";
+import OutputParameterModel from "../model/OutputParameterModel";
 
 export type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
@@ -29,9 +31,6 @@ class MouseManager {
   ): void {
     // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
     DragManager.getDragTarget(appModel);
-    // DragManager.dragTargets.forEach((dragTarget:DraggableObject) => {
-    //   dragTarget.setPosition(mouseX, mouseY);
-    // }
     ApplicationModel.getInstance().getDraggingNodes().forEach(
       (draggingNode:NodeModel) => {
         draggingNode.dragToPosition(new Position(mouseX-20, mouseY-20));
@@ -44,6 +43,7 @@ class MouseManager {
     mouseX:number, mouseY:number,
     appModel:ApplicationModel
   ): void {
+    ApplicationModel.clearEditTarget();
     ClickManager.checkElementsForClick(
       mouseX, mouseY, appModel
     )
@@ -57,12 +57,30 @@ class MouseManager {
     appModel:ApplicationModel
   ): void {
     console.log(`mouse double clicked`);
-    // const nodes:NodeModel[] = appModel.getNodes();
+    const node = RolloverManager.checkForNodeRollover(mouseX, mouseY, appModel);
+    if (node) {
+      // node.setIsEditing(true);
+      node.doubleClickAction();
+    }
+    console.log('about to call checkforInspectorInfoRowRollover')
+    const infoRow = RolloverManager.checkForInspectorInfoRowRollover(mouseX, mouseY, appModel);
+    console.log(`parameter: ${infoRow}`)
+    if (infoRow) {
+      console.log(`parameter double clicked`)
+      if (infoRow instanceof InputParameterModel) {
+        infoRow.doubleClickAction(null);
+      }
+      if (infoRow instanceof OutputParameterModel) {
+        infoRow.doubleClickAction(null);
+      }
+    }
   }
 
   // INTERACTION (MOUSE -- STUB)
   static mousePressed(
-    mouseX:number, mouseY:number, appModel:ApplicationModel,
+    mouseX:number,
+    mouseY:number,
+    appModel:ApplicationModel,
   ): void {
     // console.log(`mouse pressed at : ${p.mouseX}, ${p.mouseY}`);
   }

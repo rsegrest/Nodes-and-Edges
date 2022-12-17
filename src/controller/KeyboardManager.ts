@@ -25,10 +25,13 @@ class KeyboardManager {
 
   static handleKeyPress(
     keyCode:number, key:string):void {
-    if (ApplicationModel.getEditTarget()) {
+    const editTarget = ApplicationModel.getEditTarget()
+    console.log('editTarget', editTarget);
+    if (editTarget) {
       // console.log('keyTyped', keyCode)
       if (keyCode === 13) {
-        ApplicationModel.setEditTarget(null);
+        ApplicationModel.clearEditTarget();
+        // do parameters
       }
       if (
         (keyCode === 13)
