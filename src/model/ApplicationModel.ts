@@ -14,6 +14,18 @@ import InputParameterModel from "./InputParameterModel";
 import OutputParameterModel from "./OutputParameterModel";
 
 class ApplicationModel {
+  clearPlugsSelected():void {
+    const nodes = this.getNodes();
+    if (nodes.length > 0) {
+      for (let i = 0; i < nodes.length; i++) {
+        const plugsForNode = (nodes[i] as NodeModel).getPlugs();
+        plugsForNode.forEach((plug) => {
+          plug.setIsSelected(false);
+        });
+      }
+    }
+    return;
+  }
   getPlugParent(plug: PlugModel): NodeModel | null {
     const nodes = this.getNodes().filter((node) => node.getPlugs().includes(plug));
     if (nodes.length > 0) {
@@ -24,6 +36,9 @@ class ApplicationModel {
       }
     }
     return null;
+  }
+  getDraggingNodes(): NodeModel[] {
+    return this.getNodes().filter((node) => node.getIsDragging());
   }
 
   private static instance: ApplicationModel | null = null;

@@ -8,6 +8,7 @@ import ToolModel from "../model/ToolModel";
 import RolloverManager from "./mouse/RolloverManager";
 import ClickManager from "./mouse/ClickManager";
 import DragManager from "./mouse/DragManager";
+import Position from "../model/positioning/Position";
 
 export type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
@@ -25,9 +26,17 @@ class MouseManager {
   static mouseDragged(
     mouseX:number, mouseY:number,
     appModel:ApplicationModel
-    ): void {
-      // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
-      DragManager.getDragTarget(appModel);
+  ): void {
+    // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
+    DragManager.getDragTarget(appModel);
+    // DragManager.dragTargets.forEach((dragTarget:DraggableObject) => {
+    //   dragTarget.setPosition(mouseX, mouseY);
+    // }
+    ApplicationModel.getInstance().getDraggingNodes().forEach(
+      (draggingNode:NodeModel) => {
+        draggingNode.dragToPosition(new Position(mouseX-20, mouseY-20));
+      }
+    );
   }
 
   // INTERACTION (MOUSE)

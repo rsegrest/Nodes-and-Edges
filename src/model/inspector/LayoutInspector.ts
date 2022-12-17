@@ -129,7 +129,6 @@ class LayoutInspector {
     const yCalc = yInspectorTop
       +(rowNum*rowHeight)
       +yTableOffset;
-    console.log('yCalc', yCalc)
     const rowPos = new Position(
       xInspectorLeft,
       yCalc

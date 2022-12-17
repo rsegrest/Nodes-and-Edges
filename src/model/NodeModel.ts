@@ -155,23 +155,23 @@ export class NodeModel extends DraggableGuiElementModel {
     this.isRolledOver = true;
     this.isHighlit = true;
     throw('NodeModel rolloverAction not implemented');
-    console.log('NodeModel rolloverAction', this.toString());
+    // console.log('NodeModel rolloverAction', this.toString());
   }
   // override GUIElementModel
   public clickAction(): void {
-    console.log('clickAction: ');
-    console.log('this: ', this);
+    // console.log('clickAction: ');
+    // console.log('this: ', this);
     this.isSelected = true;
     this.isHighlit = true;
     const inspector = ApplicationModel.getInstance().getInspector();
     inspector.createTable(this);
-    console.log('NodeModel onClick', this.toString());
+    // console.log('NodeModel onClick', this.toString());
   }
   // override GUIElementModel
   public doubleClickAction(): void {
     this.isEditing = true;
     ApplicationModel.setEditTarget(this);
-    console.log('NodeModel doubleClickAction', this.toString());
+    // console.log('NodeModel doubleClickAction', this.toString());
   }
   // override setUpBoundary
   public setUpBoundary(): void {

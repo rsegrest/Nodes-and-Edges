@@ -20,12 +20,12 @@ class RolloverManager {
 
     // Toolbox
     if (appModel.getToolbox().checkBoundary(mouseX, mouseY)) {
-      console.warn(`MouseManager.mouseMoved(): toolbox->setIsRolledOver()}]`);
+      // console.warn(`MouseManager.mouseMoved(): toolbox->setIsRolledOver()}]`);
       appModel.getToolbox().setIsRolledOver();
     }
     // Inspector
     if (appModel.getInspector().checkBoundary(mouseX, mouseY)) {
-      console.warn(`MouseManager.mouseMoved(): inspector->setIsRolledOver()}]`);
+      // console.warn(`MouseManager.mouseMoved(): inspector->setIsRolledOver()}]`);
       appModel.getInspector().setIsRolledOver();
     }
   }
@@ -38,7 +38,7 @@ class RolloverManager {
     appModel.getNodes().forEach((node) => {
       node.getPlugs().forEach((plug) => {
         if (plug.checkBoundary(mouseX, mouseY)) {
-          console.warn(`MouseManager.mouseMoved(): plug.setIsRolledOver(): [\n\t${plug}\n\t]()}]`);
+          // console.warn(`MouseManager.mouseMoved(): plug.setIsRolledOver(): [\n\t${plug}\n\t]()}]`);
           plug.setIsRolledOver();
           foundPlug = true;
         } else {
@@ -58,7 +58,7 @@ class RolloverManager {
     appModel.getSelectedNodes().forEach((node) => {
       node.getInputParameterList().forEach((inputParam) => {
         if (inputParam.checkBoundary(mouseX, mouseY)) {
-          console.warn(`MouseManager.mouseMoved(): inputParam->setIsRolledOver(): [\n\t${inputParam}\n\t]()}]`);
+          // console.warn(`MouseManager.mouseMoved(): inputParam->setIsRolledOver(): [\n\t${inputParam}\n\t]()}]`);
           inputParam.setIsRolledOver();
           foundParam = true;
         } else {
@@ -71,7 +71,7 @@ class RolloverManager {
     appModel.getSelectedNodes().forEach((node) => {
       node.getInputParameterList().forEach((outputParam) => {
         if (outputParam.checkBoundary(mouseX, mouseY)) {
-          console.warn(`MouseManager.mouseMoved(): outputParam->setIsRolledOver(): [\n\t${outputParam}\n\t]()}]`);
+          // console.warn(`MouseManager.mouseMoved(): outputParam->setIsRolledOver(): [\n\t${outputParam}\n\t]()}]`);
           outputParam.setIsRolledOver();
           foundParam = true;
         } else {
@@ -90,7 +90,7 @@ class RolloverManager {
     // Nodes
     appModel.getNodes().forEach((node) => {
       if (node.checkBoundary(mouseX, mouseY)) {
-        console.warn(`MouseManager.mouseMoved(): getNodes->setIsRolledOver(): [\n\t${node}\n\t]()}]`);
+        // console.warn(`MouseManager.mouseMoved(): getNodes->setIsRolledOver(): [\n\t${node}\n\t]()}]`);
         foundNode = true;
         node.setIsRolledOver();
       } else {
@@ -108,7 +108,7 @@ class RolloverManager {
     // Tools
     appModel.getToolbox().getToolList().forEach((tool) => {
       if (tool.checkBoundary(mouseX, mouseY)) {
-        console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`);
+        // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`);
         foundTool = true;
         tool.setIsRolledOver();
       } else {
@@ -126,7 +126,7 @@ class RolloverManager {
     // Edges
     appModel.getEdges().forEach((edge) => {
       if (edge.checkBoundary(mouseX, mouseY)) {
-        console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${edge}\n\t]()}]`);
+        // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${edge}\n\t]()}]`);
         edge.setIsRolledOver();
       } else {
         edge.setIsRolledOver(false);

@@ -33,7 +33,7 @@ export class Layout {
     const inspectorHeight = 300;
     inspector.setDimensions(new Dimension(inspectorWidth, inspectorHeight));
     
-    console.log('Layout.height : ' + Layout.height);
+    // console.log('Layout.height : ' + Layout.height);
     const inspectorPosition = new Position(
       10,
       this.height - (inspectorHeight+10)

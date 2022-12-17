@@ -4,6 +4,7 @@ import RenderApplication from "./view/RenderApplication";
 import ApplicationModel from "./model/ApplicationModel";
 import InteractionManager from "./controller/InteractionManager";
 import Layout from "./model/positioning/Layout";
+import CreationManager from "./controller/CreationManager";
 let p: p5;
 let lastWindowDimensionX: number | null = null;
 let lastWindowDimensionY: number | null = null;
@@ -25,6 +26,6 @@ export const draw = (_p: p5): void => {
     lastWindowDimensionY = p.windowHeight;
   }
   p.background("rgb(180,180,200)");
-  
+  CreationManager.advanceState();
   RenderApplication.renderElements(applicationModel as ApplicationModel);
 };

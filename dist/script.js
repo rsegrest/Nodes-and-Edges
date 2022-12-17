@@ -467,7 +467,6 @@
       yTableOffset = 0
     ) {
       const yCalc = yInspectorTop + rowNum * rowHeight + yTableOffset;
-      console.log("yCalc", yCalc);
       const rowPos = new Position(xInspectorLeft, yCalc);
       return rowPos;
     }
@@ -477,8 +476,6 @@
       );
     }
   }
-
-  // private static rowCount = 0;
   LayoutInspector.DEFAULT_INSPECTOR_WIDTH = 600;
   LayoutInspector.DEFAULT_INSPECTOR_HEIGHT = 300;
 
@@ -804,7 +801,8 @@
       const inspectorWidth = 600;
       const inspectorHeight = 300;
       inspector.setDimensions(new Dimension(inspectorWidth, inspectorHeight));
-      console.log("Layout.height : " + Layout.height);
+
+      // console.log('Layout.height : ' + Layout.height);
       const inspectorPosition = new Position(
         10,
         this.height - (inspectorHeight + 10)
@@ -1116,24 +1114,28 @@
       this.isRolledOver = true;
       this.isHighlit = true;
       throw "NodeModel rolloverAction not implemented";
+
+      // console.log('NodeModel rolloverAction', this.toString());
     }
 
     // override GUIElementModel
     clickAction() {
-      console.log("clickAction: ");
-      console.log("this: ", this);
+      // console.log('clickAction: ');
+      // console.log('this: ', this);
       this.isSelected = true;
       this.isHighlit = true;
       const inspector = ApplicationModel.getInstance().getInspector();
       inspector.createTable(this);
-      console.log("NodeModel onClick", this.toString());
+
+      // console.log('NodeModel onClick', this.toString());
     }
 
     // override GUIElementModel
     doubleClickAction() {
       this.isEditing = true;
       ApplicationModel.setEditTarget(this);
-      console.log("NodeModel doubleClickAction", this.toString());
+
+      // console.log('NodeModel doubleClickAction', this.toString());
     }
 
     // override setUpBoundary
@@ -1288,6 +1290,34 @@
       // Element, Subelement, Edge
       return new NodeModel("69", "new node", objectsNewPos, objectsNewDim);
     }
+    static tryToMakeConnection() {
+      // check if there are two plugs selected
+      const appModel = ApplicationModel.getInstance();
+      const plugs = ApplicationModel.getInstance().getSelectedPlugs();
+      if (plugs && plugs.length === 2) {
+        const sourcePlug = plugs[0];
+        const targetPlug = plugs[1];
+        const sourceNode = appModel.getPlugParent(sourcePlug);
+        const targetNode = appModel.getPlugParent(targetPlug);
+
+        // TODO: build a meaningful ID based on connection description
+        const edge = new EdgeModel(
+          Math.floor(Math.random() * 100000).toString(),
+          sourceNode,
+          targetNode,
+          sourcePlug,
+          targetPlug
+        );
+        ApplicationModel.getInstance().addEdge(edge);
+        ApplicationModel.getInstance().clearPlugsSelected();
+      }
+
+      // if so, create edge
+      // if not, do nothing
+    }
+    static advanceState() {
+      this.tryToMakeConnection();
+    }
     constructor() {
       // CreationManager.populateNodeAndEdgeList();
     }
@@ -1309,17 +1339,6 @@
     }
     createPlug(plugPosition, position) {
       return new PlugModel(plugPosition, position);
-    }
-    static populateNodeAndEdgeList() {
-      // const nodeData = generatedNodeData();
-      const nodes = CreationManager.createNodes();
-      const edges = [];
-
-      // const edges = CreationManager.createEdges(nodes);
-      return {
-        nodes,
-        edges,
-      };
     }
     static createNodes() {
       const nodes = [];
@@ -1412,6 +1431,39 @@
   }
 
   class ApplicationModel {
+    clearPlugsSelected() {
+      const nodes = this.getNodes();
+      if (nodes.length > 0) {
+        for (let i = 0; i < nodes.length; i++) {
+          const plugsForNode = nodes[i].getPlugs();
+          plugsForNode.forEach((plug) => {
+            plug.setIsSelected(false);
+          });
+        }
+      }
+      return;
+    }
+    getPlugParent(plug) {
+      var _a;
+      const nodes = this.getNodes().filter((node) =>
+        node.getPlugs().includes(plug)
+      );
+      if (nodes.length > 0) {
+        for (let i = 0; i < nodes.length; i++) {
+          if (
+            (_a = nodes[i]) === null || _a === void 0
+              ? void 0
+              : _a.getPlugs().includes(plug)
+          ) {
+            return nodes[i];
+          }
+        }
+      }
+      return null;
+    }
+    getDraggingNodes() {
+      return this.getNodes().filter((node) => node.getIsDragging());
+    }
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     constructor() {
       this.nodes = [];
@@ -1623,15 +1675,13 @@
 
       // Toolbox
       if (appModel.getToolbox().checkBoundary(mouseX, mouseY)) {
-        console.warn(`MouseManager.mouseMoved(): toolbox->setIsRolledOver()}]`);
+        // console.warn(`MouseManager.mouseMoved(): toolbox->setIsRolledOver()}]`);
         appModel.getToolbox().setIsRolledOver();
       }
 
       // Inspector
       if (appModel.getInspector().checkBoundary(mouseX, mouseY)) {
-        console.warn(
-          `MouseManager.mouseMoved(): inspector->setIsRolledOver()}]`
-        );
+        // console.warn(`MouseManager.mouseMoved(): inspector->setIsRolledOver()}]`);
         appModel.getInspector().setIsRolledOver();
       }
     }
@@ -1640,9 +1690,7 @@
       appModel.getNodes().forEach((node) => {
         node.getPlugs().forEach((plug) => {
           if (plug.checkBoundary(mouseX, mouseY)) {
-            console.warn(
-              `MouseManager.mouseMoved(): plug.setIsRolledOver(): [\n\t${plug}\n\t]()}]`
-            );
+            // console.warn(`MouseManager.mouseMoved(): plug.setIsRolledOver(): [\n\t${plug}\n\t]()}]`);
             plug.setIsRolledOver();
             foundPlug = true;
           } else {
@@ -1659,9 +1707,7 @@
       appModel.getSelectedNodes().forEach((node) => {
         node.getInputParameterList().forEach((inputParam) => {
           if (inputParam.checkBoundary(mouseX, mouseY)) {
-            console.warn(
-              `MouseManager.mouseMoved(): inputParam->setIsRolledOver(): [\n\t${inputParam}\n\t]()}]`
-            );
+            // console.warn(`MouseManager.mouseMoved(): inputParam->setIsRolledOver(): [\n\t${inputParam}\n\t]()}]`);
             inputParam.setIsRolledOver();
             foundParam = true;
           } else {
@@ -1674,9 +1720,7 @@
       appModel.getSelectedNodes().forEach((node) => {
         node.getInputParameterList().forEach((outputParam) => {
           if (outputParam.checkBoundary(mouseX, mouseY)) {
-            console.warn(
-              `MouseManager.mouseMoved(): outputParam->setIsRolledOver(): [\n\t${outputParam}\n\t]()}]`
-            );
+            // console.warn(`MouseManager.mouseMoved(): outputParam->setIsRolledOver(): [\n\t${outputParam}\n\t]()}]`);
             outputParam.setIsRolledOver();
             foundParam = true;
           } else {
@@ -1692,9 +1736,7 @@
       // Nodes
       appModel.getNodes().forEach((node) => {
         if (node.checkBoundary(mouseX, mouseY)) {
-          console.warn(
-            `MouseManager.mouseMoved(): getNodes->setIsRolledOver(): [\n\t${node}\n\t]()}]`
-          );
+          // console.warn(`MouseManager.mouseMoved(): getNodes->setIsRolledOver(): [\n\t${node}\n\t]()}]`);
           foundNode = true;
           node.setIsRolledOver();
         } else {
@@ -1712,9 +1754,7 @@
         .getToolList()
         .forEach((tool) => {
           if (tool.checkBoundary(mouseX, mouseY)) {
-            console.warn(
-              `MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`
-            );
+            // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${tool}\n\t]()}]`);
             foundTool = true;
             tool.setIsRolledOver();
           } else {
@@ -1729,9 +1769,7 @@
       // Edges
       appModel.getEdges().forEach((edge) => {
         if (edge.checkBoundary(mouseX, mouseY)) {
-          console.warn(
-            `MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${edge}\n\t]()}]`
-          );
+          // console.warn(`MouseManager.mouseMoved(): getToolList->setIsRolledOver(): [\n\t${edge}\n\t]()}]`);
           edge.setIsRolledOver();
         } else {
           edge.setIsRolledOver(false);
@@ -1795,7 +1833,8 @@
         const outputParams = selectedNodes[0].getOutputParameterList();
         params.push(...inputParams);
         params.push(...outputParams);
-        console.log(`params.length: ${params.length}`);
+
+        // console.log(`params.length: ${params.length}`);
         for (let i = 0; i < params.length; i += 1) {
           const nextParam = params[i];
           if (nextParam === undefined) {
@@ -1813,7 +1852,7 @@
     // INTERACTION
     // selectedNodes includes node to check if selected
     static checkForSelectNode(mouseX, mouseY, appModel) {
-      console.log("checkForSelectNode");
+      // console.log("checkForSelectNode")
       const nodes = appModel.getNodes();
       const mousePosition = new Position(mouseX, mouseY);
       for (let i = 0; i < nodes.length; i += 1) {
@@ -1823,8 +1862,6 @@
             node.setIsSelected(false);
           }
           if (node.checkBoundary(mousePosition.x, mousePosition.y)) {
-            // console.warn("FOUND NODE")
-            // node.setIsSelected();
             node.clickAction();
           }
         }
@@ -1950,6 +1987,9 @@
       }
       const node = DragManager.checkForNodeDragTargets(appModel);
       if (node) {
+        console.log("dragging node", node);
+      }
+      if (node) {
         node.setIsDragging(true);
         return node;
       }
@@ -1966,6 +2006,15 @@
     static mouseDragged(mouseX, mouseY, appModel) {
       // console.log(`mouse dragged to : ${p.mouseX}, ${p.mouseY}`);
       DragManager.getDragTarget(appModel);
+
+      // DragManager.dragTargets.forEach((dragTarget:DraggableObject) => {
+      //   dragTarget.setPosition(mouseX, mouseY);
+      // }
+      ApplicationModel.getInstance()
+        .getDraggingNodes()
+        .forEach((draggingNode) => {
+          draggingNode.dragToPosition(new Position(mouseX - 20, mouseY - 20));
+        });
     }
 
     // INTERACTION (MOUSE)
@@ -2059,7 +2108,7 @@
       // move Inspector
     }
 
-    // INTERACTION
+    // INTERACTION -- MOVE TO DRAG MANAGER?
     static dragDynamicTool(appModel, pos, tool = null) {
       let dynamicTool = appModel.getDynamicTool();
       if (dynamicTool === null) {
@@ -2083,23 +2132,6 @@
       return;
     }
   }
-
-  // static getClosestPlugsOnSelectedNode(appModel:ApplicationModel):PlugModel[] {
-  //   const selectedNodes = appModel.getSelectedNodes();
-  //   // Array for if multiple nodes are selected
-  //   // Right now, one at a time is selected, only
-  //   const closestPlugArray = [];
-  //   if (selectedNodes.length > 0) {
-  //     for (let i = 0; i < selectedNodes.length; i += 1) {
-  //       const p = ApplicationModel.getP() as p5;
-  //       const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
-  //         p.mouseX, p.mouseY
-  //       );
-  //       closestPlugArray.push(closestPlug);
-  //     }
-  //   }
-  //   return closestPlugArray as PlugModel[];
-  // }
 
   class RenderEdge {
     constructor(p) {
@@ -2533,7 +2565,6 @@
         typeof pos === "undefined" ||
         typeof dim === "undefined"
       ) {
-        // was throw
         console.warn("tool position data is null");
         return;
       }
@@ -2880,6 +2911,7 @@
       lastWindowDimensionY = p.windowHeight;
     }
     p.background("rgb(180,180,200)");
+    CreationManager.advanceState();
     RenderApplication.renderElements(applicationModel);
   };
 

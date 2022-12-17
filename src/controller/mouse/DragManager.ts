@@ -109,6 +109,9 @@ class DragManager {
     };
     const node = DragManager.checkForNodeDragTargets(appModel);
     if (node) {
+      console.log('dragging node', node);
+    }
+    if (node) {
       node.setIsDragging(true);
       return node
     };

@@ -43,7 +43,6 @@ class RenderTool {
       || (typeof pos === 'undefined')
       || (typeof dim === 'undefined')
     ) {
-      // was throw
       console.warn('tool position data is null');
       return;
     }

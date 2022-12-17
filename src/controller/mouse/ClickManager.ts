@@ -72,7 +72,7 @@ class ClickManager {
       const outputParams = (selectedNodes[0] as NodeModel).getOutputParameterList();
       params.push(...inputParams);
       params.push(...outputParams);
-      console.log(`params.length: ${params.length}`);
+      // console.log(`params.length: ${params.length}`);
       for (let i = 0; i < params.length; i += 1) {
         const nextParam:InputParameterModel|OutputParameterModel|undefined = params[i];
         if (nextParam === undefined) { continue; }
@@ -91,7 +91,7 @@ class ClickManager {
   static checkForSelectNode(
     mouseX:number, mouseY:number, appModel:ApplicationModel
   ): void {
-    console.log("checkForSelectNode")
+    // console.log("checkForSelectNode")
     const nodes = appModel.getNodes();
     const mousePosition = new Position(
       mouseX,
@@ -105,11 +105,7 @@ class ClickManager {
           node.setIsSelected(false);
         }
         if (node.checkBoundary(mousePosition.x, mousePosition.y)) {
-          // console.warn("FOUND NODE")
-          // node.setIsSelected();
           node.clickAction()
-        } else {
-          // console.warn("DIDN'T FIND NODE")
         }
       }
     }

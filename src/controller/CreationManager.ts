@@ -30,7 +30,7 @@ export class CreationManager {
       // inputParameterList, outputParameterList
     );
   }
-  public static advanceState() {
+  public static tryToMakeConnection():void {
     // check if there are two plugs selected
     const appModel = ApplicationModel.getInstance();
     const plugs = ApplicationModel.getInstance().getSelectedPlugs();
@@ -44,10 +44,13 @@ export class CreationManager {
       const edge = new EdgeModel(Math.floor(Math.random()*100000).toString(),
         (sourceNode as NodeModel), (targetNode as NodeModel), sourcePlug, targetPlug);
       ApplicationModel.getInstance().addEdge(edge);
+      ApplicationModel.getInstance().clearPlugsSelected();
     }
     // if so, create edge
     // if not, do nothing
-    
+  }
+  public static advanceState():void {
+    this.tryToMakeConnection();
   }
   private static instance: CreationManager;
   private constructor() {

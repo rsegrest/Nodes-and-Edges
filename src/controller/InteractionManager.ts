@@ -28,7 +28,7 @@ class InteractionManager {
     // move Inspector
   }
 
-  // INTERACTION
+  // INTERACTION -- MOVE TO DRAG MANAGER?
   static dragDynamicTool(
     appModel:ApplicationModel,
     pos: Position,
