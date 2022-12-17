@@ -12,6 +12,7 @@ import ToolModel from "./ToolModel";
 import DynamicToolModel from "./DynamicToolModel";
 import InputParameterModel from "./InputParameterModel";
 import OutputParameterModel from "./OutputParameterModel";
+import InspectorInfoRow from "./inspector/InspectorInfoRow";
 
 class ApplicationModel {
   clearPlugsSelected():void {
@@ -42,7 +43,7 @@ class ApplicationModel {
   }
 
   private static instance: ApplicationModel | null = null;
-  private static editTarget: NodeModel | InputParameterModel | OutputParameterModel | null = null;
+  private static editTarget: NodeModel | InspectorInfoRow | null = null;
   private nodes: NodeModel[] = [];
   private edges: EdgeModel[] = [];
   private toolbox: ToolboxModel = new ToolboxModel();
@@ -75,8 +76,8 @@ class ApplicationModel {
     if (this.editTarget instanceof NodeModel) {
       this.editTarget.setLabel(this.editTarget.getLabel()+key);
     }
-    if ((this.editTarget instanceof InputParameterModel)
-      || (this.editTarget instanceof OutputParameterModel)) {
+    if (this.editTarget instanceof InspectorInfoRow) {
+      console.warn(`InspectorInfoRow: ${this.editTarget.getValue()}`)
       this.editTarget.setValue(this.editTarget.getValue()+key);
     }
   }
@@ -84,25 +85,29 @@ class ApplicationModel {
   static backspaceEditTarget():void {
     if (this.editTarget === null) return;
     let content = null;
-    let setFunction = null;
+    // let setFunction = null;
     if (this.editTarget instanceof NodeModel) {
       content = this.editTarget.getLabel();
-      setFunction = this.editTarget.setLabel;
-    } else if ((this.editTarget instanceof InputParameterModel)
-      || (this.editTarget instanceof OutputParameterModel)) {
+      // setFunction = this.editTarget.setLabel;
+      // if (content === null) return;
+      const bsLabelContent = content.toString().slice(0, -1);
+      console.log(bsLabelContent)
+      this.editTarget.setLabel(bsLabelContent);
+    } else if (this.editTarget instanceof InspectorInfoRow) {
+      console.log('bet-- iir')
       content = this.editTarget.getValue();
-      setFunction = this.editTarget.setValue;
+      console.log(content)
+      const bsLabelContent = content.toString().slice(0, -1);
+      this.editTarget.setValue(bsLabelContent);
+      return;
     }
-    if (content === null) return;
-    if (setFunction === null) return;
-    const bsLabelContent = content.toString().slice(0, -1);
-    setFunction(bsLabelContent);
+    
   }
 
-  static getEditTarget(): NodeModel | InputParameterModel | OutputParameterModel | null {
+  static getEditTarget(): NodeModel | InspectorInfoRow | null {
     return ApplicationModel.editTarget;
   }
-  static setEditTarget(editingString: NodeModel | InputParameterModel | OutputParameterModel | null): void {
+  static setEditTarget(editingString: NodeModel | InspectorInfoRow | null): void {
     ApplicationModel.editTarget = editingString;
   }
   static clearEditTarget(): void {

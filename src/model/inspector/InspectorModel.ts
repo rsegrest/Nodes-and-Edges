@@ -2,6 +2,7 @@ import GuiElementModel from "../abstract/GuiElement";
 import InputParameterModel from "../InputParameterModel";
 import NodeModel from "../NodeModel";
 import OutputParameterModel from "../OutputParameterModel";
+import Position from "../positioning/Position";
 // import Dimension from "../positioning/Dimension";
 // import Position from "../positioning/Position";
 import InspectorTable from "./InspectorTable";
@@ -32,7 +33,11 @@ class InspectorModel extends GuiElementModel {
   // TODO: ****** set up table using node params
   // TODO: test this
   public createTable(node:NodeModel): void {
-    this.inspectorTable = new InspectorTable(node);
+    const imPos = this.position as Position;
+    console.warn(`InspectorModel.createTable(): imPos = ${imPos.toString()}`);
+    this.inspectorTable = new InspectorTable(
+      node, this.position as Position
+    );
   }
   public getTable(): InspectorTable|null {
     return this.inspectorTable;

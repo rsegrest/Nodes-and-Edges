@@ -1,16 +1,20 @@
 import p5 from "p5";
-// import { setup } from "../setup";
-// import { draw } from "../draw";
 import { createSketch } from "../p5-util/sketch";
 import InspectorModel from "../model/inspector/InspectorModel";
 import LayoutInspector from "../model/inspector/LayoutInspector";
 import ApplicationModel from "../model/ApplicationModel";
-import CreationManager from "../controller/CreationManager";
 import Position from "../model/positioning/Position";
 import Dimension from "../model/positioning/Dimension";
 import NodeModel from "../model/NodeModel";
-import MouseManager from "../controller/MouseManager";
 import Layout from "../model/positioning/Layout";
+import InspectorHeadingRow from "../model/inspector/InspectorHeadingRow";
+import InspectorInfoRow from "../model/inspector/InspectorInfoRow";
+import InputParameterModel from "../model/InputParameterModel";
+import OutputParameterModel from "../model/OutputParameterModel";
+// import CreationManager from "../controller/CreationManager";
+// import MouseManager from "../controller/MouseManager";
+// import { setup } from "../setup";
+// import { draw } from "../draw";
 
 describe("Layout Inspector tests", () => {
   let p: p5;
@@ -109,32 +113,31 @@ describe("Layout Inspector tests", () => {
     expect(secondRowPos).toStrictEqual(new Position(0,50));
   })
 
-  it('should set position for parameter rows with no offsets', () => {
-    const testRows = createTestRows();
-    const rowHeight = 25;
-    const xInspectorLeft = 0;
-    const yInspectorTop = 0;
-    const yTableOffset = 0;
-    LayoutInspector.assignPositionsToRows(
-      testRows, rowHeight,
-      xInspectorLeft, yInspectorTop, yTableOffset
-    );
-    // send to get position function
-    expect(testRows[0]!.getPosition()).toStrictEqual(new Position(0,0));
-    expect(testRows[1]!.getPosition()).toStrictEqual(new Position(0,25));
-    expect(testRows[9]!.getPosition()).toStrictEqual(new Position(0,225));
-  })
+  // it('should set position for parameter rows with no offsets', () => {
+  //   const testRows = createTestRows();
+  //   const rowHeight = 25;
+  //   const inspectorPosition = new Position(10, 400);
+  //   const yTableOffset = 0;
+  //   LayoutInspector.assignPositionsToRows(
+  //     testRows, inspectorPosition, rowHeight,
+  //     yTableOffset
+  //   );
+  //   // send to get position function
+  //   expect(testRows[0]!.getPosition()).toStrictEqual(new Position(0,0));
+  //   expect(testRows[1]!.getPosition()).toStrictEqual(new Position(0,25));
+  //   expect(testRows[9]!.getPosition()).toStrictEqual(new Position(0,225));
+  // })
 
 
   it('should set position for parameter rows with offsets', () => {
     const testRows = createTestRows();
     const rowHeight = 25;
-    const xInspectorLeft = 10;
-    const yInspectorTop = 400;
+    // const xInspectorLeft = 10;
+    // const yInspectorTop = 400;
+    const inspectorPosition = new Position(10, 400);
     const yTableOffset = 50;
     LayoutInspector.assignPositionsToRows(
-      testRows, rowHeight,
-      xInspectorLeft, yInspectorTop, yTableOffset
+      testRows, inspectorPosition, rowHeight, yTableOffset
     );
     // send to get position function
     expect(testRows[0]!.getPosition()).toStrictEqual(new Position(10,450));
@@ -158,6 +161,39 @@ describe("Layout Inspector tests", () => {
     expect(plugParent).toStrictEqual(node0);
     const plugParent2 = appModel.getPlugParent(node1plug);
     expect(plugParent2).toStrictEqual(node1);
+  })
+  // const buildTable = (
+  //   inputParams:InputParameterModel[],
+  //   outputParams:OutputParameterModel[]
+  // ):(InspectorHeadingRow|InspectorInfoRow)[] => {
+  //   const rows = LayoutInspector.createRowsFromInputAndOutputParameters(
+  //     inputParams, outputParams
+  //   );
+  //   LayoutInspector.assignDimensionsToRows(rows);
+  //   LayoutInspector.assignPositionsToRows(rows, inspectorPosition);
+  //   LayoutInspector.assignBoundariesToRows(rows);
+  //   // TODO: ********* DEBUG ********* -- boundary is not set correctly
+  //   console.log(`row[1] boundary: ${(rows[1] as InspectorRow).getBoundary()}`);
+  //   return rows;
+  // }
+
+  it('should set row position, dimensions, and boundaries correctly', () => {
+    const testRows = createTestRows();
+    const appModel = ApplicationModel.getInstance();
+    const nodes = appModel.getNodes();
+    // const inputs = (nodes[0] as NodeModel).getInputParameterList();
+    // const outputs = (nodes[0] as NodeModel).getOutputParameterList();
+    const inspector = appModel.getInspector();
+    inspector.createTable(nodes[0] as NodeModel);
+
+    
+    // send to get position function
+    expect(testRows[0]!.getPosition()).toStrictEqual(new Position(10,450));
+    expect(testRows[1]!.getPosition()).toStrictEqual(new Position(10,475));
+    expect(testRows[2]!.getPosition()).toStrictEqual(new Position(10,500));
+
+    expect(testRows[6]!.getPosition()).toStrictEqual(new Position(10,600));
+    expect(testRows[9]!.getPosition()).toStrictEqual(new Position(10,675));
   })
   
   // it("should display a node's parameters in inspector after selection", () => {

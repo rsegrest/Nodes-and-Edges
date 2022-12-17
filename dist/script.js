@@ -356,6 +356,8 @@
   class InspectorInfoRow extends InspectorRow {
     constructor(parameter, rowNum) {
       super(rowNum);
+      this.isEditing = false;
+      this.parameter = parameter;
       this.columns = [
         new InspectorInfoColumn(parameter.getName(), 0),
         new InspectorInfoColumn(
@@ -370,8 +372,23 @@
     clickAction() {
       throw new Error("Method not implemented.");
     }
+    getValue() {
+      console.log(`InspectorInfoRow.getValue()`);
+      return this.parameter.getValue().toString();
+    }
+    setValue(value) {
+      this.parameter.setValue(value);
+      this.columns = [
+        new InspectorInfoColumn(this.parameter.getName(), 0),
+        new InspectorInfoColumn(
+          `${this.parameter.getValue()} ${this.parameter.getUnits()}`,
+          1
+        ),
+      ];
+    }
     doubleClickAction() {
-      throw new Error("Method not implemented.");
+      this.isEditing = true;
+      ApplicationModel.setEditTarget(this);
     }
     toString() {
       var _a;
@@ -383,17 +400,13 @@
     }
   }
 
+  // import InspectorInfoColumn from "./InspectorInfoColumn";
+  // import PlugModel from "../PlugModel";
+  // import Boundary from "../positioning/Boundary";
   class LayoutInspector {
     static assignBoundariesToRows(rows) {
       rows.forEach((row) => {
-        // const pos = row.getPosition() as Position;
-        // const dim = row.getDimensions() as Dimension;
         row.setUpBoundary();
-
-        // new Boundary(
-        // pos.x as number, pos.y as number,
-        // (pos.x as number)+(dim.width as number),
-        // (pos.y as number)+(dim.height as number)));
       });
     }
     constructor(pos, dim) {
@@ -455,9 +468,8 @@
     }
     static assignPositionsToRows(
       rows,
+      inspectorPosition,
       rowHeight = LayoutInspector.ROW_HEIGHT,
-      xInspectorLeft = 0,
-      yInspectorTop = 0,
       yTableOffset = this.Y_FIRST_ROW_OFFSET
     ) {
       rows.forEach((row, index) =>
@@ -465,8 +477,8 @@
           LayoutInspector.calcRowPosition(
             index,
             rowHeight,
-            xInspectorLeft,
-            yInspectorTop,
+            inspectorPosition.x,
+            inspectorPosition.y,
             yTableOffset
           )
         )
@@ -510,11 +522,11 @@
 
   // TODO: paging, num rows to display
   class InspectorTable {
-    constructor(node) {
+    constructor(node, inspectorPosition) {
       const inputs = node.getInputParameterList();
       const outputs = node.getOutputParameterList();
       this.numCols = 2;
-      this.rows = this.buildTable(inputs, outputs);
+      this.rows = this.buildTable(inputs, outputs, inspectorPosition);
     }
     getNumRows() {
       return this.rows.length;
@@ -522,14 +534,16 @@
     getNumCols() {
       return this.numCols;
     }
-    buildTable(inputParams, outputParams) {
+    buildTable(inputParams, outputParams, inspectorPosition) {
       const rows = LayoutInspector.createRowsFromInputAndOutputParameters(
         inputParams,
         outputParams
       );
       LayoutInspector.assignDimensionsToRows(rows);
-      LayoutInspector.assignPositionsToRows(rows);
+      LayoutInspector.assignPositionsToRows(rows, inspectorPosition);
       LayoutInspector.assignBoundariesToRows(rows);
+
+      // TODO: ********* DEBUG ********* -- boundary is not set correctly
       console.log(`row[1] boundary: ${rows[1].getBoundary()}`);
       return rows;
     }
@@ -581,7 +595,9 @@
     // TODO: ****** set up table using node params
     // TODO: test this
     createTable(node) {
-      this.inspectorTable = new InspectorTable(node);
+      const imPos = this.position;
+      console.warn(`InspectorModel.createTable(): imPos = ${imPos.toString()}`);
+      this.inspectorTable = new InspectorTable(node, this.position);
     }
     getTable() {
       return this.inspectorTable;
@@ -1538,31 +1554,32 @@
       if (this.editTarget instanceof NodeModel) {
         this.editTarget.setLabel(this.editTarget.getLabel() + key);
       }
-      if (
-        this.editTarget instanceof InputParameterModel ||
-        this.editTarget instanceof OutputParameterModel
-      ) {
+      if (this.editTarget instanceof InspectorInfoRow) {
+        console.warn(`InspectorInfoRow: ${this.editTarget.getValue()}`);
         this.editTarget.setValue(this.editTarget.getValue() + key);
       }
     }
     static backspaceEditTarget() {
       if (this.editTarget === null) return;
       let content = null;
-      let setFunction = null;
+
+      // let setFunction = null;
       if (this.editTarget instanceof NodeModel) {
         content = this.editTarget.getLabel();
-        setFunction = this.editTarget.setLabel;
-      } else if (
-        this.editTarget instanceof InputParameterModel ||
-        this.editTarget instanceof OutputParameterModel
-      ) {
+
+        // setFunction = this.editTarget.setLabel;
+        // if (content === null) return;
+        const bsLabelContent = content.toString().slice(0, -1);
+        console.log(bsLabelContent);
+        this.editTarget.setLabel(bsLabelContent);
+      } else if (this.editTarget instanceof InspectorInfoRow) {
+        console.log("bet-- iir");
         content = this.editTarget.getValue();
-        setFunction = this.editTarget.setValue;
+        console.log(content);
+        const bsLabelContent = content.toString().slice(0, -1);
+        this.editTarget.setValue(bsLabelContent);
+        return;
       }
-      if (content === null) return;
-      if (setFunction === null) return;
-      const bsLabelContent = content.toString().slice(0, -1);
-      setFunction(bsLabelContent);
     }
     static getEditTarget() {
       return ApplicationModel.editTarget;
@@ -1718,7 +1735,7 @@
           // do parameters
         }
         if (keyCode === 13 || keyCode === 8) {
-          // console.log('hit backspace');
+          console.log("hit backspace");
           ApplicationModel.backspaceEditTarget();
         }
         if (this.isNonPrintingCharacter(keyCode)) {
@@ -2149,13 +2166,13 @@
       );
       console.log(`parameter: ${infoRow}`);
       if (infoRow) {
-        console.log(`parameter double clicked`);
-        if (infoRow instanceof InputParameterModel) {
-          infoRow.doubleClickAction(null);
-        }
-        if (infoRow instanceof OutputParameterModel) {
-          infoRow.doubleClickAction(null);
-        }
+        console.log(`infoRow double clicked`);
+        infoRow.doubleClickAction();
+
+        // if (infoRow instanceof OutputParameterModel) {
+        //   infoRow.doubleClickAction(null);
+        // }
+        console.log(`editTarget is : ${ApplicationModel.getEditTarget()}`);
       }
     }
 
@@ -2393,6 +2410,7 @@
       if (!pos) return;
       p.push();
       p.translate(pos.x, pos.y);
+      p.pop();
       for (let i = 0; i < numRows; i++) {
         const row =
           (_a = ipm.getTable()) === null || _a === void 0
@@ -2405,7 +2423,6 @@
           RenderInspector.renderHeadingRow(row);
         }
       }
-      p.pop();
     }
     static renderHeadingRow(row) {
       const p = this.p;

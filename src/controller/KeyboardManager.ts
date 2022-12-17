@@ -36,7 +36,7 @@ class KeyboardManager {
       if (
         (keyCode === 13)
         || (keyCode === 8)) {
-          // console.log('hit backspace');
+          console.log('hit backspace');
           ApplicationModel.backspaceEditTarget();
       }
       if (this.isNonPrintingCharacter(keyCode)) {

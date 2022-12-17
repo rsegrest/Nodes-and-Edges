@@ -11,6 +11,7 @@ import DragManager from "./mouse/DragManager";
 import Position from "../model/positioning/Position";
 import InputParameterModel from "../model/InputParameterModel";
 import OutputParameterModel from "../model/OutputParameterModel";
+import InspectorInfoRow from "../model/inspector/InspectorInfoRow";
 
 export type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 
@@ -66,13 +67,14 @@ class MouseManager {
     const infoRow = RolloverManager.checkForInspectorInfoRowRollover(mouseX, mouseY, appModel);
     console.log(`parameter: ${infoRow}`)
     if (infoRow) {
-      console.log(`parameter double clicked`)
-      if (infoRow instanceof InputParameterModel) {
-        infoRow.doubleClickAction(null);
-      }
-      if (infoRow instanceof OutputParameterModel) {
-        infoRow.doubleClickAction(null);
-      }
+      console.log(`infoRow double clicked`)
+      infoRow.doubleClickAction();
+      
+      // if (infoRow instanceof OutputParameterModel) {
+      //   infoRow.doubleClickAction(null);
+      // }
+      console.log(`editTarget is : ${ApplicationModel.getEditTarget()}`)
+      
     }
   }
 

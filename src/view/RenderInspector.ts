@@ -58,12 +58,12 @@ class RenderInspector {
     if (!pos) return;
     p.push();
     p.translate(pos.x, pos.y);
+    p.pop();
     for (let i = 0; i < numRows; i++) {
       const row = ipm.getTable()?.getRow(i);
       if (row instanceof InspectorInfoRow) { RenderInspector.renderInfoRow(row); }
       if (row instanceof InspectorHeadingRow) { RenderInspector.renderHeadingRow(row); }
     }
-    p.pop();
   }
   static renderHeadingRow(row: InspectorHeadingRow):void {
     const p = this.p;

@@ -6,20 +6,14 @@ import OutputParameterModel from "../OutputParameterModel";
 import InspectorModel from "./InspectorModel";
 import InspectorHeadingRow from "./InspectorHeadingRow";
 import InspectorInfoRow from "./InspectorInfoRow";
-import InspectorInfoColumn from "./InspectorInfoColumn";
-import PlugModel from "../PlugModel";
-import Boundary from "../positioning/Boundary";
+// import InspectorInfoColumn from "./InspectorInfoColumn";
+// import PlugModel from "../PlugModel";
+// import Boundary from "../positioning/Boundary";
 
 class LayoutInspector {
   static assignBoundariesToRows(rows: (InspectorHeadingRow | InspectorInfoRow)[]):void {
     rows.forEach((row) => {
-      // const pos = row.getPosition() as Position;
-      // const dim = row.getDimensions() as Dimension;
       row.setUpBoundary();
-        // new Boundary(
-        // pos.x as number, pos.y as number,
-        // (pos.x as number)+(dim.width as number),
-        // (pos.y as number)+(dim.height as number)));
     });
   }
 
@@ -116,14 +110,17 @@ class LayoutInspector {
 
   static assignPositionsToRows(
     rows:(InspectorHeadingRow|InspectorInfoRow)[],
+    inspectorPosition:Position,
     rowHeight:number=LayoutInspector.ROW_HEIGHT,
-    xInspectorLeft=0,
-    yInspectorTop=0,
     yTableOffset=this.Y_FIRST_ROW_OFFSET
   ):(InspectorHeadingRow|InspectorInfoRow)[] {
     rows.forEach((row, index) => row.setPosition(
       LayoutInspector.calcRowPosition(
-        index, rowHeight, xInspectorLeft, yInspectorTop, yTableOffset
+        index,
+        rowHeight,
+        inspectorPosition.x,
+        inspectorPosition.y,
+        yTableOffset
       )
     ));
 
