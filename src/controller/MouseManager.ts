@@ -8,12 +8,6 @@ import ToolModel from "../model/ToolModel";
 import RolloverManager from "./mouse/RolloverManager";
 import ClickManager from "./mouse/ClickManager";
 import DragManager from "./mouse/DragManager";
-// import InputParameterModel from "../model/InputParameterModel";
-// import OutputParameterModel from "../model/OutputParameterModel";
-// import Position from "../model/positioning/Position";
-// import DraggableGuiElementModel from "../model/abstract/DraggableGuiElement";
-// import InteractionManager from "./InteractionManager";
-
 
 export type DraggableObject = NodeModel|EdgeModel|PlugModel|ToolboxModel|ToolModel;
 

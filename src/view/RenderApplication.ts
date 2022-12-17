@@ -2,6 +2,7 @@ import p5 from "p5";
 import InteractionManager from "../controller/InteractionManager";
 import ApplicationModel from "../model/ApplicationModel";
 import NodeModel from "../model/NodeModel";
+import PlugModel from "../model/PlugModel";
 import Position from "../model/positioning/Position";
 import ToolModel from "../model/ToolModel";
 import P5Reference from "./P5Reference";
@@ -102,6 +103,16 @@ class RenderApplication {
     RenderGuides.render();
     // const htmlContainer = document.getElementById('htmlContainer');
     // CreationManager.createContainer(p, htmlContainer as HTMLElement);
+
+    // 8. RENDER LEAD LINE if Plug is selected
+    const selectedPlugs = appModel.getSelectedPlugs()
+    if (selectedPlugs.length === 1) {
+      RenderApplication.drawLeadLine(
+        p, appModel,
+        ((selectedPlugs[0] as PlugModel).getPosition() as Position),
+        new Position(p.mouseX, p.mouseY)
+      );
+    }
   }
 
   // 5. RENDER EDGES

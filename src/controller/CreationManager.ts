@@ -10,6 +10,7 @@ import DynamicToolModel from "../model/DynamicToolModel";
 import InputParameterModel from "../model/InputParameterModel";
 import OutputParameterModel from "../model/OutputParameterModel";
 import p5 from "p5";
+import ApplicationModel from "../model/ApplicationModel";
 
 // const BASE_NODE_WIDTH = Layout.BASE_NODE_WIDTH;
 // const BASE_NODE_HEIGHT = Layout.BASE_NODE_HEIGHT;
@@ -29,10 +30,30 @@ export class CreationManager {
       // inputParameterList, outputParameterList
     );
   }
+  public static advanceState() {
+    // check if there are two plugs selected
+    const appModel = ApplicationModel.getInstance();
+    const plugs = ApplicationModel.getInstance().getSelectedPlugs();
+
+    if (plugs && plugs.length === 2) {
+      const sourcePlug = plugs[0] as PlugModel;
+      const targetPlug = plugs[1] as PlugModel;
+      const sourceNode = appModel.getPlugParent(sourcePlug);
+      const targetNode = appModel.getPlugParent(targetPlug);
+      // TODO: build a meaningful ID based on connection description
+      const edge = new EdgeModel(Math.floor(Math.random()*100000).toString(),
+        (sourceNode as NodeModel), (targetNode as NodeModel), sourcePlug, targetPlug);
+      ApplicationModel.getInstance().addEdge(edge);
+    }
+    // if so, create edge
+    // if not, do nothing
+    
+  }
   private static instance: CreationManager;
   private constructor() {
     // CreationManager.populateNodeAndEdgeList();
   }
+
 
   // RENDER (Testing HTML Component render)
   static createContainer(
@@ -60,19 +81,6 @@ export class CreationManager {
     return new PlugModel(plugPosition, position);
   }
 
-  static populateNodeAndEdgeList(): {
-    nodes: NodeModel[];
-    edges: EdgeModel[];
-  } {
-    // const nodeData = generatedNodeData();
-    const nodes = CreationManager.createNodes();
-    const edges = [] as EdgeModel[];
-    // const edges = CreationManager.createEdges(nodes);
-    return {
-      nodes,
-      edges,
-    };
-  }
   static createNodes(): NodeModel[] {
     const nodes: NodeModel[] = [];
     const labels: string[] = ["Solar Array", "Cable", "Avionics", "Radiator"];

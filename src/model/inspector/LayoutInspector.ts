@@ -7,10 +7,10 @@ import InspectorModel from "./InspectorModel";
 import InspectorHeadingRow from "./InspectorHeadingRow";
 import InspectorInfoRow from "./InspectorInfoRow";
 import InspectorInfoColumn from "./InspectorInfoColumn";
+import PlugModel from "../PlugModel";
 
 class LayoutInspector {
-  // private static rowCount = 0;
-  
+
   private static readonly DEFAULT_INSPECTOR_WIDTH = 600;
   private static readonly DEFAULT_INSPECTOR_HEIGHT = 300;
   // SPIRAL 3 TODO: Make panel draggable using title bar

@@ -1428,7 +1428,9 @@
     // FOR DEVELOPMENT TESTING
     initializeForDev() {
       this.nodes = CreationManager.createNodes();
-      this.edges = CreationManager.createEdges(this.nodes);
+
+      // this.edges = CreationManager.createEdges(this.nodes);
+      this.edges = [];
     }
     static addCharacterToEditTarget(key) {
       if (this.editTarget === null) return;
@@ -2222,20 +2224,15 @@
     }
     static renderTable(ipm) {
       var _a;
-
-      // console.log('renderTable', ipm.getTable());
       const p = RenderInspector.getP();
       const pos = ipm.getPosition();
       const table = ipm.getTable();
       const numRows =
         table === null || table === void 0 ? void 0 : table.getNumRows();
-
-      // console.log('renderTable:pos', pos)
       if (!pos) return;
       p.push();
       p.translate(pos.x, pos.y);
       for (let i = 0; i < numRows; i++) {
-        // RenderInspector.renderRow(ipm.getTable()?.getRow(i));
         const row =
           (_a = ipm.getTable()) === null || _a === void 0
             ? void 0
@@ -2754,6 +2751,16 @@
 
       // const htmlContainer = document.getElementById('htmlContainer');
       // CreationManager.createContainer(p, htmlContainer as HTMLElement);
+      // 8. RENDER LEAD LINE if Plug is selected
+      const selectedPlugs = appModel.getSelectedPlugs();
+      if (selectedPlugs.length === 1) {
+        RenderApplication.drawLeadLine(
+          p,
+          appModel,
+          selectedPlugs[0].getPosition(),
+          new Position(p.mouseX, p.mouseY)
+        );
+      }
     }
 
     // 5. RENDER EDGES

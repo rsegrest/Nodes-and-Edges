@@ -1,4 +1,3 @@
-// import p5 from "p5";
 import ApplicationModel from "../model/ApplicationModel";
 import DynamicToolModel from "../model/DynamicToolModel";
 import InspectorModel from "../model/inspector/InspectorModel";
@@ -8,10 +7,6 @@ import Position from "../model/positioning/Position";
 import ToolboxModel from "../model/ToolboxModel";
 import ToolModel from "../model/ToolModel";
 
-import InputParameterModel from "../model/InputParameterModel";
-import NodeModel from "../model/NodeModel";
-import OutputParameterModel from "../model/OutputParameterModel";
-import PlugModel from "../model/PlugModel";
 class InteractionManager {
 
   // INTERACTION
@@ -64,19 +59,3 @@ class InteractionManager {
   }
       
 export default InteractionManager;
-// static getClosestPlugsOnSelectedNode(appModel:ApplicationModel):PlugModel[] {
-//   const selectedNodes = appModel.getSelectedNodes();
-//   // Array for if multiple nodes are selected
-//   // Right now, one at a time is selected, only
-//   const closestPlugArray = [];
-//   if (selectedNodes.length > 0) {
-//     for (let i = 0; i < selectedNodes.length; i += 1) {
-//       const p = ApplicationModel.getP() as p5;
-//       const closestPlug = (selectedNodes[i] as NodeModel).getPlugClosestToMouse(
-//         p.mouseX, p.mouseY
-//       );
-//       closestPlugArray.push(closestPlug);
-//     }
-//   }
-//   return closestPlugArray as PlugModel[];
-// }

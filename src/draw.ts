@@ -25,5 +25,6 @@ export const draw = (_p: p5): void => {
     lastWindowDimensionY = p.windowHeight;
   }
   p.background("rgb(180,180,200)");
+  
   RenderApplication.renderElements(applicationModel as ApplicationModel);
 };

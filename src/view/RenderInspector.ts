@@ -51,17 +51,14 @@ class RenderInspector {
   }
 
   static renderTable(ipm:InspectorModel):void {
-    // console.log('renderTable', ipm.getTable());
     const p = RenderInspector.getP();
     const pos = ipm.getPosition();
     const table = ipm.getTable();
     const numRows = table?.getNumRows() as number;
-    // console.log('renderTable:pos', pos)
     if (!pos) return;
     p.push();
     p.translate(pos.x, pos.y);
     for (let i = 0; i < numRows; i++) {
-      // RenderInspector.renderRow(ipm.getTable()?.getRow(i));
       const row = ipm.getTable()?.getRow(i);
       if (row instanceof InspectorInfoRow) { RenderInspector.renderInfoRow(row); }
       if (row instanceof InspectorHeadingRow) { RenderInspector.renderHeadingRow(row); }

@@ -14,6 +14,17 @@ import InputParameterModel from "./InputParameterModel";
 import OutputParameterModel from "./OutputParameterModel";
 
 class ApplicationModel {
+  getPlugParent(plug: PlugModel): NodeModel | null {
+    const nodes = this.getNodes().filter((node) => node.getPlugs().includes(plug));
+    if (nodes.length > 0) {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i]?.getPlugs().includes(plug)) {
+          return (nodes[i] as NodeModel);
+        }
+      }
+    }
+    return null;
+  }
 
   private static instance: ApplicationModel | null = null;
   private static editTarget: NodeModel | null = null;
@@ -40,7 +51,8 @@ class ApplicationModel {
   // FOR DEVELOPMENT TESTING
   initializeForDev(): void {
     this.nodes = CreationManager.createNodes();
-    this.edges = CreationManager.createEdges(this.nodes);
+    // this.edges = CreationManager.createEdges(this.nodes);
+    this.edges = [];
   }
 
   static addCharacterToEditTarget(key: string):void {
