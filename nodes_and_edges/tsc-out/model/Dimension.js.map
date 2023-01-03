@@ -1,0 +1,1 @@
+{"version":3,"file":"Dimension.js","sourceRoot":"","sources":["../../src/model/Dimension.ts"],"names":[],"mappings":"AAAA,MAAM,OAAO,SAAS;IAGpB,YACE,KAAY,EACZ,MAAa;QAEb,IAAI,CAAC,KAAK,GAAG,KAAK,CAAC;QACnB,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;IACvB,CAAC;IACM,QAAQ;QACb,OAAO,oBAAoB,IAAI,CAAC,KAAK,aAAa,IAAI,CAAC,MAAM,GAAG,CAAC;IACnE,CAAC;CACF;AACD,eAAe,SAAS,CAAC"}

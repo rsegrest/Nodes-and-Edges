@@ -1,3 +1,0 @@
-8-yo MacBook Pro: 7.86s
-3-yo MacBook Pro: 4.Xs
-NASA PC: ~55s

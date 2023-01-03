@@ -1,0 +1,43 @@
+15 December 2022
+
+
+
+TODO: Algorithm to plot "cord" path
+
+class EdgeModel {
+	// TODO: one- or two-way
+	// firstConnect: "plug" reference
+	// secondConnect: other "plug"
+	// point array to draw line
+
+	// type of line? // define types
+	// oneWay?
+	// type of arrow?
+}
+
+UNIT TESTS:
+ * TODO: Click on node to select
+    - Check if it is selected
+ * TODO: Compare 
+
+DONE:
+: If param is selected, don't de-select node
+: Draw line only when interacting with plug
+: Create edge when a second node is selected
+: Interaction manager?
+: setContent or something to be function to activate for keyTyped
+: SEND SELECTED NODE (instead of first in array)
+: Rolled-over node member variable in chart manager
+: check tools for rollover
+: Initialize and store toolbox data in this class
+: Create base class for nodes, edges, plugs, tools, toolbox
+: Try setting "isDragging" to true on first node
+: Check for mouse button held down on node for drag
+: Draw line from selected node
+: "Collision" check for rolling over node
+: Display plugs on rollover
+: Collision check for "plug"
+: Make plug black on rollover
+: Lay out four nodes
+: Chart Manager
+: Fix select
